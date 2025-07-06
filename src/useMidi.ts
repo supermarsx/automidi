@@ -9,6 +9,7 @@ export interface MidiDevice {
 export interface MidiMessage {
   data: Uint8Array;
   timestamp: number;
+  source?: string;
 }
 
 export function useMidi() {
@@ -45,7 +46,9 @@ export function useMidi() {
           const msg: MidiMessage = {
             data: new Uint8Array(payload.message),
             timestamp: payload.time,
+            source: payload.source,
           };
+          console.log('MIDI from', msg.source ?? 'unknown', msg.data);
           for (const fn of listeners.current) fn(msg);
         }
       } catch (err) {
