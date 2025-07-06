@@ -31,8 +31,12 @@ const Pad = memo(
     cc: ccNum,
     isEmpty,
     onSelect,
+    selected,
+    extraClass,
   }: PadProps & {
     onSelect: (p: { id: string; note?: number; cc?: number }) => void;
+    selected?: boolean;
+    extraClass?: string;
   }) => {
     const colour = useStore((s) => s.padColours[id] || '#000000');
 
@@ -42,7 +46,9 @@ const Pad = memo(
 
     return (
       <div
-        className="midi-pad-container"
+        className={`midi-pad-container ${selected ? 'selected' : ''} ${
+          extraClass || ''
+        }`}
         id={id}
         style={{ backgroundColor: colour }}
         title={note !== undefined ? `Note ${note}` : `CC ${ccNum}`}
@@ -55,11 +61,20 @@ const Pad = memo(
 export function LaunchpadCanvas() {
   const [selected, setSelected] = useState<PadProps | null>(null);
   const grid: React.ReactElement[] = [];
-
+  
   // Top row - 9 CC controls
   for (let x = 0; x < 9; x++) {
     const id = `cc-${TOP_CC[x]}`;
-    grid.push(<Pad key={id} id={id} cc={TOP_CC[x]} onSelect={setSelected} />);
+    grid.push(
+      <Pad
+        key={id}
+        id={id}
+        cc={TOP_CC[x]}
+        onSelect={setSelected}
+        selected={selected?.id === id}
+        extraClass="top-cc"
+      />,
+    );
   }
 
   // Main 8x8 grid with side controls moved to the right
@@ -68,13 +83,28 @@ export function LaunchpadCanvas() {
     for (let x = 0; x < 8; x++) {
       const note = NOTE_GRID[y][x];
       const id = `n-${note}`;
-      grid.push(<Pad key={id} id={id} note={note} onSelect={setSelected} />);
+      grid.push(
+        <Pad
+          key={id}
+          id={id}
+          note={note}
+          onSelect={setSelected}
+          selected={selected?.id === id}
+        />,
+      );
     }
 
     // Side CC control (right)
     const sideId = `cc-${SIDE_CC[y]}`;
     grid.push(
-      <Pad key={sideId} id={sideId} cc={SIDE_CC[y]} onSelect={setSelected} />,
+      <Pad
+        key={sideId}
+        id={sideId}
+        cc={SIDE_CC[y]}
+        onSelect={setSelected}
+        selected={selected?.id === sideId}
+        extraClass="side-cc"
+      />,
     );
   }
   return (
