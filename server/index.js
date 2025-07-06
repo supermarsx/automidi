@@ -42,8 +42,34 @@ const server = app.listen(process.env.PORT || 3000, () => {
 });
 
 const wss = new WebSocketServer({ server });
+
+function sendDevices(ws) {
+  ws.send(JSON.stringify({ type: 'devices', ...listDevices() }));
+}
+
+wss.on('connection', ws => {
+  sendDevices(ws);
+  ws.on('message', msg => {
+    try {
+      const data = JSON.parse(msg.toString());
+      if (data.type === 'getDevices') {
+        sendDevices(ws);
+      }
+    } catch {
+      // ignore malformed messages
+    }
+  });
+});
+
+WebMidi.addListener('portschanged', () => {
+  const payload = JSON.stringify({ type: 'devices', ...listDevices() });
+  for (const ws of wss.clients) {
+    if (ws.readyState === ws.OPEN) ws.send(payload);
+  }
+});
+
 WebMidi.addListener('midimessage', e => {
-  const payload = JSON.stringify({ message: e.message.rawData, time: e.timestamp });
+  const payload = JSON.stringify({ type: 'midi', message: e.message.rawData, time: e.timestamp });
   for (const ws of wss.clients) {
     if (ws.readyState === ws.OPEN) {
       ws.send(payload);

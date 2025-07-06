@@ -17,6 +17,7 @@ export function useMidi() {
   const listeners = useRef(new Set<(msg: MidiMessage) => void>());
   const wsRef = useRef<WebSocket | null>(null);
 
+
   useEffect(() => {
     let cancelled = false;
 
@@ -55,14 +56,26 @@ export function useMidi() {
   useEffect(() => {
     const ws = new WebSocket(`ws://${location.hostname}:3000`);
     wsRef.current = ws;
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: 'getDevices' }));
+    };
     ws.onmessage = (ev) => {
       try {
         const payload = JSON.parse(ev.data);
-        const msg: MidiMessage = {
-          data: new Uint8Array(payload.message),
-          timestamp: payload.time,
-        };
-        for (const fn of listeners.current) fn(msg);
+        if (payload.type === 'devices') {
+          setInputs(payload.inputs);
+          setOutputs(payload.outputs);
+          const lp = payload.outputs.find((o: MidiDevice) =>
+            o.name.includes('Launchpad X'),
+          );
+          launchpad.current = lp ? lp.id : null;
+        } else if (payload.type === 'midi') {
+          const msg: MidiMessage = {
+            data: new Uint8Array(payload.message),
+            timestamp: payload.time,
+          };
+          for (const fn of listeners.current) fn(msg);
+        }
       } catch (err) {
         console.error(err);
       }
