@@ -130,7 +130,7 @@ const Pad = memo(({ id, note, cc: ccNum, isEmpty }: PadProps) => {
       >
         {LAUNCHPAD_COLORS.map((color) => (
           <option 
-            key={color.value} 
+            key={color.color} 
             value={color.color}
             style={{ backgroundColor: color.color, color: color.color === '#000000' ? '#fff' : '#000' }}
           >
