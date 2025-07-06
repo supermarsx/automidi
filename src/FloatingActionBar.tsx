@@ -29,13 +29,15 @@ export default function FloatingActionBar() {
   return (
     <>
       <div className={`floating-action-bar ${isScrolled ? 'scrolled' : ''}`}>
-        <button
-          className="retro-button"
-          onClick={() => setShowLogger(!showLogger)}
-          title="Toggle MIDI Logger"
-        >
-          {showLogger ? 'HIDE LOG' : 'MIDI LOG'} ({logCount})
-        </button>
+        {!showLogger && (
+          <button
+            className="retro-button"
+            onClick={() => setShowLogger(true)}
+            title="Toggle MIDI Logger"
+          >
+            MIDI LOG ({logCount})
+          </button>
+        )}
         <button
           className="retro-button"
           onClick={() => setShowSettings(true)}

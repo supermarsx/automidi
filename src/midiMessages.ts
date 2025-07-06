@@ -82,7 +82,7 @@ export function clearAllLeds(): number[] {
 }
 
 export function scrollText(text: string, loop = false, speed = 7): number[] {
-  const textBytes = text.split('').map((c) => c.charCodeAt(0));
+  const textBytes = Array.from(text).map((c) => c.codePointAt(0) || 0);
   return sysex(0x07, loop ? 0x01 : 0x00, clamp7(speed), 0x00, ...textBytes, 0x00);
 }
 
