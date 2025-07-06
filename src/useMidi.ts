@@ -22,7 +22,7 @@ export function useMidi() {
     let cancelled = false;
 
     const update = () => {
-      fetch('/midi/devices')
+      fetch(`http://${location.hostname}:3000/midi/devices`)
         .then((res) => {
           if (!res.ok) {
             throw new Error(
@@ -88,7 +88,7 @@ export function useMidi() {
   const send = useCallback(
     (bytes: number[] | Uint8Array, output?: MidiDevice | null) => {
       const port = output?.id ?? launchpad.current ?? 0;
-      fetch('/midi/send', {
+      fetch(`http://${location.hostname}:3000/midi/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ port, data: Array.from(bytes) }),
