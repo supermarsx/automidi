@@ -1,18 +1,17 @@
 import { useState } from 'react';
 import { useMidi } from './useMidi';
-import { 
-  enterProgrammerMode, 
-  exitProgrammerMode, 
-  setBrightness, 
-  setSleepMode, 
-  clearAllLeds, 
+import {
+  enterProgrammerMode,
+  exitProgrammerMode,
+  setBrightness,
+  setSleepMode,
+  clearAllLeds,
   scrollText,
   setLayout,
   setDAWMode,
   ledLighting,
-  setLedSolid,
   setLedFlashing,
-  setLedPulsing
+  setLedPulsing,
 } from './midiMessages';
 
 export default function LaunchpadControls() {
@@ -57,13 +56,13 @@ export default function LaunchpadControls() {
 
   const testRainbow = () => {
     const colors = [
-      { id: 11, red: 127, green: 0, blue: 0 },    // Red
-      { id: 12, red: 127, green: 64, blue: 0 },   // Orange
-      { id: 13, red: 127, green: 127, blue: 0 },  // Yellow
-      { id: 14, red: 0, green: 127, blue: 0 },    // Green
-      { id: 15, red: 0, green: 64, blue: 127 },   // Blue
-      { id: 16, red: 64, green: 0, blue: 127 },   // Indigo
-      { id: 17, red: 127, green: 0, blue: 127 },  // Violet
+      { id: 11, red: 127, green: 0, blue: 0 }, // Red
+      { id: 12, red: 127, green: 64, blue: 0 }, // Orange
+      { id: 13, red: 127, green: 127, blue: 0 }, // Yellow
+      { id: 14, red: 0, green: 127, blue: 0 }, // Green
+      { id: 15, red: 0, green: 64, blue: 127 }, // Blue
+      { id: 16, red: 64, green: 0, blue: 127 }, // Indigo
+      { id: 17, red: 127, green: 0, blue: 127 }, // Violet
       { id: 18, red: 127, green: 127, blue: 127 }, // White
     ];
     send(ledLighting(colors));
@@ -86,22 +85,28 @@ export default function LaunchpadControls() {
   return (
     <div className="retro-panel">
       <h3>◄ Launchpad X Control Matrix ►</h3>
-      
+
       <div className="row mb-3">
         <div className="col-md-4">
           <h5 className="text-info">MODE CONTROL:</h5>
-          <button className="retro-button me-2 mb-2" onClick={handleEnterProgrammer}>
+          <button
+            className="retro-button me-2 mb-2"
+            onClick={handleEnterProgrammer}
+          >
             PROGRAMMER MODE
           </button>
-          <button className="retro-button me-2 mb-2" onClick={handleExitProgrammer}>
+          <button
+            className="retro-button me-2 mb-2"
+            onClick={handleExitProgrammer}
+          >
             LIVE MODE
           </button>
           <div className="mb-2">
             <label className="form-label text-info">LAYOUT:</label>
             <div className="d-flex align-items-center">
-              <select 
-                className="form-select retro-select me-2" 
-                value={layout} 
+              <select
+                className="form-select retro-select me-2"
+                value={layout}
                 onChange={(e) => setLayoutValue(Number(e.target.value))}
                 style={{ width: 'auto' }}
               >
@@ -134,7 +139,7 @@ export default function LaunchpadControls() {
             </div>
           </div>
         </div>
-        
+
         <div className="col-md-4">
           <h5 className="text-info">LED CONTROL:</h5>
           <div className="mb-3">
@@ -149,7 +154,10 @@ export default function LaunchpadControls() {
                 onChange={(e) => setBrightnessValue(Number(e.target.value))}
               />
               <span className="text-info me-2">{brightness}</span>
-              <button className="retro-button btn-sm" onClick={handleSetBrightness}>
+              <button
+                className="retro-button btn-sm"
+                onClick={handleSetBrightness}
+              >
                 SET
               </button>
             </div>
@@ -172,7 +180,7 @@ export default function LaunchpadControls() {
             CLEAR ALL
           </button>
         </div>
-        
+
         <div className="col-md-4">
           <h5 className="text-info">TEXT DISPLAY:</h5>
           <div className="mb-3">
@@ -185,14 +193,17 @@ export default function LaunchpadControls() {
                 onChange={(e) => setScrollTextValue(e.target.value)}
                 maxLength={32}
               />
-              <button className="retro-button btn-sm" onClick={handleScrollText}>
+              <button
+                className="retro-button btn-sm"
+                onClick={handleScrollText}
+              >
                 SCROLL
               </button>
             </div>
           </div>
         </div>
       </div>
-      
+
       <div className="row">
         <div className="col-12">
           <h5 className="text-info">LED EFFECTS TEST:</h5>
