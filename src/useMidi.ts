@@ -17,45 +17,30 @@ export function useMidi() {
   const listeners = useRef(new Set<(msg: MidiMessage) => void>());
   const wsRef = useRef<WebSocket | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const update = () => {
-      fetch('/midi/devices')
-        .then((res) => res.json())
-        .then((data) => {
-          if (cancelled) return;
-          setInputs(data.inputs);
-          setOutputs(data.outputs);
-          const lp = data.outputs.find((o: MidiDevice) =>
-            o.name.includes('Launchpad X'),
-          );
-          launchpad.current = lp ? lp.id : null;
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    };
-
-    update();
-    const id = setInterval(update, 2000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, []);
 
   useEffect(() => {
     const ws = new WebSocket(`ws://${location.hostname}:3000`);
     wsRef.current = ws;
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: 'getDevices' }));
+    };
     ws.onmessage = (ev) => {
       try {
         const payload = JSON.parse(ev.data);
-        const msg: MidiMessage = {
-          data: new Uint8Array(payload.message),
-          timestamp: payload.time,
-        };
-        for (const fn of listeners.current) fn(msg);
+        if (payload.type === 'devices') {
+          setInputs(payload.inputs);
+          setOutputs(payload.outputs);
+          const lp = payload.outputs.find((o: MidiDevice) =>
+            o.name.includes('Launchpad X'),
+          );
+          launchpad.current = lp ? lp.id : null;
+        } else if (payload.type === 'midi') {
+          const msg: MidiMessage = {
+            data: new Uint8Array(payload.message),
+            timestamp: payload.time,
+          };
+          for (const fn of listeners.current) fn(msg);
+        }
       } catch (err) {
         console.error(err);
       }
