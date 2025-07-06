@@ -36,7 +36,6 @@ export default function LaunchpadControls() {
   const [layout, setLayoutValue] = useState(0);
   const [dawBank, setDawBank] = useState(0);
   const clearBeforeLoad = useStore((s) => s.settings.clearBeforeLoad);
-  const setClearBeforeLoad = useStore((s) => s.setClearBeforeLoad);
 
   const handleEnterProgrammer = () => {
     notify(send(enterProgrammerMode()), 'Programmer mode');
@@ -225,21 +224,6 @@ export default function LaunchpadControls() {
           >
             CLEAR CONFIG
           </button>
-          <div className="form-check mb-2">
-            <input
-              type="checkbox"
-              className="form-check-input me-2"
-              id="clearBeforeLoad"
-              checked={clearBeforeLoad}
-              onChange={(e) => setClearBeforeLoad(e.target.checked)}
-            />
-            <label
-              className="form-check-label text-info"
-              htmlFor="clearBeforeLoad"
-            >
-              CLEAR BEFORE LOAD
-            </label>
-          </div>
           <button className="retro-button mb-2" onClick={handleLoadToLaunchpad}>
             LOAD INTO LAUNCHPAD
           </button>

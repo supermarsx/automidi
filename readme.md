@@ -53,6 +53,10 @@ can be previewed locally using `npm run preview`.
   Programmer mode automatically.
 - Top and side pads are mapped to CC numbers while the main grid is mapped to
   notes, letting you experiment with lighting and macros.
+MIDI channels map LED behaviours:
+- **Channel 1** (`0x90`/`0xB0`) for static colours
+- **Channel 2** (`0x91`/`0xB1`) for flashing colours
+- **Channel 3** (`0x92`/`0xB2`) for pulsing colours
 
 ---
 

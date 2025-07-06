@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useStore } from './store';
 import { useToastStore } from './toastStore';
 import './SettingsModal.css';
@@ -19,6 +19,7 @@ export default function SettingsModal({ onClose }: Props) {
   const pingYellow = useStore((s) => s.settings.pingYellow);
   const pingOrange = useStore((s) => s.settings.pingOrange);
   const pingEnabled = useStore((s) => s.settings.pingEnabled);
+  const clearBeforeLoad = useStore((s) => s.settings.clearBeforeLoad);
   const setHost = useStore((s) => s.setHost);
   const setPort = useStore((s) => s.setPort);
   const setAutoReconnect = useStore((s) => s.setAutoReconnect);
@@ -30,6 +31,7 @@ export default function SettingsModal({ onClose }: Props) {
   const setPingYellow = useStore((s) => s.setPingYellow);
   const setPingOrange = useStore((s) => s.setPingOrange);
   const setPingEnabled = useStore((s) => s.setPingEnabled);
+  const setClearBeforeLoad = useStore((s) => s.setClearBeforeLoad);
   const addToast = useToastStore((s) => s.addToast);
 
   const [h, setH] = useState(host);
@@ -43,6 +45,8 @@ export default function SettingsModal({ onClose }: Props) {
   const [py, setPy] = useState(pingYellow);
   const [po, setPo] = useState(pingOrange);
   const [pe, setPe] = useState(pingEnabled);
+  const [cbl, setCbl] = useState(clearBeforeLoad);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const save = () => {
     setHost(h);
@@ -56,8 +60,61 @@ export default function SettingsModal({ onClose }: Props) {
     setPingGreen(pg);
     setPingYellow(py);
     setPingOrange(po);
+    setClearBeforeLoad(cbl);
     onClose();
     addToast('Settings saved', 'success');
+  };
+
+  const exportSettings = () => {
+    const data = JSON.stringify(useStore.getState().settings);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'system-config.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    addToast('Config exported', 'success');
+  };
+
+  const importSettings = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const cfg = JSON.parse(ev.target?.result as string);
+        setHost(cfg.host ?? h);
+        setPort(cfg.port ?? p);
+        setAutoReconnect(cfg.autoReconnect ?? ar);
+        setReconnectInterval(cfg.reconnectInterval ?? reconnectInterval);
+        setMaxReconnectAttempts(cfg.maxReconnectAttempts ?? mra);
+        setLogLimit(cfg.logLimit ?? ll);
+        setPingInterval(cfg.pingInterval ?? pi);
+        setPingEnabled(cfg.pingEnabled ?? pe);
+        setPingGreen(cfg.pingGreen ?? pg);
+        setPingYellow(cfg.pingYellow ?? py);
+        setPingOrange(cfg.pingOrange ?? po);
+        setClearBeforeLoad(cfg.clearBeforeLoad ?? cbl);
+        setH(cfg.host ?? h);
+        setP(cfg.port ?? p);
+        setAr(cfg.autoReconnect ?? ar);
+        setRi((cfg.reconnectInterval ?? reconnectInterval) / 1000);
+        setMra(cfg.maxReconnectAttempts ?? mra);
+        setLl(cfg.logLimit ?? ll);
+        setPi(cfg.pingInterval ?? pi);
+        setPg(cfg.pingGreen ?? pg);
+        setPy(cfg.pingYellow ?? py);
+        setPo(cfg.pingOrange ?? po);
+        setPe(cfg.pingEnabled ?? pe);
+        setCbl(cfg.clearBeforeLoad ?? cbl);
+        addToast('Config imported', 'success');
+      } catch {
+        addToast('Failed to import config', 'error');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   };
 
   useEffect(() => {
@@ -107,6 +164,7 @@ export default function SettingsModal({ onClose }: Props) {
               <input
                 type="number"
                 className="form-control retro-input"
+                style={{ width: '8rem' }}
                 value={ll}
                 onChange={(e) => setLl(Number(e.target.value))}
                 min="1"
@@ -197,6 +255,21 @@ export default function SettingsModal({ onClose }: Props) {
                 Automatically reconnect when connection is lost
               </small>
             </div>
+            <div className="mb-3 form-check">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="clearBeforeLoad"
+                checked={cbl}
+                onChange={(e) => setCbl(e.target.checked)}
+              />
+              <label
+                className="form-check-label text-info"
+                htmlFor="clearBeforeLoad"
+              >
+                CLEAR BEFORE LOAD
+              </label>
+            </div>
             {ar && (
               <>
                 <div className="mb-3">
@@ -234,6 +307,22 @@ export default function SettingsModal({ onClose }: Props) {
             )}
           </div>
           <div className="modal-footer">
+            <input
+              type="file"
+              accept="application/json"
+              ref={fileRef}
+              onChange={importSettings}
+              style={{ display: 'none' }}
+            />
+            <button className="retro-button me-2" onClick={exportSettings}>
+              EXPORT
+            </button>
+            <button
+              className="retro-button me-2"
+              onClick={() => fileRef.current?.click()}
+            >
+              IMPORT
+            </button>
             <button className="retro-button me-2" onClick={save}>
               SAVE CONFIG
             </button>

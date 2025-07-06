@@ -40,6 +40,7 @@ const Pad = memo(
   }) => {
     const colour = useStore((s) => s.padColours[id] || '#000000');
     const label = useStore((s) => s.padLabels[id] || '');
+    const displayLabel = label.length > 6 ? `${label.slice(0, 5)}…` : label;
 
     if (isEmpty) {
       return <div className="midi-pad-empty"></div>;
@@ -55,7 +56,7 @@ const Pad = memo(
         title={note !== undefined ? `Note ${note}` : `CC ${ccNum}`}
         onClick={() => onSelect({ id, note, cc: ccNum })}
       >
-        {label && <span className="pad-label">{label}</span>}
+        {label && <span className="pad-label">{displayLabel}</span>}
       </div>
     );
   },
