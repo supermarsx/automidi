@@ -19,6 +19,41 @@ export function useMidi() {
 
 
   useEffect(() => {
+    let cancelled = false;
+
+    const update = () => {
+      fetch('/midi/devices')
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(
+              `Failed to fetch MIDI devices: ${res.status} ${res.statusText}`,
+            );
+          }
+          return res.json();
+        })
+        .then((data) => {
+          if (cancelled) return;
+          setInputs(data.inputs);
+          setOutputs(data.outputs);
+          const lp = data.outputs.find((o: MidiDevice) =>
+            o.name.includes('Launchpad X'),
+          );
+          launchpad.current = lp ? lp.id : null;
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    };
+
+    update();
+    const id = setInterval(update, 2000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
+
+  useEffect(() => {
     const ws = new WebSocket(`ws://${location.hostname}:3000`);
     wsRef.current = ws;
     ws.onopen = () => {
