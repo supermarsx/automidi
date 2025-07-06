@@ -36,9 +36,8 @@ to receive device updates and MIDI messages.
 ## Development workflow
 
 1. Install dependencies with `npm install`.
-2. Start the backend: `npm run server`.
-3. In another terminal start the Vite dev server: `npm run dev`.
-4. Visit <http://localhost:5173> and start playing with your MIDI gear.
+2. Start the development servers with `npm run dev`. This launches both the backend and Vite dev server concurrently.
+3. Visit <http://localhost:5173> and start playing with your MIDI gear.
 
 For a production build run `npm run build`. The output is placed in `dist/` and
 can be previewed locally using `npm run preview`.
@@ -71,9 +70,9 @@ testing device specific commands.
 
 ## Useful scripts
 
-- `npm run dev` – start the Vite dev server
+- `npm run dev` – start both the backend and Vite dev server
 - `npm run build` – build the React application for production
 - `npm run preview` – preview the production build locally
 - `npm run lint` – run ESLint
 - `npm run format` – run Prettier
-- `npm run server` – start the MIDI backend
+- `npm run server` – start only the MIDI backend
