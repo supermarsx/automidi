@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+const base = `http://${location.hostname}:3000`;
+
 export interface MidiDevice {
   id: number;
   name: string;
@@ -21,7 +23,7 @@ export function useMidi() {
     let cancelled = false;
 
     const update = () => {
-      fetch('/midi/devices')
+      fetch(`${base}/midi/devices`)
         .then((res) => res.json())
         .then((data) => {
           if (cancelled) return;
@@ -68,7 +70,7 @@ export function useMidi() {
   const send = useCallback(
     (bytes: number[] | Uint8Array, output?: MidiDevice | null) => {
       const port = output?.id ?? launchpad.current ?? 0;
-      fetch('/midi/send', {
+      fetch(`${base}/midi/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ port, data: Array.from(bytes) }),
