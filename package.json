@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "preview": "vite preview",
-    "server": "node server/index.js"
+    "server": "node server/index.cjs"
   },
   "dependencies": {
     "@tonejs/midi": "^2.0.28",
