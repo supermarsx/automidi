@@ -29,6 +29,11 @@ function App() {
           </div>
           <div className="row">
             <div className="col-12">
+              <ConfigManager />
+            </div>
+          </div>
+          <div className="row">
+            <div className="col-12">
               <LaunchpadControls />
             </div>
           </div>
@@ -38,11 +43,6 @@ function App() {
             </div>
             <div className="col-md-6">
               <SysexWorkbench />
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-12">
-              <ConfigManager />
             </div>
           </div>
         </div>
