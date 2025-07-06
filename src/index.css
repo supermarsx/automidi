@@ -86,7 +86,7 @@ body {
   display: grid;
   grid-template-columns: repeat(9, 40px);
   grid-template-rows: repeat(9, 40px);
-  gap: 2px;
+  gap: 6px;
   justify-content: center;
   background: #000020;
   padding: 10px;
@@ -109,7 +109,7 @@ body {
 }
 
 .midi-pad-container.side-cc {
-  margin-left: 2px;
+  margin-left: 10px;
 }
 
 .midi-pad-container.selected {
@@ -143,6 +143,7 @@ body {
 }
 #cc-99 .midi-pad-container {
   border-radius: 5px;
+  margin-left: 10px;
 }
 
 .retro-panel {
