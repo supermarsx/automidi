@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useStore } from './store';
-import './SettingsModal.css';
 
 interface Props {
   onClose: () => void;
@@ -22,24 +21,39 @@ export default function SettingsModal({ onClose }: Props) {
   };
 
   return (
-    <div className="modal">
-      <div className="modal-content">
-        <h3>Socket Settings</h3>
-        <label>
-          Host:
-          <input value={h} onChange={(e) => setH(e.target.value)} />
-        </label>
-        <label>
-          Port:
-          <input
-            type="number"
-            value={p}
-            onChange={(e) => setP(Number(e.target.value))}
-          />
-        </label>
-        <div className="actions">
-          <button onClick={save}>Save</button>
-          <button onClick={onClose}>Cancel</button>
+    <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
+      <div className="modal-dialog">
+        <div className="modal-content modal-retro">
+          <div className="modal-header">
+            <h5 className="modal-title">◄ SYSTEM CONFIGURATION ►</h5>
+          </div>
+          <div className="modal-body">
+            <div className="mb-3">
+              <label className="form-label text-info">HOST ADDRESS:</label>
+              <input 
+                className="form-control retro-input" 
+                value={h} 
+                onChange={(e) => setH(e.target.value)} 
+              />
+            </div>
+            <div className="mb-3">
+              <label className="form-label text-info">PORT NUMBER:</label>
+              <input
+                type="number"
+                className="form-control retro-input"
+                value={p}
+                onChange={(e) => setP(Number(e.target.value))}
+              />
+            </div>
+          </div>
+          <div className="modal-footer">
+            <button className="retro-button me-2" onClick={save}>
+              SAVE CONFIG
+            </button>
+            <button className="retro-button" onClick={onClose}>
+              ABORT
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useMidi } from './useMidi';
 import { sysex } from './midiMessages';
-import './SysexWorkbench.css';
 
 interface CommandDef {
   code: number;
@@ -64,35 +63,50 @@ export default function SysexWorkbench() {
 
   const bytes = sysex(cmd, ...params);
   const hex = Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, '0'))
+    .map((b) => b.toString(16).padStart(2, '0').toUpperCase())
     .join(' ');
 
   return (
     <div className="sysex-workbench">
-      <label>
-        Command:
-        <select value={cmd} onChange={(e) => setCmd(Number(e.target.value))}>
+      <h3 className="text-warning">◄ SysEx Workbench ►</h3>
+      <div className="mb-3">
+        <label className="form-label text-info">COMMAND:</label>
+        <select 
+          className="form-select retro-select" 
+          value={cmd} 
+          onChange={(e) => setCmd(Number(e.target.value))}
+        >
           {COMMANDS.map((c) => (
             <option key={c.code} value={c.code}>
               {c.name}
             </option>
           ))}
         </select>
-      </label>
-      <div className="params">
-        {params.map((p, i) => (
-          <input
-            key={i}
-            type="number"
-            min={0}
-            max={127}
-            value={p}
-            onChange={(e) => handleParam(i, e.target.value)}
-          />
-        ))}
       </div>
-      <pre>{hex}</pre>
-      <button onClick={() => send(bytes)}>Send</button>
+      <div className="mb-3">
+        <label className="form-label text-info">PARAMETERS:</label>
+        <div className="d-flex gap-2">
+          {params.map((p, i) => (
+            <input
+              key={i}
+              type="number"
+              className="form-control retro-input"
+              style={{ width: '80px' }}
+              min={0}
+              max={127}
+              value={p}
+              onChange={(e) => handleParam(i, e.target.value)}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="hex-display">
+        <strong>HEX OUTPUT:</strong><br />
+        {hex}
+      </div>
+      <button className="retro-button" onClick={() => send(bytes)}>
+        ◄ TRANSMIT ►
+      </button>
     </div>
   );
 }

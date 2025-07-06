@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react';
 import type { Macro, MidiMsg } from './store';
-import './MacroEditor.css';
 
 interface Props {
   macro: Macro;
@@ -58,19 +57,36 @@ export default function MacroEditor({ macro, onSave, onCancel }: Props) {
   });
 
   return (
-    <div className="macro-editor">
-      <h3>Edit Macro</h3>
-      <input value={name} onChange={(e) => setName(e.target.value)} />
-      <div>
-        <button onClick={() => setTab('timeline')}>Timeline</button>
-        <button onClick={() => setTab('json')}>JSON</button>
+    <div className="retro-panel mt-3">
+      <h4 className="text-warning">◄ MACRO EDITOR ►</h4>
+      <div className="mb-3">
+        <label className="form-label text-info">MACRO NAME:</label>
+        <input 
+          className="form-control retro-input" 
+          value={name} 
+          onChange={(e) => setName(e.target.value)} 
+        />
+      </div>
+      <div className="mb-3">
+        <button 
+          className={`retro-button me-2 ${tab === 'timeline' ? 'active' : ''}`}
+          onClick={() => setTab('timeline')}
+        >
+          TIMELINE
+        </button>
+        <button 
+          className={`retro-button ${tab === 'json' ? 'active' : ''}`}
+          onClick={() => setTab('json')}
+        >
+          JSON
+        </button>
       </div>
       {tab === 'timeline' ? (
-        <div className="timeline" onDragOver={(e) => e.preventDefault()}>
+        <div className="macro-timeline" onDragOver={(e) => e.preventDefault()}>
           {items.map((item) => (
             <div
               key={item.index}
-              className="event"
+              className="timeline-event"
               draggable
               onDragStart={() => {
                 dragIndex.current = item.index;
@@ -78,12 +94,18 @@ export default function MacroEditor({ macro, onSave, onCancel }: Props) {
               onDrop={() => handleDrop(item.index)}
               style={{
                 left: item.left * SCALE,
-                width: Math.max(10, item.width * SCALE),
+                width: Math.max(20, item.width * SCALE),
               }}
             >
               <span>{item.index + 1}</span>
               <div
-                className="handle"
+                style={{
+                  width: '6px',
+                  height: '100%',
+                  background: '#ffff00',
+                  cursor: 'ew-resize',
+                  marginLeft: '4px',
+                }}
                 onMouseDown={(e) => {
                   e.stopPropagation();
                   const startX = e.clientX;
@@ -103,16 +125,20 @@ export default function MacroEditor({ macro, onSave, onCancel }: Props) {
         </div>
       ) : (
         <textarea
-          className="json-editor"
+          className="form-control retro-textarea"
           value={json}
           onChange={(e) => setJson(e.target.value)}
           onBlur={handleJsonBlur}
           rows={10}
         />
       )}
-      <div className="actions">
-        <button onClick={save}>Save</button>
-        <button onClick={onCancel}>Cancel</button>
+      <div className="mt-3">
+        <button className="retro-button me-2" onClick={save}>
+          SAVE
+        </button>
+        <button className="retro-button" onClick={onCancel}>
+          CANCEL
+        </button>
       </div>
     </div>
   );

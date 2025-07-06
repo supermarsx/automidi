@@ -2,7 +2,6 @@ import React, { memo } from 'react';
 import { noteOn, cc } from './midiMessages';
 import { useMidi } from './useMidi';
 import { useStore } from './store';
-import './LaunchpadCanvas.css';
 
 // MIDI mappings for Launchpad X
 const NOTE_GRID: number[][] = [
@@ -48,9 +47,10 @@ const Pad = memo(({ id, note, cc: ccNum }: PadProps) => {
   return (
     <input
       type="color"
-      className="pad"
+      className="midi-pad"
       value={colour}
       onChange={handleChange}
+      style={{ backgroundColor: colour }}
     />
   );
 });
@@ -59,7 +59,7 @@ export function LaunchpadCanvas() {
   const grid: React.ReactElement[] = [];
 
   // top-left corner
-  grid.push(<div key="tl" />);
+  grid.push(<div key="tl" className="midi-pad" style={{ background: '#000020' }} />);
 
   // top row
   for (let x = 0; x < 8; x++) {
@@ -68,11 +68,11 @@ export function LaunchpadCanvas() {
   }
 
   // top-right corner
-  grid.push(<div key="tr" />);
+  grid.push(<div key="tr" className="midi-pad" style={{ background: '#000020' }} />);
 
   for (let y = 0; y < 8; y++) {
     // left blank column
-    grid.push(<div key={`l-${y}`} />);
+    grid.push(<div key={`l-${y}`} className="midi-pad" style={{ background: '#000020' }} />);
     for (let x = 0; x < 8; x++) {
       const note = NOTE_GRID[y][x];
       const id = `n-${note}`;
@@ -83,9 +83,9 @@ export function LaunchpadCanvas() {
   }
 
   // bottom-right corner
-  grid.push(<div key="br" />);
+  grid.push(<div key="br" className="midi-pad" style={{ background: '#000020' }} />);
 
-  return <div className="launchpad-grid">{grid}</div>;
+  return <div className="midi-grid">{grid}</div>;
 }
 
 export default memo(LaunchpadCanvas);

@@ -16,21 +16,35 @@ export default function MacroList() {
   };
 
   return (
-    <div>
-      <h2>Macros</h2>
-      <ul>
-        {macros.map((m) => (
-          <li key={m.id}>
-            {m.name}
-            <button onClick={() => playMacro(m.id)}>Play</button>
-            <button onClick={() => playMacro(m.id, { loop: true })}>
-              Loop
-            </button>
-            <button onClick={() => setEditing(m)}>Edit</button>
-            <button onClick={() => removeMacro(m.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
+    <div className="retro-panel">
+      <h3>◄ Macro Sequencer ►</h3>
+      {macros.length === 0 ? (
+        <div className="text-warning text-center p-3">
+          NO MACROS LOADED
+        </div>
+      ) : (
+        <div>
+          {macros.map((m) => (
+            <div key={m.id} className="macro-list-item">
+              <span className="macro-name">{m.name}</span>
+              <div>
+                <button className="retro-button btn-sm me-1" onClick={() => playMacro(m.id)}>
+                  PLAY
+                </button>
+                <button className="retro-button btn-sm me-1" onClick={() => playMacro(m.id, { loop: true })}>
+                  LOOP
+                </button>
+                <button className="retro-button btn-sm me-1" onClick={() => setEditing(m)}>
+                  EDIT
+                </button>
+                <button className="retro-button btn-sm" onClick={() => removeMacro(m.id)}>
+                  DEL
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
       {editing && (
         <MacroEditor
           macro={editing}
