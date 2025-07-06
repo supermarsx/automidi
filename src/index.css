@@ -70,6 +70,20 @@ body {
   height: 100%;
   position: relative;
 }
+#n-54::after,
+#n-55::after,
+#n-45::after,
+#n-44::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60%;
+  height: 60%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border: 1px solid #ffff00;
+  pointer-events: none;
+}
 
 .midi-pad-select {
   width: 100%;
