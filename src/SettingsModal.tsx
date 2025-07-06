@@ -10,17 +10,20 @@ export default function SettingsModal({ onClose }: Props) {
   const port = useStore((s) => s.settings.port);
   const autoReconnect = useStore((s) => s.settings.autoReconnect);
   const reconnectInterval = useStore((s) => s.settings.reconnectInterval);
+  const maxReconnectAttempts = useStore((s) => s.settings.maxReconnectAttempts);
   const logLimit = useStore((s) => s.settings.logLimit);
   const setHost = useStore((s) => s.setHost);
   const setPort = useStore((s) => s.setPort);
   const setAutoReconnect = useStore((s) => s.setAutoReconnect);
   const setReconnectInterval = useStore((s) => s.setReconnectInterval);
+  const setMaxReconnectAttempts = useStore((s) => s.setMaxReconnectAttempts);
   const setLogLimit = useStore((s) => s.setLogLimit);
 
   const [h, setH] = useState(host);
   const [p, setP] = useState(port);
   const [ar, setAr] = useState(autoReconnect);
   const [ri, setRi] = useState(reconnectInterval / 1000); // Convert to seconds for UI
+  const [mra, setMra] = useState(maxReconnectAttempts);
   const [ll, setLl] = useState(logLimit);
 
   const save = () => {
@@ -28,6 +31,7 @@ export default function SettingsModal({ onClose }: Props) {
     setPort(Number(p));
     setAutoReconnect(ar);
     setReconnectInterval(Math.max(1, ri) * 1000); // Minimum 1 second, convert back to milliseconds
+    setMaxReconnectAttempts(mra);
     setLogLimit(ll);
     onClose();
   };
@@ -102,6 +106,7 @@ export default function SettingsModal({ onClose }: Props) {
               <small className="text-warning">Automatically reconnect when connection is lost</small>
             </div>
             {ar && (
+              <>
               <div className="mb-3">
                 <label className="form-label text-info">RECONNECT INTERVAL (SECONDS):</label>
                 <input
@@ -115,6 +120,19 @@ export default function SettingsModal({ onClose }: Props) {
                 />
                 <small className="text-warning">Minimum: 1 second, Maximum: 60 seconds</small>
               </div>
+              <div className="mb-3">
+                <label className="form-label text-info">MAX RECONNECT ATTEMPTS:</label>
+                <input
+                  type="number"
+                  className="form-control retro-input"
+                  value={mra}
+                  onChange={(e) => setMra(Number(e.target.value))}
+                  min="1"
+                  max="99"
+                />
+                <small className="text-warning">Default: 10</small>
+              </div>
+              </>
             )}
           </div>
           <div className="modal-footer">
