@@ -57,34 +57,35 @@ const LAUNCHPAD_COLORS = [
   { name: 'ORANGE_LOW', value: 177, color: '#331100' },
   { name: 'ORANGE_MID', value: 178, color: '#662200' },
   { name: 'ORANGE_FULL', value: 179, color: '#FF4400' },
-  { name: 'WHITE', value: 3, color: '#FFFFFF' }
+  { name: 'WHITE', value: 3, color: '#FFFFFF' },
 ];
 
-function findClosestLaunchpadColor(hex: string): { value: number; color: string } {
+function findClosestLaunchpadColor(hex: string): {
+  value: number;
+  color: string;
+} {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
-  
+
   let closestColor = LAUNCHPAD_COLORS[0];
   let minDistance = Infinity;
-  
+
   for (const color of LAUNCHPAD_COLORS) {
     const cr = parseInt(color.color.slice(1, 3), 16);
     const cg = parseInt(color.color.slice(3, 5), 16);
     const cb = parseInt(color.color.slice(5, 7), 16);
-    
+
     const distance = Math.sqrt(
-      Math.pow(r - cr, 2) + 
-      Math.pow(g - cg, 2) + 
-      Math.pow(b - cb, 2)
+      Math.pow(r - cr, 2) + Math.pow(g - cg, 2) + Math.pow(b - cb, 2),
     );
-    
+
     if (distance < minDistance) {
       minDistance = distance;
       closestColor = color;
     }
   }
-  
+
   return { value: closestColor.value, color: closestColor.color };
 }
 
@@ -105,11 +106,13 @@ const Pad = memo(({ id, note, cc: ccNum, isEmpty }: PadProps) => {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedColor = LAUNCHPAD_COLORS.find(c => c.color === e.target.value);
+    const selectedColor = LAUNCHPAD_COLORS.find(
+      (c) => c.color === e.target.value,
+    );
     if (!selectedColor) return;
-    
+
     setPadColour(id, selectedColor.color);
-    
+
     if (status === 'connected') {
       if (note !== undefined) {
         send(noteOn(note, selectedColor.value));
@@ -129,10 +132,13 @@ const Pad = memo(({ id, note, cc: ccNum, isEmpty }: PadProps) => {
         title={note !== undefined ? `Note ${note}` : `CC ${ccNum}`}
       >
         {LAUNCHPAD_COLORS.map((color) => (
-          <option 
-            key={color.color} 
+          <option
+            key={color.name}
             value={color.color}
-            style={{ backgroundColor: color.color, color: color.color === '#000000' ? '#fff' : '#000' }}
+            style={{
+              backgroundColor: color.color,
+              color: color.color === '#000000' ? '#fff' : '#000',
+            }}
           >
             {color.name}
           </option>
@@ -157,7 +163,7 @@ export function LaunchpadCanvas() {
     // Side CC control (left)
     const sideId = `cc-${SIDE_CC[y]}`;
     grid.push(<Pad key={sideId} id={sideId} cc={SIDE_CC[y]} />);
-    
+
     // Main 8x8 note grid
     for (let x = 0; x < 8; x++) {
       const note = NOTE_GRID[y][x];
