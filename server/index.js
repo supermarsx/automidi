@@ -78,7 +78,13 @@ WebMidi.addListener('portschanged', () => {
 });
 
 WebMidi.addListener('midimessage', e => {
-  const payload = JSON.stringify({ type: 'midi', message: e.message.rawData, time: e.timestamp });
+  const source = e.port?.name ?? e.target?.name ?? 'unknown';
+  const payload = JSON.stringify({
+    type: 'midi',
+    message: e.message.rawData,
+    time: e.timestamp,
+    source,
+  });
   for (const ws of wss.clients) {
     if (ws.readyState === ws.OPEN) {
       ws.send(payload);
