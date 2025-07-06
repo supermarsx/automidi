@@ -476,3 +476,8 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #ffff00;
 }
+
+/* Ping delay status */
+.delay-status {
+  color: #00ffff;
+}
