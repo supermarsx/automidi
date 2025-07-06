@@ -5,12 +5,30 @@ const { WebMidi } = require('webmidi');
 const app = express();
 app.use(express.json());
 
+let currentDevices = { inputs: [], outputs: [] };
+
 WebMidi.enable().then(() => {
+  console.log('WebMidi enabled successfully');
+  
   function listDevices() {
-    const inputs = WebMidi.inputs.map((input, index) => ({ id: index, name: input.name }));
-    const outputs = WebMidi.outputs.map((output, index) => ({ id: index, name: output.name }));
+    const inputs = WebMidi.inputs.map((input, index) => ({ 
+      id: index, 
+      name: input.name,
+      manufacturer: input.manufacturer,
+      state: input.state
+    }));
+    const outputs = WebMidi.outputs.map((output, index) => ({ 
+      id: index, 
+      name: output.name,
+      manufacturer: output.manufacturer,
+      state: output.state
+    }));
+    currentDevices = { inputs, outputs };
     return { inputs, outputs };
   }
+
+  // Initialize device list
+  listDevices();
 
   app.get('/midi/devices', (_req, res) => {
     res.json(listDevices());
@@ -29,9 +47,10 @@ WebMidi.enable().then(() => {
     }
     try {
       out.send(data);
+      console.log(`Sent MIDI to ${out.name}:`, data);
       res.json({ ok: true });
     } catch (err) {
-      console.error(err);
+      console.error('MIDI send error:', err);
       res.status(500).json({ error: err.message });
     }
   });
@@ -42,52 +61,115 @@ WebMidi.enable().then(() => {
 
   const wss = new WebSocketServer({ server });
 
-  function sendDevices(ws) {
-    ws.send(JSON.stringify({ type: 'devices', ...listDevices() }));
-  }
-
-  wss.on('connection', ws => {
-    sendDevices(ws);
-    ws.on('message', msg => {
-      try {
-        const data = JSON.parse(msg.toString());
-        if (data.type === 'getDevices') {
-          sendDevices(ws);
-        } else if (data.type === 'send') {
-          const { port = 0, bytes } = data;
-          const out = WebMidi.outputs[port];
-          if (!out || !Array.isArray(bytes)) return;
-          try {
-            out.send(bytes);
-          } catch (err) {
-            console.error(err);
-          }
-        }
-      } catch {
-        // ignore malformed messages
-      }
-    });
-  });
-
-  WebMidi.addListener('portschanged', () => {
-    const payload = JSON.stringify({ type: 'devices', ...listDevices() });
-    for (const ws of wss.clients) {
-      if (ws.readyState === ws.OPEN) ws.send(payload);
-    }
-  });
-
-  WebMidi.addListener('midimessage', e => {
-    const source = e.port?.name ?? e.target?.name ?? 'unknown';
-    const payload = JSON.stringify({
-      type: 'midi',
-      message: e.message.rawData,
-      time: e.timestamp,
-      source,
-    });
+  function broadcastToClients(message) {
+    const payload = JSON.stringify(message);
     for (const ws of wss.clients) {
       if (ws.readyState === ws.OPEN) {
         ws.send(payload);
       }
     }
+  }
+
+  function sendDevices(ws) {
+    const devices = listDevices();
+    const message = { type: 'devices', ...devices };
+    if (ws) {
+      ws.send(JSON.stringify(message));
+    } else {
+      broadcastToClients(message);
+    }
+  }
+
+  // Set up MIDI input listeners for all devices
+  function setupMidiListeners() {
+    WebMidi.inputs.forEach((input, index) => {
+      console.log(`Setting up listener for input: ${input.name}`);
+      
+      // Listen to all MIDI messages
+      input.addListener('midimessage', (e) => {
+        const message = {
+          type: 'midi',
+          direction: 'in',
+          message: Array.from(e.message.data || e.data || []),
+          timestamp: e.timestamp || Date.now(),
+          source: input.name,
+          port: index
+        };
+        console.log('MIDI IN:', message);
+        broadcastToClients(message);
+      });
+
+      // Listen to specific message types for better logging
+      input.addListener('noteon', (e) => {
+        console.log(`Note ON from ${input.name}: ${e.note.name}${e.note.octave} vel:${e.velocity}`);
+      });
+
+      input.addListener('noteoff', (e) => {
+        console.log(`Note OFF from ${input.name}: ${e.note.name}${e.note.octave}`);
+      });
+
+      input.addListener('controlchange', (e) => {
+        console.log(`CC from ${input.name}: CC${e.controller.number} val:${e.value}`);
+      });
+    });
+  }
+
+  // Initial setup
+  setupMidiListeners();
+
+  wss.on('connection', ws => {
+    console.log('WebSocket client connected');
+    sendDevices(ws);
+    
+    ws.on('message', msg => {
+      try {
+        const data = JSON.parse(msg.toString());
+        console.log('Received WebSocket message:', data);
+        
+        if (data.type === 'getDevices') {
+          sendDevices(ws);
+        } else if (data.type === 'send') {
+          const { port = 0, bytes } = data;
+          const out = WebMidi.outputs[port];
+          if (!out || !Array.isArray(bytes)) {
+            console.error('Invalid output port or bytes:', { port, bytes });
+            return;
+          }
+          try {
+            out.send(bytes);
+            console.log(`Sent MIDI via WebSocket to ${out.name}:`, bytes);
+            
+            // Broadcast the outgoing message to all clients for logging
+            broadcastToClients({
+              type: 'midi',
+              direction: 'out',
+              message: bytes,
+              timestamp: Date.now(),
+              target: out.name,
+              port: port
+            });
+          } catch (err) {
+            console.error('WebSocket MIDI send error:', err);
+          }
+        }
+      } catch (err) {
+        console.error('WebSocket message parse error:', err);
+      }
+    });
+
+    ws.on('close', () => {
+      console.log('WebSocket client disconnected');
+    });
   });
+
+  // Listen for device changes
+  WebMidi.addListener('portschanged', () => {
+    console.log('MIDI ports changed');
+    listDevices();
+    setupMidiListeners(); // Re-setup listeners for new devices
+    sendDevices(); // Broadcast to all clients
+  });
+
+}).catch(err => {
+  console.error('Failed to enable WebMidi:', err);
 });

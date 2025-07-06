@@ -1,31 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
-import { useMidi } from './useMidi';
+import { useMidi, type MidiMessage } from './useMidi';
 
-interface LogEntry {
+interface LogEntry extends MidiMessage {
   id: number;
-  timestamp: string;
-  direction: 'in' | 'out';
-  data: number[];
-  source?: string;
+  formattedTime: string;
 }
 
 export default function MidiLogger() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isVisible, setIsVisible] = useState(false);
+  const [filter, setFilter] = useState<'all' | 'in' | 'out'>('all');
   const { listen } = useMidi();
   const logRef = useRef<HTMLDivElement>(null);
   const idCounter = useRef(0);
 
   useEffect(() => {
-    const unlisten = listen((msg) => {
+    const unlisten = listen((msg: MidiMessage) => {
       const entry: LogEntry = {
+        ...msg,
         id: idCounter.current++,
-        timestamp: new Date().toLocaleTimeString(),
-        direction: 'in',
-        data: Array.from(msg.data),
-        source: msg.source,
+        formattedTime: new Date(msg.timestamp).toLocaleTimeString(),
       };
-      setLogs(prev => [...prev.slice(-99), entry]); // Keep last 100 entries
+      setLogs(prev => [...prev.slice(-199), entry]); // Keep last 200 entries
     });
     return unlisten;
   }, [listen]);
@@ -47,10 +43,49 @@ export default function MidiLogger() {
     const status = bytes[0];
     if (status >= 0x80 && status <= 0x8F) return 'NOTE_OFF';
     if (status >= 0x90 && status <= 0x9F) return 'NOTE_ON';
+    if (status >= 0xA0 && status <= 0xAF) return 'AFTERTOUCH';
     if (status >= 0xB0 && status <= 0xBF) return 'CC';
+    if (status >= 0xC0 && status <= 0xCF) return 'PROG_CHG';
+    if (status >= 0xD0 && status <= 0xDF) return 'CH_PRESSURE';
+    if (status >= 0xE0 && status <= 0xEF) return 'PITCH_BEND';
     if (status === 0xF0) return 'SYSEX';
+    if (status === 0xF1) return 'MTC';
+    if (status === 0xF2) return 'SONG_POS';
+    if (status === 0xF3) return 'SONG_SEL';
+    if (status === 0xF6) return 'TUNE_REQ';
+    if (status === 0xF7) return 'EOX';
+    if (status === 0xF8) return 'CLOCK';
+    if (status === 0xFA) return 'START';
+    if (status === 0xFB) return 'CONTINUE';
+    if (status === 0xFC) return 'STOP';
+    if (status === 0xFE) return 'ACTIVE_SENSE';
+    if (status === 0xFF) return 'RESET';
     return 'OTHER';
   };
+
+  const getMessageDetails = (bytes: number[]) => {
+    if (bytes.length === 0) return '';
+    const status = bytes[0];
+    
+    if (status >= 0x90 && status <= 0x9F && bytes.length >= 3) {
+      return `Ch${(status & 0x0F) + 1} Note:${bytes[1]} Vel:${bytes[2]}`;
+    }
+    if (status >= 0x80 && status <= 0x8F && bytes.length >= 3) {
+      return `Ch${(status & 0x0F) + 1} Note:${bytes[1]} Vel:${bytes[2]}`;
+    }
+    if (status >= 0xB0 && status <= 0xBF && bytes.length >= 3) {
+      return `Ch${(status & 0x0F) + 1} CC:${bytes[1]} Val:${bytes[2]}`;
+    }
+    if (status === 0xF0) {
+      return `Len:${bytes.length}`;
+    }
+    return '';
+  };
+
+  const filteredLogs = logs.filter(log => {
+    if (filter === 'all') return true;
+    return log.direction === filter;
+  });
 
   if (!isVisible) {
     return (
@@ -59,7 +94,7 @@ export default function MidiLogger() {
         style={{ bottom: '20px', right: '20px', zIndex: 1000 }}
         onClick={() => setIsVisible(true)}
       >
-        MIDI LOG
+        MIDI LOG ({logs.length})
       </button>
     );
   }
@@ -68,7 +103,17 @@ export default function MidiLogger() {
     <div className="midi-logger">
       <div className="logger-header">
         <h5 className="text-warning">◄ MIDI DATA STREAM ►</h5>
-        <div>
+        <div className="d-flex align-items-center">
+          <select 
+            className="form-select retro-select me-2" 
+            style={{ width: 'auto', fontSize: '12px' }}
+            value={filter}
+            onChange={(e) => setFilter(e.target.value as 'all' | 'in' | 'out')}
+          >
+            <option value="all">ALL</option>
+            <option value="in">IN</option>
+            <option value="out">OUT</option>
+          </select>
           <button className="retro-button btn-sm me-2" onClick={clearLogs}>
             CLEAR
           </button>
@@ -78,21 +123,24 @@ export default function MidiLogger() {
         </div>
       </div>
       <div className="logger-content" ref={logRef}>
-        {logs.length === 0 ? (
+        {filteredLogs.length === 0 ? (
           <div className="text-center text-warning p-3">
-            NO MIDI DATA RECEIVED
+            NO MIDI DATA {filter !== 'all' ? `(${filter.toUpperCase()})` : ''}
           </div>
         ) : (
-          logs.map((entry) => (
+          filteredLogs.map((entry) => (
             <div key={entry.id} className={`log-entry ${entry.direction}`}>
-              <span className="log-time">{entry.timestamp}</span>
+              <span className="log-time">{entry.formattedTime}</span>
               <span className={`log-direction ${entry.direction}`}>
                 {entry.direction === 'in' ? '◄ IN' : 'OUT ►'}
               </span>
-              <span className="log-type">{getMsgType(entry.data)}</span>
-              <span className="log-data">{formatBytes(entry.data)}</span>
-              {entry.source && (
-                <span className="log-source">({entry.source})</span>
+              <span className="log-type">{getMsgType(entry.message)}</span>
+              <span className="log-data">{formatBytes(entry.message)}</span>
+              <span className="log-details">{getMessageDetails(entry.message)}</span>
+              {(entry.source || entry.target) && (
+                <span className="log-source">
+                  ({entry.direction === 'in' ? entry.source : entry.target})
+                </span>
               )}
             </div>
           ))

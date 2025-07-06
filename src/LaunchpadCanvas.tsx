@@ -1,9 +1,9 @@
 import React, { memo } from 'react';
-import { noteOn, cc } from './midiMessages';
+import { noteOn, cc, ledLighting } from './midiMessages';
 import { useMidi } from './useMidi';
 import { useStore } from './store';
 
-// MIDI mappings for Launchpad X
+// MIDI mappings for Launchpad X according to programmer's reference
 const NOTE_GRID: number[][] = [
   [81, 82, 83, 84, 85, 86, 87, 88],
   [71, 72, 73, 74, 75, 76, 77, 78],
@@ -16,32 +16,65 @@ const NOTE_GRID: number[][] = [
 ];
 
 const TOP_CC = [104, 105, 106, 107, 108, 109, 110, 111];
-const SIDE_CC = [91, 92, 93, 94, 95, 96, 97, 98];
+const SIDE_CC = [89, 79, 69, 59, 49, 39, 29, 19];
 
-function hexToVelocity(hex: string) {
+// Launchpad X color palette according to spec
+const LAUNCHPAD_COLORS = {
+  OFF: 0,
+  RED_LOW: 1, RED_FULL: 3,
+  AMBER_LOW: 17, AMBER_FULL: 19,
+  YELLOW_FULL: 35,
+  GREEN_LOW: 49, GREEN_FULL: 51,
+  SPRING_FULL: 67,
+  CYAN_FULL: 83,
+  BLUE_LOW: 97, BLUE_FULL: 99,
+  PURPLE_FULL: 115,
+  PINK_FULL: 131,
+  WHITE: 3
+};
+
+function hexToLaunchpadColor(hex: string): number {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
-  return Math.round(((r + g + b) / (255 * 3)) * 127);
+  
+  // Map to closest Launchpad color
+  if (r > 200 && g < 100 && b < 100) return LAUNCHPAD_COLORS.RED_FULL;
+  if (r > 200 && g > 200 && b < 100) return LAUNCHPAD_COLORS.AMBER_FULL;
+  if (r > 200 && g > 200 && b > 200) return LAUNCHPAD_COLORS.WHITE;
+  if (r < 100 && g > 200 && b < 100) return LAUNCHPAD_COLORS.GREEN_FULL;
+  if (r < 100 && g < 100 && b > 200) return LAUNCHPAD_COLORS.BLUE_FULL;
+  if (r > 200 && g < 100 && b > 200) return LAUNCHPAD_COLORS.PURPLE_FULL;
+  if (r < 100 && g > 200 && b > 200) return LAUNCHPAD_COLORS.CYAN_FULL;
+  return LAUNCHPAD_COLORS.OFF;
 }
 
 interface PadProps {
   id: string;
   note?: number;
   cc?: number;
+  isEmpty?: boolean;
 }
 
-const Pad = memo(({ id, note, cc: ccNum }: PadProps) => {
+const Pad = memo(({ id, note, cc: ccNum, isEmpty }: PadProps) => {
   const colour = useStore((s) => s.padColours[id] || '#000000');
   const setPadColour = useStore((s) => s.setPadColour);
   const { send } = useMidi();
 
+  if (isEmpty) {
+    return <div className="midi-pad-empty"></div>;
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setPadColour(id, value);
-    const vel = hexToVelocity(value);
-    if (note !== undefined) send(noteOn(note, vel));
-    else if (ccNum !== undefined) send(cc(ccNum, vel));
+    const colorValue = hexToLaunchpadColor(value);
+    
+    if (note !== undefined) {
+      send(noteOn(note, colorValue));
+    } else if (ccNum !== undefined) {
+      send(cc(ccNum, colorValue));
+    }
   };
 
   return (
@@ -51,6 +84,7 @@ const Pad = memo(({ id, note, cc: ccNum }: PadProps) => {
       value={colour}
       onChange={handleChange}
       style={{ backgroundColor: colour }}
+      title={note !== undefined ? `Note ${note}` : `CC ${ccNum}`}
     />
   );
 });
@@ -58,22 +92,29 @@ const Pad = memo(({ id, note, cc: ccNum }: PadProps) => {
 export function LaunchpadCanvas() {
   const grid: React.ReactElement[] = [];
 
-  // Top row (CC controls)
+  // Top row - empty corner + 8 CC controls + empty corner
+  grid.push(<Pad key="empty-top-left" id="empty-top-left" isEmpty={true} />);
   for (let x = 0; x < 8; x++) {
     const id = `cc-${TOP_CC[x]}`;
     grid.push(<Pad key={id} id={id} cc={TOP_CC[x]} />);
   }
+  grid.push(<Pad key="empty-top-right" id="empty-top-right" isEmpty={true} />);
 
   // Main 8x8 grid with side controls
   for (let y = 0; y < 8; y++) {
+    // Side CC control (left)
+    const sideId = `cc-${SIDE_CC[y]}`;
+    grid.push(<Pad key={sideId} id={sideId} cc={SIDE_CC[y]} />);
+    
+    // Main 8x8 note grid
     for (let x = 0; x < 8; x++) {
       const note = NOTE_GRID[y][x];
       const id = `n-${note}`;
       grid.push(<Pad key={id} id={id} note={note} />);
     }
-    // Side CC control
-    const id = `cc-${SIDE_CC[y]}`;
-    grid.push(<Pad key={id} id={id} cc={SIDE_CC[y]} />);
+    
+    // Empty space (right)
+    grid.push(<Pad key={`empty-right-${y}`} id={`empty-right-${y}`} isEmpty={true} />);
   }
 
   return <div className="midi-grid-fixed">{grid}</div>;

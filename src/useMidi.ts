@@ -4,12 +4,17 @@ import { useStore } from './store';
 export interface MidiDevice {
   id: number;
   name: string;
+  manufacturer?: string;
+  state?: string;
 }
 
 export interface MidiMessage {
-  data: Uint8Array;
+  direction: 'in' | 'out';
+  message: number[];
   timestamp: number;
   source?: string;
+  target?: string;
+  port?: number;
 }
 
 export function useMidi() {
@@ -19,77 +24,97 @@ export function useMidi() {
   const [inputs, setInputs] = useState<MidiDevice[]>([]);
   const [outputs, setOutputs] = useState<MidiDevice[]>([]);
   const [status, setStatus] = useState<'connected' | 'closed' | 'connecting'>('connecting');
-  const launchpad = useRef<number | null>(null);
+  const launchpadRef = useRef<number | null>(null);
   const listeners = useRef(new Set<(msg: MidiMessage) => void>());
   const wsRef = useRef<WebSocket | null>(null);
-  const logListeners = useRef(new Set<(entry: any) => void>());
 
   useEffect(() => {
     setStatus('connecting');
     const ws = new WebSocket(`ws://${host}:${port}`);
     wsRef.current = ws;
+    
     ws.onopen = () => {
+      console.log('WebSocket connected');
       setStatus('connected');
       ws.send(JSON.stringify({ type: 'getDevices' }));
     };
+    
     ws.onmessage = (ev) => {
       try {
         const payload = JSON.parse(ev.data);
+        console.log('WebSocket message received:', payload);
+        
         if (payload.type === 'devices') {
-          setInputs(payload.inputs);
-          setOutputs(payload.outputs);
-          const lp = payload.outputs.find((o: MidiDevice) =>
-            o.name.includes('Launchpad X'),
+          setInputs(payload.inputs || []);
+          setOutputs(payload.outputs || []);
+          
+          // Find Launchpad X
+          const launchpad = payload.outputs?.find((o: MidiDevice) =>
+            o.name?.toLowerCase().includes('launchpad x')
           );
-          launchpad.current = lp ? lp.id : null;
+          launchpadRef.current = launchpad ? launchpad.id : null;
+          console.log('Launchpad X detected:', launchpad);
+          
         } else if (payload.type === 'midi') {
           const msg: MidiMessage = {
-            data: new Uint8Array(payload.message),
-            timestamp: payload.time,
+            direction: payload.direction || 'in',
+            message: payload.message || [],
+            timestamp: payload.timestamp || Date.now(),
             source: payload.source,
+            target: payload.target,
+            port: payload.port
           };
-          console.log('MIDI from', msg.source ?? 'unknown', msg.data);
-          for (const fn of listeners.current) fn(msg);
+          
+          console.log('MIDI message:', msg);
+          for (const fn of listeners.current) {
+            fn(msg);
+          }
         }
       } catch (err) {
-        console.error(err);
+        console.error('WebSocket message parse error:', err);
       }
     };
-    ws.onclose = () => setStatus('closed');
-    ws.onerror = () => setStatus('closed');
+    
+    ws.onclose = () => {
+      console.log('WebSocket disconnected');
+      setStatus('closed');
+    };
+    
+    ws.onerror = (err) => {
+      console.error('WebSocket error:', err);
+      setStatus('closed');
+    };
+    
     return () => {
       ws.close();
     };
   }, [host, port]);
 
   const send = useCallback(
-    (bytes: number[] | Uint8Array, output?: MidiDevice | null) => {
-      const targetPort = output?.id ?? 
-                        (selectedOutput ? Number(selectedOutput) : null) ?? 
-                        launchpad.current ?? 
-                        0;
+    (bytes: number[] | Uint8Array) => {
+      if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+        console.error('WebSocket not connected');
+        return;
+      }
+
+      const targetPort = selectedOutput ? Number(selectedOutput) : 
+                        launchpadRef.current !== null ? launchpadRef.current : 0;
       
       const bytesArray = Array.from(bytes);
       
-      // Log outgoing MIDI
-      for (const fn of logListeners.current) {
-        fn({
-          timestamp: new Date().toLocaleTimeString(),
-          direction: 'out',
-          data: bytesArray,
-          port: targetPort,
-        });
-      }
-
+      console.log('Sending MIDI:', { port: targetPort, bytes: bytesArray });
+      
       try {
-        wsRef.current?.send(
-          JSON.stringify({ type: 'send', port: targetPort, bytes: bytesArray }),
-        );
+        wsRef.current.send(JSON.stringify({ 
+          type: 'send', 
+          port: targetPort, 
+          bytes: bytesArray 
+        }));
       } catch (err) {
-        console.error(err);
+        console.error('Failed to send MIDI:', err);
       }
     },
-    [selectedOutput],
+    [selectedOutput]
   );
 
   const listen = useCallback((handler: (msg: MidiMessage) => void) => {
@@ -99,34 +124,23 @@ export function useMidi() {
     };
   }, []);
 
-  const listenToLogs = useCallback((handler: (entry: any) => void) => {
-    logListeners.current.add(handler);
-    return () => {
-      logListeners.current.delete(handler);
-    };
-  }, []);
-
-  const enterProgrammer = useCallback(() => {
-    send([0xf0, 0x00, 0x20, 0x29, 0x02, 0x0c, 0x0e, 0x01, 0xf7]);
-  }, [send]);
-
-  const returnToLive = useCallback(() => {
-    send([0xf0, 0x00, 0x20, 0x29, 0x02, 0x0c, 0x0e, 0x00, 0xf7]);
-  }, [send]);
-
+  // Auto-enter programmer mode when Launchpad X is detected
   useEffect(() => {
-    if (launchpad.current !== null) {
-      enterProgrammer();
+    if (launchpadRef.current !== null && status === 'connected') {
+      console.log('Auto-entering programmer mode for Launchpad X');
+      // Enter programmer mode
+      setTimeout(() => {
+        send([0xf0, 0x00, 0x20, 0x29, 0x02, 0x0c, 0x0e, 0x01, 0xf7]);
+      }, 1000);
     }
-  }, [outputs, enterProgrammer]);
+  }, [launchpadRef.current, status, send]);
 
   return {
     inputs,
     outputs,
     send,
     listen,
-    listenToLogs,
-    returnToLive,
     status,
+    launchpadDetected: launchpadRef.current !== null
   };
 }
