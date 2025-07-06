@@ -104,6 +104,17 @@ body {
   transition: all 0.1s;
 }
 
+.pad-label {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  font-size: 0.6rem;
+  color: #ffff00;
+  text-align: center;
+  pointer-events: none;
+}
+
 .midi-pad-container.top-cc {
   margin-bottom: 10px;
 }

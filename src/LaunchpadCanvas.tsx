@@ -39,6 +39,7 @@ const Pad = memo(
     extraClass?: string;
   }) => {
     const colour = useStore((s) => s.padColours[id] || '#000000');
+    const label = useStore((s) => s.padLabels[id] || '');
 
     if (isEmpty) {
       return <div className="midi-pad-empty"></div>;
@@ -53,7 +54,9 @@ const Pad = memo(
         style={{ backgroundColor: colour }}
         title={note !== undefined ? `Note ${note}` : `CC ${ccNum}`}
         onClick={() => onSelect({ id, note, cc: ccNum })}
-      />
+      >
+        {label && <span className="pad-label">{label}</span>}
+      </div>
     );
   },
 );
@@ -61,7 +64,7 @@ const Pad = memo(
 export function LaunchpadCanvas() {
   const [selected, setSelected] = useState<PadProps | null>(null);
   const grid: React.ReactElement[] = [];
-  
+
   // Top row - 9 CC controls
   for (let x = 0; x < 9; x++) {
     const id = `cc-${TOP_CC[x]}`;

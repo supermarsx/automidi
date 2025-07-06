@@ -35,6 +35,8 @@ export default function LaunchpadControls() {
   const [scrollTextValue, setScrollTextValue] = useState('HELLO WORLD');
   const [layout, setLayoutValue] = useState(0);
   const [dawBank, setDawBank] = useState(0);
+  const clearBeforeLoad = useStore((s) => s.settings.clearBeforeLoad);
+  const setClearBeforeLoad = useStore((s) => s.setClearBeforeLoad);
 
   const handleEnterProgrammer = () => {
     notify(send(enterProgrammerMode()), 'Programmer mode');
@@ -73,7 +75,11 @@ export default function LaunchpadControls() {
   };
 
   const handleLoadToLaunchpad = () => {
-    let ok = send(enterProgrammerMode());
+    let ok = true;
+    if (clearBeforeLoad) {
+      ok = send(clearAllLeds());
+    }
+    ok = send(enterProgrammerMode()) && ok;
     for (const [id, hex] of Object.entries(padColours)) {
       const color = LAUNCHPAD_COLORS.find((c) => c.color === hex)?.value;
       if (color === undefined) continue;
@@ -219,6 +225,21 @@ export default function LaunchpadControls() {
           >
             CLEAR CONFIG
           </button>
+          <div className="form-check mb-2">
+            <input
+              type="checkbox"
+              className="form-check-input me-2"
+              id="clearBeforeLoad"
+              checked={clearBeforeLoad}
+              onChange={(e) => setClearBeforeLoad(e.target.checked)}
+            />
+            <label
+              className="form-check-label text-info"
+              htmlFor="clearBeforeLoad"
+            >
+              CLEAR BEFORE LOAD
+            </label>
+          </div>
           <button className="retro-button mb-2" onClick={handleLoadToLaunchpad}>
             LOAD INTO LAUNCHPAD
           </button>
