@@ -24,7 +24,7 @@ export default function SettingsModal({ onClose }: Props) {
     setHost(h);
     setPort(Number(p));
     setAutoReconnect(ar);
-    setReconnectInterval(ri * 1000); // Convert back to milliseconds
+    setReconnectInterval(Math.max(1, ri) * 1000); // Minimum 1 second, convert back to milliseconds
     onClose();
   };
 
@@ -44,6 +44,7 @@ export default function SettingsModal({ onClose }: Props) {
                 onChange={(e) => setH(e.target.value)} 
                 placeholder="localhost"
               />
+              <small className="text-warning">Default: localhost</small>
             </div>
             <div className="mb-3">
               <label className="form-label text-info">PORT NUMBER:</label>
@@ -55,6 +56,7 @@ export default function SettingsModal({ onClose }: Props) {
                 min="1"
                 max="65535"
               />
+              <small className="text-warning">Default: 3000</small>
             </div>
             <div className="mb-3">
               <div className="form-check">
@@ -69,6 +71,7 @@ export default function SettingsModal({ onClose }: Props) {
                   AUTO-RECONNECT ON FAILURE
                 </label>
               </div>
+              <small className="text-warning">Automatically reconnect when connection is lost</small>
             </div>
             {ar && (
               <div className="mb-3">
@@ -82,6 +85,7 @@ export default function SettingsModal({ onClose }: Props) {
                   max="60"
                   step="0.5"
                 />
+                <small className="text-warning">Minimum: 1 second, Maximum: 60 seconds</small>
               </div>
             )}
           </div>

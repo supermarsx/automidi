@@ -6,9 +6,12 @@ interface LogEntry extends MidiMessage {
   formattedTime: string;
 }
 
-export default function MidiLogger() {
+interface Props {
+  onClose: () => void;
+}
+
+export default function MidiLogger({ onClose }: Props) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [isVisible, setIsVisible] = useState(false);
   const [filter, setFilter] = useState<'all' | 'in' | 'out'>('all');
   const { listen } = useMidi();
   const logRef = useRef<HTMLDivElement>(null);
@@ -87,18 +90,6 @@ export default function MidiLogger() {
     return log.direction === filter;
   });
 
-  if (!isVisible) {
-    return (
-      <button 
-        className="retro-button position-fixed"
-        style={{ bottom: '20px', right: '20px', zIndex: 1000 }}
-        onClick={() => setIsVisible(true)}
-      >
-        MIDI LOG ({logs.length})
-      </button>
-    );
-  }
-
   return (
     <div className="midi-logger">
       <div className="logger-header">
@@ -110,14 +101,14 @@ export default function MidiLogger() {
             value={filter}
             onChange={(e) => setFilter(e.target.value as 'all' | 'in' | 'out')}
           >
-            <option value="all">ALL</option>
-            <option value="in">IN</option>
-            <option value="out">OUT</option>
+            <option value="all">ALL ({logs.length})</option>
+            <option value="in">IN ({logs.filter(l => l.direction === 'in').length})</option>
+            <option value="out">OUT ({logs.filter(l => l.direction === 'out').length})</option>
           </select>
           <button className="retro-button btn-sm me-2" onClick={clearLogs}>
             CLEAR
           </button>
-          <button className="retro-button btn-sm" onClick={() => setIsVisible(false)}>
+          <button className="retro-button btn-sm" onClick={onClose}>
             HIDE
           </button>
         </div>

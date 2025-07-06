@@ -3,8 +3,8 @@ import LaunchpadControls from './LaunchpadControls';
 import MacroList from './MacroList';
 import SysexWorkbench from './SysexWorkbench';
 import MidiDevices from './MidiDevices';
-import MidiLogger from './MidiLogger';
 import ActionBar from './ActionBar';
+import FloatingActionBar from './FloatingActionBar';
 import './App.css';
 
 function App() {
@@ -43,7 +43,7 @@ function App() {
           </div>
         </div>
       </div>
-      <MidiLogger />
+      <FloatingActionBar />
     </div>
   );
 }

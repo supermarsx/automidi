@@ -25,21 +25,25 @@ export function useMidi() {
   const selectedOutput = useStore((s) => s.devices.outputId);
   const [inputs, setInputs] = useState<MidiDevice[]>([]);
   const [outputs, setOutputs] = useState<MidiDevice[]>([]);
-  const [status, setStatus] = useState<'connected' | 'closed' | 'connecting'>('connecting');
+  const [status, setStatus] = useState<'connected' | 'closed' | 'connecting'>('closed');
   const launchpadRef = useRef<number | null>(null);
   const listeners = useRef(new Set<(msg: MidiMessage) => void>());
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isPageLoadedRef = useRef(false);
+  const connectionAttemptsRef = useRef(0);
+  const maxReconnectAttempts = 10;
 
   // Wait for page to fully load before connecting
   useEffect(() => {
     const handleLoad = () => {
       isPageLoadedRef.current = true;
+      console.log('Page fully loaded, ready to connect WebSocket');
     };
 
     if (document.readyState === 'complete') {
       isPageLoadedRef.current = true;
+      console.log('Page already loaded');
     } else {
       window.addEventListener('load', handleLoad);
       return () => window.removeEventListener('load', handleLoad);
@@ -47,90 +51,151 @@ export function useMidi() {
   }, []);
 
   const connectWebSocket = useCallback(() => {
-    if (!isPageLoadedRef.current) return;
+    if (!isPageLoadedRef.current) {
+      console.log('Page not fully loaded yet, waiting...');
+      return;
+    }
     
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      return; // Already connected
+      console.log('WebSocket already connected');
+      return;
     }
 
-    console.log(`Connecting to WebSocket at ws://${host}:${port}`);
+    // Close existing connection if any
+    if (wsRef.current) {
+      wsRef.current.close();
+    }
+
+    console.log(`Attempting WebSocket connection to ws://${host}:${port} (attempt ${connectionAttemptsRef.current + 1})`);
     setStatus('connecting');
     
-    const ws = new WebSocket(`ws://${host}:${port}`);
-    wsRef.current = ws;
-    
-    ws.onopen = () => {
-      console.log('WebSocket connected');
-      setStatus('connected');
-      ws.send(JSON.stringify({ type: 'getDevices' }));
+    try {
+      const ws = new WebSocket(`ws://${host}:${port}`);
+      wsRef.current = ws;
       
-      // Clear any pending reconnect
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-        reconnectTimeoutRef.current = null;
-      }
-    };
-    
-    ws.onmessage = (ev) => {
-      try {
-        const payload = JSON.parse(ev.data);
-        
-        if (payload.type === 'devices') {
-          setInputs(payload.inputs || []);
-          setOutputs(payload.outputs || []);
-          
-          // Find Launchpad X
-          const launchpad = payload.outputs?.find((o: MidiDevice) =>
-            o.name?.toLowerCase().includes('launchpad x')
-          );
-          launchpadRef.current = launchpad ? launchpad.id : null;
-          console.log('Launchpad X detected:', launchpad);
-          
-        } else if (payload.type === 'midi') {
-          const msg: MidiMessage = {
-            direction: payload.direction || 'in',
-            message: payload.message || [],
-            timestamp: payload.timestamp || Date.now(),
-            source: payload.source,
-            target: payload.target,
-            port: payload.port
-          };
-          
-          for (const fn of listeners.current) {
-            fn(msg);
-          }
+      const connectionTimeout = setTimeout(() => {
+        if (ws.readyState === WebSocket.CONNECTING) {
+          console.log('Connection timeout, closing WebSocket');
+          ws.close();
         }
-      } catch (err) {
-        console.error('WebSocket message parse error:', err);
-      }
-    };
-    
-    ws.onclose = () => {
-      console.log('WebSocket disconnected');
-      setStatus('closed');
+      }, 5000); // 5 second timeout
       
-      // Auto-reconnect if enabled
-      if (autoReconnect && !reconnectTimeoutRef.current) {
-        console.log(`Reconnecting in ${reconnectInterval}ms...`);
-        reconnectTimeoutRef.current = setTimeout(() => {
+      ws.onopen = () => {
+        clearTimeout(connectionTimeout);
+        console.log('WebSocket connected successfully');
+        setStatus('connected');
+        connectionAttemptsRef.current = 0; // Reset attempts on successful connection
+        
+        // Request device list
+        ws.send(JSON.stringify({ type: 'getDevices' }));
+        
+        // Clear any pending reconnect
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
           reconnectTimeoutRef.current = null;
-          connectWebSocket();
-        }, reconnectInterval);
-      }
-    };
-    
-    ws.onerror = (err) => {
-      console.error('WebSocket error:', err);
+        }
+      };
+      
+      ws.onmessage = (ev) => {
+        try {
+          const payload = JSON.parse(ev.data);
+          
+          if (payload.type === 'devices') {
+            console.log('Received device list:', payload);
+            setInputs(payload.inputs || []);
+            setOutputs(payload.outputs || []);
+            
+            // Find Launchpad X
+            const launchpad = payload.outputs?.find((o: MidiDevice) =>
+              o.name?.toLowerCase().includes('launchpad x')
+            );
+            launchpadRef.current = launchpad ? launchpad.id : null;
+            if (launchpad) {
+              console.log('Launchpad X detected:', launchpad);
+            }
+            
+          } else if (payload.type === 'midi') {
+            const msg: MidiMessage = {
+              direction: payload.direction || 'in',
+              message: payload.message || [],
+              timestamp: payload.timestamp || Date.now(),
+              source: payload.source,
+              target: payload.target,
+              port: payload.port
+            };
+            
+            for (const fn of listeners.current) {
+              fn(msg);
+            }
+          }
+        } catch (err) {
+          console.error('WebSocket message parse error:', err);
+        }
+      };
+      
+      ws.onclose = (event) => {
+        clearTimeout(connectionTimeout);
+        console.log('WebSocket disconnected:', event.code, event.reason);
+        setStatus('closed');
+        
+        // Auto-reconnect if enabled and not too many attempts
+        if (autoReconnect && connectionAttemptsRef.current < maxReconnectAttempts && !reconnectTimeoutRef.current) {
+          connectionAttemptsRef.current++;
+          const delay = Math.min(reconnectInterval * connectionAttemptsRef.current, 30000); // Max 30s delay
+          console.log(`Reconnecting in ${delay}ms... (attempt ${connectionAttemptsRef.current}/${maxReconnectAttempts})`);
+          
+          reconnectTimeoutRef.current = setTimeout(() => {
+            reconnectTimeoutRef.current = null;
+            connectWebSocket();
+          }, delay);
+        } else if (connectionAttemptsRef.current >= maxReconnectAttempts) {
+          console.log('Max reconnection attempts reached');
+        }
+      };
+      
+      ws.onerror = (err) => {
+        clearTimeout(connectionTimeout);
+        console.error('WebSocket error:', err);
+        setStatus('closed');
+      };
+      
+    } catch (err) {
+      console.error('Failed to create WebSocket:', err);
       setStatus('closed');
-    };
+    }
   }, [host, port, autoReconnect, reconnectInterval]);
+
+  // Manual reconnect function
+  const reconnect = useCallback(() => {
+    console.log('Manual reconnect triggered');
+    connectionAttemptsRef.current = 0; // Reset attempts for manual reconnect
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+    connectWebSocket();
+  }, [connectWebSocket]);
 
   // Initial connection when page is loaded
   useEffect(() => {
     if (isPageLoadedRef.current) {
-      connectWebSocket();
+      // Small delay to ensure everything is ready
+      setTimeout(connectWebSocket, 100);
     }
   }, [connectWebSocket]);
+
+  // Reconnect when settings change
+  useEffect(() => {
+    if (isPageLoadedRef.current && status !== 'connecting') {
+      console.log('Settings changed, reconnecting...');
+      connectionAttemptsRef.current = 0;
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+      setTimeout(connectWebSocket, 100);
+    }
+  }, [host, port]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -147,8 +212,8 @@ export function useMidi() {
   const send = useCallback(
     (bytes: number[] | Uint8Array) => {
       if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-        console.error('WebSocket not connected');
-        return;
+        console.warn('Cannot send MIDI: WebSocket not connected (status:', status, ')');
+        return false;
       }
 
       // Use selected output device, fallback to Launchpad X, then default to 0
@@ -165,11 +230,13 @@ export function useMidi() {
           port: targetPort, 
           bytes: bytesArray 
         }));
+        return true;
       } catch (err) {
         console.error('Failed to send MIDI:', err);
+        return false;
       }
     },
-    [selectedOutput]
+    [selectedOutput, status]
   );
 
   const listen = useCallback((handler: (msg: MidiMessage) => void) => {
@@ -196,6 +263,6 @@ export function useMidi() {
     listen,
     status,
     launchpadDetected: launchpadRef.current !== null,
-    reconnect: connectWebSocket
+    reconnect
   };
 }

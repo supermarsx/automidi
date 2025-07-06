@@ -83,7 +83,7 @@ export const useStore = create<StoreState>()(
       setPadColour: (id, colour) =>
         set((state) => ({ padColours: { ...state.padColours, [id]: colour } })),
       settings: { 
-        host: location.hostname, 
+        host: location.hostname || 'localhost', 
         port: 3000,
         autoReconnect: true,
         reconnectInterval: 2000
@@ -91,7 +91,12 @@ export const useStore = create<StoreState>()(
       setHost: (h) => set((state) => ({ settings: { ...state.settings, host: h } })),
       setPort: (p) => set((state) => ({ settings: { ...state.settings, port: p } })),
       setAutoReconnect: (enabled) => set((state) => ({ settings: { ...state.settings, autoReconnect: enabled } })),
-      setReconnectInterval: (interval) => set((state) => ({ settings: { ...state.settings, reconnectInterval: interval } })),
+      setReconnectInterval: (interval) => set((state) => ({ 
+        settings: { 
+          ...state.settings, 
+          reconnectInterval: Math.max(1000, interval) // Minimum 1 second
+        } 
+      })),
     }),
     {
       name: 'store',
