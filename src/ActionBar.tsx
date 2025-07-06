@@ -10,8 +10,11 @@ export default function ActionBar() {
         <span className={`connection-status ${status} me-3`}>
           SOCKET: {status.toUpperCase()}
         </span>
-        <span className="text-info me-3">
-          PING: {pingDelay === null ? '---' : `${pingDelay}ms`}
+        <span className="text-info me-3 d-flex align-items-center">
+          PING:
+          <span className="ping-value ms-2">
+            {pingDelay === null ? '---' : `${pingDelay}ms`}
+          </span>
         </span>
         {launchpadDetected && (
           <span className="text-success me-3">
