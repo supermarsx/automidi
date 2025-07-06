@@ -16,7 +16,7 @@ const NOTE_GRID: number[][] = [
   [11, 12, 13, 14, 15, 16, 17, 18],
 ];
 
-const TOP_CC = [104, 105, 106, 107, 108, 109, 110, 111];
+const TOP_CC = [91, 92, 93, 94, 95, 96, 97, 98, 99];
 const SIDE_CC = [89, 79, 69, 59, 49, 39, 29, 19];
 
 interface PadProps {
@@ -53,7 +53,7 @@ const Pad = memo(({ id, note, cc: ccNum, isEmpty }: PadProps) => {
   };
 
   return (
-    <div className="midi-pad-container">
+    <div className="midi-pad-container" id={id}>
       <select
         className="midi-pad-select"
         value={colour}
@@ -81,9 +81,8 @@ const Pad = memo(({ id, note, cc: ccNum, isEmpty }: PadProps) => {
 export function LaunchpadCanvas() {
   const grid: React.ReactElement[] = [];
 
-  // Top row - empty corner + 8 CC controls
-  grid.push(<Pad key="empty-top-left" id="empty-top-left" isEmpty={true} />);
-  for (let x = 0; x < 8; x++) {
+  // Top row - 9 CC controls
+  for (let x = 0; x < 9; x++) {
     const id = `cc-${TOP_CC[x]}`;
     grid.push(<Pad key={id} id={id} cc={TOP_CC[x]} />);
   }
