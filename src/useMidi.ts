@@ -15,14 +15,14 @@ export interface MidiMessage {
 export function useMidi() {
   const host = useStore((s) => s.settings.host);
   const port = useStore((s) => s.settings.port);
+  const selectedOutput = useStore((s) => s.devices.outputId);
   const [inputs, setInputs] = useState<MidiDevice[]>([]);
   const [outputs, setOutputs] = useState<MidiDevice[]>([]);
   const [status, setStatus] = useState<'connected' | 'closed' | 'connecting'>('connecting');
   const launchpad = useRef<number | null>(null);
   const listeners = useRef(new Set<(msg: MidiMessage) => void>());
   const wsRef = useRef<WebSocket | null>(null);
-
-
+  const logListeners = useRef(new Set<(entry: any) => void>());
 
   useEffect(() => {
     setStatus('connecting');
@@ -64,22 +64,45 @@ export function useMidi() {
 
   const send = useCallback(
     (bytes: number[] | Uint8Array, output?: MidiDevice | null) => {
-      const port = output?.id ?? launchpad.current ?? 0;
+      const targetPort = output?.id ?? 
+                        (selectedOutput ? Number(selectedOutput) : null) ?? 
+                        launchpad.current ?? 
+                        0;
+      
+      const bytesArray = Array.from(bytes);
+      
+      // Log outgoing MIDI
+      for (const fn of logListeners.current) {
+        fn({
+          timestamp: new Date().toLocaleTimeString(),
+          direction: 'out',
+          data: bytesArray,
+          port: targetPort,
+        });
+      }
+
       try {
         wsRef.current?.send(
-          JSON.stringify({ type: 'send', port, bytes: Array.from(bytes) }),
+          JSON.stringify({ type: 'send', port: targetPort, bytes: bytesArray }),
         );
       } catch (err) {
         console.error(err);
       }
     },
-    [],
+    [selectedOutput],
   );
 
   const listen = useCallback((handler: (msg: MidiMessage) => void) => {
     listeners.current.add(handler);
     return () => {
       listeners.current.delete(handler);
+    };
+  }, []);
+
+  const listenToLogs = useCallback((handler: (entry: any) => void) => {
+    logListeners.current.add(handler);
+    return () => {
+      logListeners.current.delete(handler);
     };
   }, []);
 
@@ -102,6 +125,7 @@ export function useMidi() {
     outputs,
     send,
     listen,
+    listenToLogs,
     returnToLive,
     status,
   };

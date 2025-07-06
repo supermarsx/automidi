@@ -58,34 +58,25 @@ const Pad = memo(({ id, note, cc: ccNum }: PadProps) => {
 export function LaunchpadCanvas() {
   const grid: React.ReactElement[] = [];
 
-  // top-left corner
-  grid.push(<div key="tl" className="midi-pad" style={{ background: '#000020' }} />);
-
-  // top row
+  // Top row (CC controls)
   for (let x = 0; x < 8; x++) {
     const id = `cc-${TOP_CC[x]}`;
     grid.push(<Pad key={id} id={id} cc={TOP_CC[x]} />);
   }
 
-  // top-right corner
-  grid.push(<div key="tr" className="midi-pad" style={{ background: '#000020' }} />);
-
+  // Main 8x8 grid with side controls
   for (let y = 0; y < 8; y++) {
-    // left blank column
-    grid.push(<div key={`l-${y}`} className="midi-pad" style={{ background: '#000020' }} />);
     for (let x = 0; x < 8; x++) {
       const note = NOTE_GRID[y][x];
       const id = `n-${note}`;
       grid.push(<Pad key={id} id={id} note={note} />);
     }
+    // Side CC control
     const id = `cc-${SIDE_CC[y]}`;
     grid.push(<Pad key={id} id={id} cc={SIDE_CC[y]} />);
   }
 
-  // bottom-right corner
-  grid.push(<div key="br" className="midi-pad" style={{ background: '#000020' }} />);
-
-  return <div className="midi-grid">{grid}</div>;
+  return <div className="midi-grid-fixed">{grid}</div>;
 }
 
 export default memo(LaunchpadCanvas);
