@@ -22,7 +22,14 @@ export function useMidi() {
 
     const update = () => {
       fetch('/midi/devices')
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(
+              `Failed to fetch MIDI devices: ${res.status} ${res.statusText}`,
+            );
+          }
+          return res.json();
+        })
         .then((data) => {
           if (cancelled) return;
           setInputs(data.inputs);
