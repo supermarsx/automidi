@@ -47,6 +47,12 @@ interface SettingsSlice {
     reconnectInterval: number;
     maxReconnectAttempts: number;
     logLimit: number;
+    pingInterval: number;
+    pingThresholds: {
+      green: number;
+      yellow: number;
+      orange: number;
+    };
   };
   setHost: (h: string) => void;
   setPort: (p: number) => void;
@@ -54,6 +60,10 @@ interface SettingsSlice {
   setReconnectInterval: (interval: number) => void;
   setMaxReconnectAttempts: (max: number) => void;
   setLogLimit: (limit: number) => void;
+  setPingInterval: (interval: number) => void;
+  setPingThresholds: (
+    t: Partial<{ green: number; yellow: number; orange: number }>,
+  ) => void;
 }
 
 type StoreState = DevicesSlice & MacrosSlice & PadsSlice & SettingsSlice;
@@ -92,29 +102,66 @@ export const useStore = create<StoreState>()(
         autoReconnect: true,
         reconnectInterval: 2000,
         maxReconnectAttempts: 10,
-        logLimit: 999
+        logLimit: 999,
+        pingInterval: 15000,
+        pingThresholds: { green: 10, yellow: 50, orange: 250 },
       },
-      setHost: (h) => set((state) => ({ settings: { ...state.settings, host: h } })),
-      setPort: (p) => set((state) => ({ settings: { ...state.settings, port: p } })),
-      setAutoReconnect: (enabled) => set((state) => ({ settings: { ...state.settings, autoReconnect: enabled } })),
-      setReconnectInterval: (interval) => set((state) => ({
-        settings: {
-          ...state.settings,
-          reconnectInterval: Math.max(1000, interval) // Minimum 1 second
-        }
-      })),
-      setMaxReconnectAttempts: (max) => set((state) => ({
-        settings: {
-          ...state.settings,
-          maxReconnectAttempts: Math.min(99, Math.max(1, max))
-        }
-      })),
-      setLogLimit: (limit) => set((state) => ({
-        settings: {
-          ...state.settings,
-          logLimit: Math.min(999, Math.max(1, limit))
-        }
-      })),
+      setHost: (h) =>
+        set((state) => ({ settings: { ...state.settings, host: h } })),
+      setPort: (p) =>
+        set((state) => ({ settings: { ...state.settings, port: p } })),
+      setAutoReconnect: (enabled) =>
+        set((state) => ({
+          settings: { ...state.settings, autoReconnect: enabled },
+        })),
+      setReconnectInterval: (interval) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            reconnectInterval: Math.max(1000, interval), // Minimum 1 second
+          },
+        })),
+      setMaxReconnectAttempts: (max) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            maxReconnectAttempts: Math.min(99, Math.max(1, max)),
+          },
+        })),
+      setLogLimit: (limit) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            logLimit: Math.min(999, Math.max(1, limit)),
+          },
+        })),
+      setPingInterval: (interval) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            pingInterval: Math.max(1000, interval),
+          },
+        })),
+      setPingThresholds: (t) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            pingThresholds: {
+              green: Math.max(
+                1,
+                t.green ?? state.settings.pingThresholds.green,
+              ),
+              yellow: Math.max(
+                1,
+                t.yellow ?? state.settings.pingThresholds.yellow,
+              ),
+              orange: Math.max(
+                1,
+                t.orange ?? state.settings.pingThresholds.orange,
+              ),
+            },
+          },
+        })),
     }),
     {
       name: 'store',
