@@ -47,6 +47,10 @@ interface SettingsSlice {
     reconnectInterval: number;
     maxReconnectAttempts: number;
     logLimit: number;
+    pingInterval: number;
+    pingGreen: number;
+    pingYellow: number;
+    pingOrange: number;
   };
   setHost: (h: string) => void;
   setPort: (p: number) => void;
@@ -54,6 +58,10 @@ interface SettingsSlice {
   setReconnectInterval: (interval: number) => void;
   setMaxReconnectAttempts: (max: number) => void;
   setLogLimit: (limit: number) => void;
+  setPingInterval: (interval: number) => void;
+  setPingGreen: (ms: number) => void;
+  setPingYellow: (ms: number) => void;
+  setPingOrange: (ms: number) => void;
 }
 
 type StoreState = DevicesSlice & MacrosSlice & PadsSlice & SettingsSlice;
@@ -92,7 +100,11 @@ export const useStore = create<StoreState>()(
         autoReconnect: true,
         reconnectInterval: 2000,
         maxReconnectAttempts: 10,
-        logLimit: 999
+        logLimit: 999,
+        pingInterval: 15000,
+        pingGreen: 10,
+        pingYellow: 50,
+        pingOrange: 250
       },
       setHost: (h) => set((state) => ({ settings: { ...state.settings, host: h } })),
       setPort: (p) => set((state) => ({ settings: { ...state.settings, port: p } })),
@@ -113,6 +125,30 @@ export const useStore = create<StoreState>()(
         settings: {
           ...state.settings,
           logLimit: Math.min(999, Math.max(1, limit))
+        }
+      })),
+      setPingInterval: (interval) => set((state) => ({
+        settings: {
+          ...state.settings,
+          pingInterval: Math.max(1000, interval)
+        }
+      })),
+      setPingGreen: (ms) => set((state) => ({
+        settings: {
+          ...state.settings,
+          pingGreen: Math.max(0, ms)
+        }
+      })),
+      setPingYellow: (ms) => set((state) => ({
+        settings: {
+          ...state.settings,
+          pingYellow: Math.max(0, ms)
+        }
+      })),
+      setPingOrange: (ms) => set((state) => ({
+        settings: {
+          ...state.settings,
+          pingOrange: Math.max(0, ms)
         }
       })),
     }),

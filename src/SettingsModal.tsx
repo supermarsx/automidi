@@ -13,12 +13,20 @@ export default function SettingsModal({ onClose }: Props) {
   const reconnectInterval = useStore((s) => s.settings.reconnectInterval);
   const maxReconnectAttempts = useStore((s) => s.settings.maxReconnectAttempts);
   const logLimit = useStore((s) => s.settings.logLimit);
+  const pingInterval = useStore((s) => s.settings.pingInterval);
+  const pingGreen = useStore((s) => s.settings.pingGreen);
+  const pingYellow = useStore((s) => s.settings.pingYellow);
+  const pingOrange = useStore((s) => s.settings.pingOrange);
   const setHost = useStore((s) => s.setHost);
   const setPort = useStore((s) => s.setPort);
   const setAutoReconnect = useStore((s) => s.setAutoReconnect);
   const setReconnectInterval = useStore((s) => s.setReconnectInterval);
   const setMaxReconnectAttempts = useStore((s) => s.setMaxReconnectAttempts);
   const setLogLimit = useStore((s) => s.setLogLimit);
+  const setPingInterval = useStore((s) => s.setPingInterval);
+  const setPingGreen = useStore((s) => s.setPingGreen);
+  const setPingYellow = useStore((s) => s.setPingYellow);
+  const setPingOrange = useStore((s) => s.setPingOrange);
 
   const [h, setH] = useState(host);
   const [p, setP] = useState(port);
@@ -26,6 +34,10 @@ export default function SettingsModal({ onClose }: Props) {
   const [ri, setRi] = useState(reconnectInterval / 1000); // Convert to seconds for UI
   const [mra, setMra] = useState(maxReconnectAttempts);
   const [ll, setLl] = useState(logLimit);
+  const [pi, setPi] = useState(pingInterval);
+  const [pg, setPg] = useState(pingGreen);
+  const [py, setPy] = useState(pingYellow);
+  const [po, setPo] = useState(pingOrange);
 
   const save = () => {
     setHost(h);
@@ -34,6 +46,10 @@ export default function SettingsModal({ onClose }: Props) {
     setReconnectInterval(Math.max(1, ri) * 1000); // Minimum 1 second, convert back to milliseconds
     setMaxReconnectAttempts(mra);
     setLogLimit(ll);
+    setPingInterval(Math.max(1000, pi));
+    setPingGreen(pg);
+    setPingYellow(py);
+    setPingOrange(po);
     onClose();
   };
 
@@ -90,6 +106,48 @@ export default function SettingsModal({ onClose }: Props) {
                 max="999"
               />
               <small className="text-warning">Default: 999</small>
+            </div>
+            <div className="mb-3">
+              <label className="form-label text-info">PING INTERVAL (MS):</label>
+              <input
+                type="number"
+                className="form-control retro-input"
+                value={pi}
+                onChange={(e) => setPi(Number(e.target.value))}
+                min="1000"
+                step="1000"
+              />
+              <small className="text-warning">Default: 15000</small>
+            </div>
+            <div className="mb-3">
+              <label className="form-label text-info">PING THRESHOLDS (MS):</label>
+              <div className="d-flex gap-2">
+                <input
+                  type="number"
+                  className="form-control retro-input"
+                  value={pg}
+                  onChange={(e) => setPg(Number(e.target.value))}
+                  min="0"
+                  style={{ width: '5rem' }}
+                />
+                <input
+                  type="number"
+                  className="form-control retro-input"
+                  value={py}
+                  onChange={(e) => setPy(Number(e.target.value))}
+                  min="0"
+                  style={{ width: '5rem' }}
+                />
+                <input
+                  type="number"
+                  className="form-control retro-input"
+                  value={po}
+                  onChange={(e) => setPo(Number(e.target.value))}
+                  min="0"
+                  style={{ width: '5rem' }}
+                />
+              </div>
+              <small className="text-warning">Green, Yellow, Orange defaults: 10/50/250</small>
             </div>
             <div className="mb-3">
               <div className="form-check">

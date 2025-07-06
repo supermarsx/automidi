@@ -9,6 +9,8 @@ export default function MidiLogger({ onClose }: Props) {
   const logs = useLogStore((s) => s.logs);
   const clearLogs = useLogStore((s) => s.clearLogs);
   const [filter, setFilter] = useState<'all' | 'in' | 'out'>('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [deviceFilter, setDeviceFilter] = useState('all');
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -65,9 +67,24 @@ export default function MidiLogger({ onClose }: Props) {
     return '';
   };
 
-  const filteredLogs = logs.filter(log => {
-    if (filter === 'all') return true;
-    return log.direction === filter;
+  const msgTypes = Array.from(
+    new Set(logs.map((l) => getMsgType(l.message)))
+  );
+  const devices = Array.from(
+    new Set(
+      logs
+        .map((l) => (l.direction === 'in' ? l.source : l.target))
+        .filter(Boolean)
+    )
+  );
+
+  const filteredLogs = logs.filter((log) => {
+    if (filter !== 'all' && log.direction !== filter) return false;
+    const type = getMsgType(log.message);
+    if (typeFilter !== 'all' && type !== typeFilter) return false;
+    const device = log.direction === 'in' ? log.source : log.target;
+    if (deviceFilter !== 'all' && device !== deviceFilter) return false;
+    return true;
   });
 
   return (
@@ -75,8 +92,8 @@ export default function MidiLogger({ onClose }: Props) {
       <div className="logger-header">
         <h5 className="text-warning">◄ MIDI DATA STREAM ►</h5>
         <div className="d-flex align-items-center">
-          <select 
-            className="form-select retro-select me-2" 
+          <select
+            className="form-select retro-select me-2"
             style={{ width: 'auto', fontSize: '12px' }}
             value={filter}
             onChange={(e) => setFilter(e.target.value as 'all' | 'in' | 'out')}
@@ -84,6 +101,32 @@ export default function MidiLogger({ onClose }: Props) {
             <option value="all">ALL ({logs.length})</option>
             <option value="in">IN ({logs.filter(l => l.direction === 'in').length})</option>
             <option value="out">OUT ({logs.filter(l => l.direction === 'out').length})</option>
+          </select>
+          <select
+            className="form-select retro-select me-2"
+            style={{ width: 'auto', fontSize: '12px' }}
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+          >
+            <option value="all">TYPE</option>
+            {msgTypes.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+          <select
+            className="form-select retro-select me-2"
+            style={{ width: 'auto', fontSize: '12px' }}
+            value={deviceFilter}
+            onChange={(e) => setDeviceFilter(e.target.value)}
+          >
+            <option value="all">DEVICE</option>
+            {devices.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
           </select>
           <button className="retro-button btn-sm me-2" onClick={clearLogs}>
             CLEAR

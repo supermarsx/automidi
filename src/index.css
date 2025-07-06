@@ -278,6 +278,36 @@ body {
   border: 1px solid #00ffff;
 }
 
+.ping-none {
+  background: #000040;
+  color: #00ffff;
+  border: 1px solid #00ffff;
+}
+
+.ping-good {
+  background: #004000;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+}
+
+.ping-ok {
+  background: #404000;
+  color: #ffff00;
+  border: 1px solid #ffff00;
+}
+
+.ping-warn {
+  background: #402000;
+  color: #ff8000;
+  border: 1px solid #ff8000;
+}
+
+.ping-bad {
+  background: #400000;
+  color: #ff0000;
+  border: 1px solid #ff0000;
+}
+
 @keyframes blink {
   0%, 50% { opacity: 1; }
   51%, 100% { opacity: 0.3; }
