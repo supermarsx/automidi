@@ -1,41 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
-import { useMidi, type MidiMessage } from './useMidi';
-
-interface LogEntry extends MidiMessage {
-  id: number;
-  formattedTime: string;
-}
+import { useLogStore } from './logStore';
 
 interface Props {
   onClose: () => void;
 }
 
 export default function MidiLogger({ onClose }: Props) {
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const logs = useLogStore((s) => s.logs);
+  const clearLogs = useLogStore((s) => s.clearLogs);
   const [filter, setFilter] = useState<'all' | 'in' | 'out'>('all');
-  const { listen } = useMidi();
   const logRef = useRef<HTMLDivElement>(null);
-  const idCounter = useRef(0);
-
-  useEffect(() => {
-    const unlisten = listen((msg: MidiMessage) => {
-      const entry: LogEntry = {
-        ...msg,
-        id: idCounter.current++,
-        formattedTime: new Date(msg.timestamp).toLocaleTimeString(),
-      };
-      setLogs(prev => [...prev.slice(-199), entry]); // Keep last 200 entries
-    });
-    return unlisten;
-  }, [listen]);
 
   useEffect(() => {
     if (logRef.current) {
       logRef.current.scrollTop = logRef.current.scrollHeight;
     }
   }, [logs]);
-
-  const clearLogs = () => setLogs([]);
 
   const formatBytes = (bytes: number[]) => {
     return bytes.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
