@@ -54,6 +54,15 @@ wss.on('connection', ws => {
       const data = JSON.parse(msg.toString());
       if (data.type === 'getDevices') {
         sendDevices(ws);
+      } else if (data.type === 'send') {
+        const { port = 0, bytes } = data;
+        const out = WebMidi.outputs[port];
+        if (!out || !Array.isArray(bytes)) return;
+        try {
+          out.send(bytes);
+        } catch (err) {
+          console.error(err);
+        }
       }
     } catch {
       // ignore malformed messages

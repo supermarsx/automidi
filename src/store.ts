@@ -39,7 +39,16 @@ interface PadsSlice {
   setPadColour: (id: string, colour: string) => void;
 }
 
-type StoreState = DevicesSlice & MacrosSlice & PadsSlice;
+interface SettingsSlice {
+  settings: {
+    host: string;
+    port: number;
+  };
+  setHost: (h: string) => void;
+  setPort: (p: number) => void;
+}
+
+type StoreState = DevicesSlice & MacrosSlice & PadsSlice & SettingsSlice;
 
 const kvStore = createIdbStore('automidi-db', 'state');
 
@@ -69,6 +78,9 @@ export const useStore = create<StoreState>()(
       padColours: {},
       setPadColour: (id, colour) =>
         set((state) => ({ padColours: { ...state.padColours, [id]: colour } })),
+      settings: { host: location.hostname, port: 3000 },
+      setHost: (h) => set((state) => ({ settings: { ...state.settings, host: h } })),
+      setPort: (p) => set((state) => ({ settings: { ...state.settings, port: p } })),
     }),
     {
       name: 'store',
