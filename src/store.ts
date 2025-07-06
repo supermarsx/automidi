@@ -45,6 +45,7 @@ interface SettingsSlice {
     port: number;
     autoReconnect: boolean;
     reconnectInterval: number;
+    maxReconnectAttempts: number;
     logLimit: number;
   };
   setHost: (h: string) => void;
@@ -52,6 +53,7 @@ interface SettingsSlice {
   setAutoReconnect: (enabled: boolean) => void;
   setReconnectInterval: (interval: number) => void;
   setLogLimit: (limit: number) => void;
+  setMaxReconnectAttempts: (attempts: number) => void;
 }
 
 type StoreState = DevicesSlice & MacrosSlice & PadsSlice & SettingsSlice;
@@ -89,6 +91,7 @@ export const useStore = create<StoreState>()(
         port: 3000,
         autoReconnect: true,
         reconnectInterval: 2000,
+        maxReconnectAttempts: 10,
         logLimit: 999
       },
       setHost: (h) => set((state) => ({ settings: { ...state.settings, host: h } })),
@@ -104,6 +107,12 @@ export const useStore = create<StoreState>()(
         settings: {
           ...state.settings,
           logLimit: Math.min(999, Math.max(1, limit))
+        }
+      })),
+      setMaxReconnectAttempts: (attempts) => set((state) => ({
+        settings: {
+          ...state.settings,
+          maxReconnectAttempts: Math.max(1, attempts)
         }
       })),
     }),

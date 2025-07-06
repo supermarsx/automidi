@@ -22,19 +22,24 @@ export function useMidi() {
   const port = useStore((s) => s.settings.port);
   const autoReconnect = useStore((s) => s.settings.autoReconnect);
   const reconnectInterval = useStore((s) => s.settings.reconnectInterval);
+  const maxReconnectAttempts = useStore((s) => s.settings.maxReconnectAttempts);
   const selectedOutput = useStore((s) => s.devices.outputId);
   const [inputs, setInputs] = useState<MidiDevice[]>([]);
   const [outputs, setOutputs] = useState<MidiDevice[]>([]);
   const [status, setStatus] = useState<'connected' | 'closed' | 'connecting'>('closed');
+  const [pingDelay, setPingDelay] = useState<number | null>(null);
   const launchpadRef = useRef<number | null>(null);
   const listeners = useRef(new Set<(msg: MidiMessage) => void>());
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isPageLoadedRef = useRef(false);
   const connectionAttemptsRef = useRef(0);
-  const maxReconnectAttempts = 10;
+  const lastPingRef = useRef<number | null>(null);
 
   // Wait for page to fully load before connecting
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const handleLoad = () => {
       isPageLoadedRef.current = true;
@@ -85,7 +90,16 @@ export function useMidi() {
         console.log('WebSocket connected successfully');
         setStatus('connected');
         connectionAttemptsRef.current = 0; // Reset attempts on successful connection
-        
+
+        // Start ping interval
+        if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
+        pingIntervalRef.current = setInterval(() => {
+          if (wsRef.current?.readyState === WebSocket.OPEN) {
+            lastPingRef.current = Date.now();
+            wsRef.current.send(JSON.stringify({ type: 'ping', ts: lastPingRef.current }));
+          }
+        }, 10000);
+
         // Request device list
         ws.send(JSON.stringify({ type: 'getDevices' }));
         
@@ -123,9 +137,14 @@ export function useMidi() {
               target: payload.target,
               port: payload.port
             };
-            
+
             for (const fn of listeners.current) {
               fn(msg);
+            }
+          } else if (payload.type === 'pong') {
+            const sent = payload.ts || lastPingRef.current;
+            if (sent) {
+              setPingDelay(Date.now() - sent);
             }
           }
         } catch (err) {
@@ -137,7 +156,11 @@ export function useMidi() {
         clearTimeout(connectionTimeout);
         console.log('WebSocket disconnected:', event.code, event.reason);
         setStatus('closed');
-        
+        if (pingIntervalRef.current) {
+          clearInterval(pingIntervalRef.current);
+          pingIntervalRef.current = null;
+        }
+
         // Auto-reconnect if enabled and not too many attempts
         if (autoReconnect && connectionAttemptsRef.current < maxReconnectAttempts && !reconnectTimeoutRef.current) {
           connectionAttemptsRef.current++;
@@ -163,7 +186,7 @@ export function useMidi() {
       console.error('Failed to create WebSocket:', err);
       setStatus('closed');
     }
-  }, [host, port, autoReconnect, reconnectInterval]);
+  }, [host, port, autoReconnect, reconnectInterval, maxReconnectAttempts]);
 
   // Manual reconnect function
   const reconnect = useCallback(() => {
@@ -185,6 +208,7 @@ export function useMidi() {
   }, [connectWebSocket]);
 
   // Reconnect when settings change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (isPageLoadedRef.current && status !== 'connecting') {
       console.log('Settings changed, reconnecting...');
@@ -202,6 +226,9 @@ export function useMidi() {
     return () => {
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
+      }
+      if (pingIntervalRef.current) {
+        clearInterval(pingIntervalRef.current);
       }
       if (wsRef.current) {
         wsRef.current.close();
@@ -247,6 +274,7 @@ export function useMidi() {
   }, []);
 
   // Auto-enter programmer mode when Launchpad X is detected
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (launchpadRef.current !== null && status === 'connected') {
       console.log('Auto-entering programmer mode for Launchpad X');
@@ -262,6 +290,7 @@ export function useMidi() {
     send,
     listen,
     status,
+    pingDelay,
     launchpadDetected: launchpadRef.current !== null,
     reconnect
   };

@@ -3,7 +3,7 @@ import { useMidi } from './useMidi';
 import SettingsModal from './SettingsModal';
 
 export default function ActionBar() {
-  const { status, reconnect, launchpadDetected } = useMidi();
+  const { status, reconnect, launchpadDetected, pingDelay } = useMidi();
   const [showSettings, setShowSettings] = useState(false);
 
   return (
@@ -13,6 +13,7 @@ export default function ActionBar() {
         <span className={`connection-status ${status} me-3`}>
           SOCKET: {status.toUpperCase()}
         </span>
+        <span className="delay-status me-3">DELAY: {pingDelay ? `${pingDelay}ms` : '?'}</span>
         {launchpadDetected && (
           <span className="text-success me-3">
             ► LAUNCHPAD X DETECTED
