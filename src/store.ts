@@ -37,10 +37,13 @@ interface MacrosSlice {
 interface PadsSlice {
   padColours: Record<string, string>;
   padLabels: Record<string, string>;
+  padChannels: Record<string, number>;
   setPadColour: (id: string, colour: string) => void;
   setPadColours: (colours: Record<string, string>) => void;
   setPadLabel: (id: string, label: string) => void;
   setPadLabels: (labels: Record<string, string>) => void;
+  setPadChannel: (id: string, channel: number) => void;
+  setPadChannels: (channels: Record<string, number>) => void;
 }
 
 export interface PadConfig {
@@ -48,6 +51,7 @@ export interface PadConfig {
   name: string;
   padColours: Record<string, string>;
   padLabels?: Record<string, string>;
+  padChannels?: Record<string, number>;
 }
 
 interface ConfigsSlice {
@@ -119,12 +123,19 @@ export const useStore = create<StoreState>()(
         set((state) => ({ macros: state.macros.filter((m) => m.id !== id) })),
       padColours: {},
       padLabels: {},
+      padChannels: {},
       setPadColour: (id, colour) =>
         set((state) => ({ padColours: { ...state.padColours, [id]: colour } })),
       setPadColours: (colours) => set(() => ({ padColours: { ...colours } })),
       setPadLabel: (id, label) =>
         set((state) => ({ padLabels: { ...state.padLabels, [id]: label } })),
       setPadLabels: (labels) => set(() => ({ padLabels: { ...labels } })),
+      setPadChannel: (id, channel) =>
+        set((state) => ({
+          padChannels: { ...state.padChannels, [id]: channel },
+        })),
+      setPadChannels: (channels) =>
+        set(() => ({ padChannels: { ...channels } })),
       configs: [],
       addConfig: (c) => set((s) => ({ configs: [...s.configs, c] })),
       updateConfig: (c) =>
