@@ -40,8 +40,17 @@ body {
 }
 
 @keyframes glow {
-  from { text-shadow: 2px 2px 0px #ff00ff, 0 0 10px #ffff00; }
-  to { text-shadow: 2px 2px 0px #ff00ff, 0 0 20px #ffff00, 0 0 30px #ffff00; }
+  from {
+    text-shadow:
+      2px 2px 0px #ff00ff,
+      0 0 10px #ffff00;
+  }
+  to {
+    text-shadow:
+      2px 2px 0px #ff00ff,
+      0 0 20px #ffff00,
+      0 0 30px #ffff00;
+  }
 }
 
 .status-bar {
@@ -69,47 +78,15 @@ body {
   width: 100%;
   height: 100%;
   position: relative;
-}
-#n-54::after,
-#n-55::after,
-#n-45::after,
-#n-44::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 60%;
-  height: 60%;
-  transform: translate(-50%, -50%) rotate(45deg);
-  border: 1px solid #ffff00;
-  pointer-events: none;
-}
-
-.midi-pad-select {
-  width: 100%;
-  height: 100%;
   border: 1px solid #00ff00;
   background: #000040;
   cursor: pointer;
   transition: all 0.1s;
-  font-family: 'VT323', monospace;
-  font-size: 10px;
-  color: transparent;
-  text-align: center;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
 }
 
-.midi-pad-select:hover {
+.midi-pad-container:hover {
   border-color: #ffff00;
   box-shadow: 0 0 10px #ffff00;
-}
-
-.midi-pad-select:focus {
-  outline: none;
-  border-color: #ffff00;
-  box-shadow: 0 0 15px #ffff00;
 }
 
 .midi-pad-empty {
@@ -117,6 +94,22 @@ body {
   height: 100%;
   background: transparent;
   border: 1px solid #333;
+}
+
+#n-45 .midi-pad-container {
+  border-radius: 20px 0 0 0;
+}
+#n-44 .midi-pad-container {
+  border-radius: 0 20px 0 0;
+}
+#n-55 .midi-pad-container {
+  border-radius: 0 0 0 20px;
+}
+#n-54 .midi-pad-container {
+  border-radius: 0 0 20px 0;
+}
+#cc-99 .midi-pad-container {
+  border-radius: 5px;
 }
 
 .retro-panel {
@@ -323,8 +316,14 @@ body {
 }
 
 @keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0.3; }
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0.3;
+  }
 }
 
 .retro-select {
@@ -365,17 +364,18 @@ body {
   right: 0;
   bottom: 0;
   pointer-events: none;
-  background: linear-gradient(
-    transparent 50%,
-    rgba(0, 255, 0, 0.03) 50%
-  );
+  background: linear-gradient(transparent 50%, rgba(0, 255, 0, 0.03) 50%);
   background-size: 100% 4px;
   animation: scan 0.1s linear infinite;
 }
 
 @keyframes scan {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(4px); }
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(4px);
+  }
 }
 
 /* Floating Action Bar */
@@ -529,4 +529,25 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #ffff00;
+}
+
+/* Side panel for pad options */
+.pad-options-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 220px;
+  height: 100%;
+  background: #000040;
+  border-left: 2px solid #00ffff;
+  box-shadow: -2px 0 10px #00ffff;
+  padding: 20px;
+  z-index: 1100;
+  overflow-y: auto;
+}
+
+.pad-options-panel h4 {
+  margin-top: 0;
+  color: #ffff00;
+  text-transform: uppercase;
 }

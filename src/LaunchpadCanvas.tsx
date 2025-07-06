@@ -1,8 +1,6 @@
-import React, { memo } from 'react';
-import { noteOn, cc } from './midiMessages';
-import { useMidi } from './useMidi';
+import React, { memo, useState } from 'react';
 import { useStore } from './store';
-import LAUNCHPAD_COLORS from './launchpadColors';
+import PadOptionsPanel from './PadOptionsPanel';
 
 // MIDI mappings for Launchpad X according to programmer's reference
 const NOTE_GRID: number[][] = [
@@ -26,65 +24,42 @@ interface PadProps {
   isEmpty?: boolean;
 }
 
-const Pad = memo(({ id, note, cc: ccNum, isEmpty }: PadProps) => {
-  const colour = useStore((s) => s.padColours[id] || '#000000');
-  const setPadColour = useStore((s) => s.setPadColour);
-  const { send, status } = useMidi();
+const Pad = memo(
+  ({
+    id,
+    note,
+    cc: ccNum,
+    isEmpty,
+    onSelect,
+  }: PadProps & {
+    onSelect: (p: { id: string; note?: number; cc?: number }) => void;
+  }) => {
+    const colour = useStore((s) => s.padColours[id] || '#000000');
 
-  if (isEmpty) {
-    return <div className="midi-pad-empty"></div>;
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedColor = LAUNCHPAD_COLORS.find(
-      (c) => c.color === e.target.value,
-    );
-    if (!selectedColor) return;
-
-    setPadColour(id, selectedColor.color);
-
-    if (status === 'connected') {
-      if (note !== undefined) {
-        send(noteOn(note, selectedColor.value));
-      } else if (ccNum !== undefined) {
-        send(cc(ccNum, selectedColor.value));
-      }
+    if (isEmpty) {
+      return <div className="midi-pad-empty"></div>;
     }
-  };
 
-  return (
-    <div className="midi-pad-container" id={id}>
-      <select
-        className="midi-pad-select"
-        value={colour}
-        onChange={handleChange}
+    return (
+      <div
+        className="midi-pad-container"
+        id={id}
         style={{ backgroundColor: colour }}
         title={note !== undefined ? `Note ${note}` : `CC ${ccNum}`}
-      >
-        {LAUNCHPAD_COLORS.map((color) => (
-          <option
-            key={color.value}
-            value={color.color}
-            style={{
-              backgroundColor: color.color,
-              color: color.color === '#000000' ? '#fff' : '#000',
-            }}
-          >
-            {color.name}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-});
+        onClick={() => onSelect({ id, note, cc: ccNum })}
+      />
+    );
+  },
+);
 
 export function LaunchpadCanvas() {
+  const [selected, setSelected] = useState<PadProps | null>(null);
   const grid: React.ReactElement[] = [];
 
   // Top row - 9 CC controls
   for (let x = 0; x < 9; x++) {
     const id = `cc-${TOP_CC[x]}`;
-    grid.push(<Pad key={id} id={id} cc={TOP_CC[x]} />);
+    grid.push(<Pad key={id} id={id} cc={TOP_CC[x]} onSelect={setSelected} />);
   }
 
   // Main 8x8 grid with side controls moved to the right
@@ -93,15 +68,23 @@ export function LaunchpadCanvas() {
     for (let x = 0; x < 8; x++) {
       const note = NOTE_GRID[y][x];
       const id = `n-${note}`;
-      grid.push(<Pad key={id} id={id} note={note} />);
+      grid.push(<Pad key={id} id={id} note={note} onSelect={setSelected} />);
     }
 
     // Side CC control (right)
     const sideId = `cc-${SIDE_CC[y]}`;
-    grid.push(<Pad key={sideId} id={sideId} cc={SIDE_CC[y]} />);
+    grid.push(
+      <Pad key={sideId} id={sideId} cc={SIDE_CC[y]} onSelect={setSelected} />,
+    );
   }
-
-  return <div className="midi-grid-fixed">{grid}</div>;
+  return (
+    <>
+      <div className="midi-grid-fixed">{grid}</div>
+      {selected && (
+        <PadOptionsPanel pad={selected} onClose={() => setSelected(null)} />
+      )}
+    </>
+  );
 }
 
 export default memo(LaunchpadCanvas);

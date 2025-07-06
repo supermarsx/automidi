@@ -5,6 +5,7 @@ import SysexWorkbench from './SysexWorkbench';
 import MidiDevices from './MidiDevices';
 import ActionBar from './ActionBar';
 import FloatingActionBar from './FloatingActionBar';
+import ConfigManager from './ConfigManager';
 import './App.css';
 
 function App() {
@@ -13,9 +14,7 @@ function App() {
       <div className="scan-lines"></div>
       <div className="container-fluid">
         <div className="retro-container">
-          <h1 className="retro-title">
-            ◄ AutoMIDI v2.0 ►
-          </h1>
+          <h1 className="retro-title">◄ AutoMIDI v2.0 ►</h1>
           <ActionBar />
           <div className="row">
             <div className="col-md-6">
@@ -39,6 +38,11 @@ function App() {
             </div>
             <div className="col-md-6">
               <SysexWorkbench />
+            </div>
+          </div>
+          <div className="row">
+            <div className="col-12">
+              <ConfigManager />
             </div>
           </div>
         </div>

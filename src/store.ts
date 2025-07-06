@@ -37,6 +37,20 @@ interface MacrosSlice {
 interface PadsSlice {
   padColours: Record<string, string>;
   setPadColour: (id: string, colour: string) => void;
+  setPadColours: (colours: Record<string, string>) => void;
+}
+
+export interface PadConfig {
+  id: string;
+  name: string;
+  padColours: Record<string, string>;
+}
+
+interface ConfigsSlice {
+  configs: PadConfig[];
+  addConfig: (c: PadConfig) => void;
+  updateConfig: (c: PadConfig) => void;
+  removeConfig: (id: string) => void;
 }
 
 interface SettingsSlice {
@@ -66,7 +80,11 @@ interface SettingsSlice {
   setPingEnabled: (enabled: boolean) => void;
 }
 
-type StoreState = DevicesSlice & MacrosSlice & PadsSlice & SettingsSlice;
+type StoreState = DevicesSlice &
+  MacrosSlice &
+  PadsSlice &
+  SettingsSlice &
+  ConfigsSlice;
 
 const kvStore = createIdbStore('automidi-db', 'state');
 
@@ -96,6 +114,15 @@ export const useStore = create<StoreState>()(
       padColours: {},
       setPadColour: (id, colour) =>
         set((state) => ({ padColours: { ...state.padColours, [id]: colour } })),
+      setPadColours: (colours) => set(() => ({ padColours: { ...colours } })),
+      configs: [],
+      addConfig: (c) => set((s) => ({ configs: [...s.configs, c] })),
+      updateConfig: (c) =>
+        set((s) => ({
+          configs: s.configs.map((p) => (p.id === c.id ? c : p)),
+        })),
+      removeConfig: (id) =>
+        set((s) => ({ configs: s.configs.filter((p) => p.id !== id) })),
       settings: {
         host: location.hostname || 'localhost',
         port: 3000,
