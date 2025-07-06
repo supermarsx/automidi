@@ -51,6 +51,7 @@ interface SettingsSlice {
     pingGreen: number;
     pingYellow: number;
     pingOrange: number;
+    pingEnabled: boolean;
   };
   setHost: (h: string) => void;
   setPort: (p: number) => void;
@@ -62,6 +63,7 @@ interface SettingsSlice {
   setPingGreen: (ms: number) => void;
   setPingYellow: (ms: number) => void;
   setPingOrange: (ms: number) => void;
+  setPingEnabled: (enabled: boolean) => void;
 }
 
 type StoreState = DevicesSlice & MacrosSlice & PadsSlice & SettingsSlice;
@@ -104,53 +106,73 @@ export const useStore = create<StoreState>()(
         pingInterval: 15000,
         pingGreen: 10,
         pingYellow: 50,
-        pingOrange: 250
+        pingOrange: 250,
+        pingEnabled: true,
       },
-      setHost: (h) => set((state) => ({ settings: { ...state.settings, host: h } })),
-      setPort: (p) => set((state) => ({ settings: { ...state.settings, port: p } })),
-      setAutoReconnect: (enabled) => set((state) => ({ settings: { ...state.settings, autoReconnect: enabled } })),
-      setReconnectInterval: (interval) => set((state) => ({
-        settings: {
-          ...state.settings,
-          reconnectInterval: Math.max(1000, interval) // Minimum 1 second
-        }
-      })),
-      setMaxReconnectAttempts: (max) => set((state) => ({
-        settings: {
-          ...state.settings,
-          maxReconnectAttempts: Math.min(99, Math.max(1, max))
-        }
-      })),
-      setLogLimit: (limit) => set((state) => ({
-        settings: {
-          ...state.settings,
-          logLimit: Math.min(999, Math.max(1, limit))
-        }
-      })),
-      setPingInterval: (interval) => set((state) => ({
-        settings: {
-          ...state.settings,
-          pingInterval: Math.max(1000, interval)
-        }
-      })),
-      setPingGreen: (ms) => set((state) => ({
-        settings: {
-          ...state.settings,
-          pingGreen: Math.max(0, ms)
-        }
-      })),
-      setPingYellow: (ms) => set((state) => ({
-        settings: {
-          ...state.settings,
-          pingYellow: Math.max(0, ms)
-        }
-      })),
-      setPingOrange: (ms) => set((state) => ({
-        settings: {
-          ...state.settings,
-          pingOrange: Math.max(0, ms)
-        }
-      })),
+      setHost: (h) =>
+        set((state) => ({ settings: { ...state.settings, host: h } })),
+      setPort: (p) =>
+        set((state) => ({ settings: { ...state.settings, port: p } })),
+      setAutoReconnect: (enabled) =>
+        set((state) => ({
+          settings: { ...state.settings, autoReconnect: enabled },
+        })),
+      setReconnectInterval: (interval) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            reconnectInterval: Math.max(1000, interval), // Minimum 1 second
+          },
+        })),
+      setMaxReconnectAttempts: (max) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            maxReconnectAttempts: Math.min(99, Math.max(1, max)),
+          },
+        })),
+      setLogLimit: (limit) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            logLimit: Math.min(999, Math.max(1, limit)),
+          },
+        })),
+      setPingInterval: (interval) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            pingInterval: Math.max(500, interval),
+          },
+        })),
+      setPingGreen: (ms) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            pingGreen: Math.max(0, ms),
+          },
+        })),
+      setPingYellow: (ms) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            pingYellow: Math.max(0, ms),
+          },
+        })),
+      setPingOrange: (ms) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            pingOrange: Math.max(0, ms),
+          },
+        })),
+      setPingEnabled: (enabled) =>
+        set((state) => ({
+          settings: {
+            ...state.settings,
+            pingEnabled: enabled,
+          },
+        })),
     }),
     {
       name: 'store',

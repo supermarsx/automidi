@@ -17,6 +17,7 @@ export default function SettingsModal({ onClose }: Props) {
   const pingGreen = useStore((s) => s.settings.pingGreen);
   const pingYellow = useStore((s) => s.settings.pingYellow);
   const pingOrange = useStore((s) => s.settings.pingOrange);
+  const pingEnabled = useStore((s) => s.settings.pingEnabled);
   const setHost = useStore((s) => s.setHost);
   const setPort = useStore((s) => s.setPort);
   const setAutoReconnect = useStore((s) => s.setAutoReconnect);
@@ -27,6 +28,7 @@ export default function SettingsModal({ onClose }: Props) {
   const setPingGreen = useStore((s) => s.setPingGreen);
   const setPingYellow = useStore((s) => s.setPingYellow);
   const setPingOrange = useStore((s) => s.setPingOrange);
+  const setPingEnabled = useStore((s) => s.setPingEnabled);
 
   const [h, setH] = useState(host);
   const [p, setP] = useState(port);
@@ -38,6 +40,7 @@ export default function SettingsModal({ onClose }: Props) {
   const [pg, setPg] = useState(pingGreen);
   const [py, setPy] = useState(pingYellow);
   const [po, setPo] = useState(pingOrange);
+  const [pe, setPe] = useState(pingEnabled);
 
   const save = () => {
     setHost(h);
@@ -46,7 +49,8 @@ export default function SettingsModal({ onClose }: Props) {
     setReconnectInterval(Math.max(1, ri) * 1000); // Minimum 1 second, convert back to milliseconds
     setMaxReconnectAttempts(mra);
     setLogLimit(ll);
-    setPingInterval(Math.max(1000, pi));
+    setPingInterval(Math.max(500, pi));
+    setPingEnabled(pe);
     setPingGreen(pg);
     setPingYellow(py);
     setPingOrange(po);
@@ -75,10 +79,10 @@ export default function SettingsModal({ onClose }: Props) {
           <div className="modal-body">
             <div className="mb-3">
               <label className="form-label text-info">HOST ADDRESS:</label>
-              <input 
-                className="form-control retro-input" 
-                value={h} 
-                onChange={(e) => setH(e.target.value)} 
+              <input
+                className="form-control retro-input"
+                value={h}
+                onChange={(e) => setH(e.target.value)}
                 placeholder="localhost"
               />
               <small className="text-warning">Default: localhost</small>
@@ -108,19 +112,23 @@ export default function SettingsModal({ onClose }: Props) {
               <small className="text-warning">Default: 999</small>
             </div>
             <div className="mb-3">
-              <label className="form-label text-info">PING INTERVAL (MS):</label>
+              <label className="form-label text-info">
+                PING INTERVAL (MS):
+              </label>
               <input
                 type="number"
                 className="form-control retro-input"
                 value={pi}
                 onChange={(e) => setPi(Number(e.target.value))}
-                min="1000"
-                step="1000"
+                min="500"
+                step="500"
               />
-              <small className="text-warning">Default: 15000</small>
+              <small className="text-warning">Default: 15000 (Min 500)</small>
             </div>
             <div className="mb-3">
-              <label className="form-label text-info">PING THRESHOLDS (MS):</label>
+              <label className="form-label text-info">
+                PING THRESHOLDS (MS):
+              </label>
               <div className="d-flex gap-2">
                 <input
                   type="number"
@@ -147,7 +155,24 @@ export default function SettingsModal({ onClose }: Props) {
                   style={{ width: '5rem' }}
                 />
               </div>
-              <small className="text-warning">Green, Yellow, Orange defaults: 10/50/250</small>
+              <small className="text-warning">
+                Green, Yellow, Orange defaults: 10/50/250
+              </small>
+            </div>
+            <div className="mb-3 form-check">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="pingEnabled"
+                checked={pe}
+                onChange={(e) => setPe(e.target.checked)}
+              />
+              <label
+                className="form-check-label text-info"
+                htmlFor="pingEnabled"
+              >
+                ENABLE PING
+              </label>
             </div>
             <div className="mb-3">
               <div className="form-check">
@@ -158,39 +183,50 @@ export default function SettingsModal({ onClose }: Props) {
                   checked={ar}
                   onChange={(e) => setAr(e.target.checked)}
                 />
-                <label className="form-check-label text-info" htmlFor="autoReconnect">
+                <label
+                  className="form-check-label text-info"
+                  htmlFor="autoReconnect"
+                >
                   AUTO-RECONNECT ON FAILURE
                 </label>
               </div>
-              <small className="text-warning">Automatically reconnect when connection is lost</small>
+              <small className="text-warning">
+                Automatically reconnect when connection is lost
+              </small>
             </div>
             {ar && (
               <>
-              <div className="mb-3">
-                <label className="form-label text-info">RECONNECT INTERVAL (SECONDS):</label>
-                <input
-                  type="number"
-                  className="form-control retro-input"
-                  value={ri}
-                  onChange={(e) => setRi(Number(e.target.value))}
-                  min="1"
-                  max="60"
-                  step="0.5"
-                />
-                <small className="text-warning">Minimum: 1 second, Maximum: 60 seconds</small>
-              </div>
-              <div className="mb-3">
-                <label className="form-label text-info">MAX RECONNECT ATTEMPTS:</label>
-                <input
-                  type="number"
-                  className="form-control retro-input"
-                  value={mra}
-                  onChange={(e) => setMra(Number(e.target.value))}
-                  min="1"
-                  max="99"
-                />
-                <small className="text-warning">Default: 10</small>
-              </div>
+                <div className="mb-3">
+                  <label className="form-label text-info">
+                    RECONNECT INTERVAL (SECONDS):
+                  </label>
+                  <input
+                    type="number"
+                    className="form-control retro-input"
+                    value={ri}
+                    onChange={(e) => setRi(Number(e.target.value))}
+                    min="1"
+                    max="60"
+                    step="0.5"
+                  />
+                  <small className="text-warning">
+                    Minimum: 1 second, Maximum: 60 seconds
+                  </small>
+                </div>
+                <div className="mb-3">
+                  <label className="form-label text-info">
+                    MAX RECONNECT ATTEMPTS:
+                  </label>
+                  <input
+                    type="number"
+                    className="form-control retro-input"
+                    value={mra}
+                    onChange={(e) => setMra(Number(e.target.value))}
+                    min="1"
+                    max="99"
+                  />
+                  <small className="text-warning">Default: 10</small>
+                </div>
               </>
             )}
           </div>
