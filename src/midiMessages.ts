@@ -9,47 +9,26 @@ function clamp7(value: number): number {
   return value & 0x7f;
 }
 
-export function noteOn(
-  note: number,
-  velocity: number,
-  channel = 1,
-): number[] {
-  return [
-    0x90 | clamp7(channel - 1),
-    clamp7(note),
-    clamp7(velocity),
-  ];
+export const CHANNEL_STATIC = 1; // Channel 1 - static colour
+export const CHANNEL_FLASHING = 2; // Channel 2 - flashing colour
+export const CHANNEL_PULSING = 3; // Channel 3 - pulsing colour
+
+export function noteOn(note: number, velocity: number, channel = 1): number[] {
+  return [0x90 | clamp7(channel - 1), clamp7(note), clamp7(velocity)];
 }
 
-export function noteOff(
-  note: number,
-  velocity = 0,
-  channel = 1,
-): number[] {
-  return [
-    0x80 | clamp7(channel - 1),
-    clamp7(note),
-    clamp7(velocity),
-  ];
+export function noteOff(note: number, velocity = 0, channel = 1): number[] {
+  return [0x80 | clamp7(channel - 1), clamp7(note), clamp7(velocity)];
 }
 
 export function cc(ccNum: number, value: number, channel = 1): number[] {
-  return [
-    0xb0 | clamp7(channel - 1),
-    clamp7(ccNum),
-    clamp7(value),
-  ];
+  return [0xb0 | clamp7(channel - 1), clamp7(ccNum), clamp7(value)];
 }
 
 const LAUNCHPAD_HEADER = [0xf0, 0x00, 0x20, 0x29, 0x02, 0x0c] as const;
 
 export function sysex(command: number, ...data: number[]): number[] {
-  return [
-    ...LAUNCHPAD_HEADER,
-    clamp7(command),
-    ...data.map(clamp7),
-    0xf7,
-  ];
+  return [...LAUNCHPAD_HEADER, clamp7(command), ...data.map(clamp7), 0xf7];
 }
 
 // Launchpad X specific SysEx commands according to programmer's reference
@@ -83,7 +62,14 @@ export function clearAllLeds(): number[] {
 
 export function scrollText(text: string, loop = false, speed = 7): number[] {
   const textBytes = Array.from(text).map((c) => c.codePointAt(0) || 0);
-  return sysex(0x07, loop ? 0x01 : 0x00, clamp7(speed), 0x00, ...textBytes, 0x00);
+  return sysex(
+    0x07,
+    loop ? 0x01 : 0x00,
+    0x00,
+    clamp7(speed),
+    ...textBytes,
+    0x00,
+  );
 }
 
 // Layout commands
@@ -109,6 +95,11 @@ export function setLedPulsing(id: number, color: number): number[] {
   return sysex(0x28, clamp7(id), clamp7(color));
 }
 
-export function setLedRGB(id: number, red: number, green: number, blue: number): number[] {
+export function setLedRGB(
+  id: number,
+  red: number,
+  green: number,
+  blue: number,
+): number[] {
   return sysex(0x03, clamp7(id), clamp7(red), clamp7(green), clamp7(blue));
 }
