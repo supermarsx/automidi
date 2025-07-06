@@ -1,0 +1,14 @@
+.midi-devices {
+  margin-bottom: 1rem;
+}
+
+.device-lists {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.device-lists ul {
+  list-style: none;
+  padding: 0;
+}
