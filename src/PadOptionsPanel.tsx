@@ -19,6 +19,17 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
   const setPadColour = useStore((s) => s.setPadColour);
   const { send, status } = useMidi();
 
+  const clearPad = () => {
+    setPadColour(pad.id, '#000000');
+    if (status === 'connected') {
+      if (pad.note !== undefined) {
+        send(noteOn(pad.note, 0));
+      } else if (pad.cc !== undefined) {
+        send(cc(pad.cc, 0));
+      }
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = LAUNCHPAD_COLORS.find((c) => c.color === e.target.value);
     if (!selected) return;
@@ -57,6 +68,9 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
           ))}
         </select>
       </div>
+      <button className="retro-button me-2" onClick={clearPad}>
+        CLEAR
+      </button>
       <button className="retro-button" onClick={onClose}>
         CLOSE
       </button>

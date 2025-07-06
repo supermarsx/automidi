@@ -105,7 +105,7 @@ body {
 }
 
 .midi-pad-container.top-cc {
-  margin-bottom: 2px;
+  margin-bottom: 10px;
 }
 
 .midi-pad-container.side-cc {
@@ -129,16 +129,16 @@ body {
   border: 1px solid #333;
 }
 
-#n-45 .midi-pad-container {
+#n-45.midi-pad-container {
   border-radius: 20px 0 0 0;
 }
-#n-44 .midi-pad-container {
+#n-44.midi-pad-container {
   border-radius: 0 20px 0 0;
 }
-#n-55 .midi-pad-container {
+#n-55.midi-pad-container {
   border-radius: 0 0 0 20px;
 }
-#n-54 .midi-pad-container {
+#n-54.midi-pad-container {
   border-radius: 0 0 20px 0;
 }
 #cc-99.midi-pad-container {
