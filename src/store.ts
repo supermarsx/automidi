@@ -45,11 +45,13 @@ interface SettingsSlice {
     port: number;
     autoReconnect: boolean;
     reconnectInterval: number;
+    logLimit: number;
   };
   setHost: (h: string) => void;
   setPort: (p: number) => void;
   setAutoReconnect: (enabled: boolean) => void;
   setReconnectInterval: (interval: number) => void;
+  setLogLimit: (limit: number) => void;
 }
 
 type StoreState = DevicesSlice & MacrosSlice & PadsSlice & SettingsSlice;
@@ -82,20 +84,27 @@ export const useStore = create<StoreState>()(
       padColours: {},
       setPadColour: (id, colour) =>
         set((state) => ({ padColours: { ...state.padColours, [id]: colour } })),
-      settings: { 
-        host: location.hostname || 'localhost', 
+      settings: {
+        host: location.hostname || 'localhost',
         port: 3000,
         autoReconnect: true,
-        reconnectInterval: 2000
+        reconnectInterval: 2000,
+        logLimit: 999
       },
       setHost: (h) => set((state) => ({ settings: { ...state.settings, host: h } })),
       setPort: (p) => set((state) => ({ settings: { ...state.settings, port: p } })),
       setAutoReconnect: (enabled) => set((state) => ({ settings: { ...state.settings, autoReconnect: enabled } })),
-      setReconnectInterval: (interval) => set((state) => ({ 
-        settings: { 
-          ...state.settings, 
+      setReconnectInterval: (interval) => set((state) => ({
+        settings: {
+          ...state.settings,
           reconnectInterval: Math.max(1000, interval) // Minimum 1 second
-        } 
+        }
+      })),
+      setLogLimit: (limit) => set((state) => ({
+        settings: {
+          ...state.settings,
+          logLimit: Math.min(999, Math.max(1, limit))
+        }
       })),
     }),
     {

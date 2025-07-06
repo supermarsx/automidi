@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { MidiMessage } from './useMidi';
+import { useStore } from './store';
 
 export interface LogEntry extends MidiMessage {
   id: number;
@@ -22,7 +23,8 @@ export const useLogStore = create<LogStoreState>((set) => ({
       id: idCounter++,
       formattedTime: new Date(msg.timestamp).toLocaleTimeString(),
     };
-    set((state) => ({ logs: [...state.logs.slice(-199), entry] }));
+    const limit = useStore.getState().settings.logLimit || 999;
+    set((state) => ({ logs: [...state.logs.slice(-(limit - 1)), entry] }));
   },
   clearLogs: () => set({ logs: [] }),
 }));

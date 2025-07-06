@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from './store';
 
 interface Props {
@@ -10,27 +10,43 @@ export default function SettingsModal({ onClose }: Props) {
   const port = useStore((s) => s.settings.port);
   const autoReconnect = useStore((s) => s.settings.autoReconnect);
   const reconnectInterval = useStore((s) => s.settings.reconnectInterval);
+  const logLimit = useStore((s) => s.settings.logLimit);
   const setHost = useStore((s) => s.setHost);
   const setPort = useStore((s) => s.setPort);
   const setAutoReconnect = useStore((s) => s.setAutoReconnect);
   const setReconnectInterval = useStore((s) => s.setReconnectInterval);
+  const setLogLimit = useStore((s) => s.setLogLimit);
 
   const [h, setH] = useState(host);
   const [p, setP] = useState(port);
   const [ar, setAr] = useState(autoReconnect);
   const [ri, setRi] = useState(reconnectInterval / 1000); // Convert to seconds for UI
+  const [ll, setLl] = useState(logLimit);
 
   const save = () => {
     setHost(h);
     setPort(Number(p));
     setAutoReconnect(ar);
     setReconnectInterval(Math.max(1, ri) * 1000); // Minimum 1 second, convert back to milliseconds
+    setLogLimit(ll);
     onClose();
   };
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   return (
-    <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
-      <div className="modal-dialog">
+    <div
+      className="modal d-block"
+      style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
+      onClick={onClose}
+    >
+      <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
         <div className="modal-content modal-retro">
           <div className="modal-header">
             <h5 className="modal-title">◄ SYSTEM CONFIGURATION ►</h5>
@@ -57,6 +73,18 @@ export default function SettingsModal({ onClose }: Props) {
                 max="65535"
               />
               <small className="text-warning">Default: 3000</small>
+            </div>
+            <div className="mb-3">
+              <label className="form-label text-info">MAX LOG ENTRIES:</label>
+              <input
+                type="number"
+                className="form-control retro-input"
+                value={ll}
+                onChange={(e) => setLl(Number(e.target.value))}
+                min="1"
+                max="999"
+              />
+              <small className="text-warning">Default: 999</small>
             </div>
             <div className="mb-3">
               <div className="form-check">
