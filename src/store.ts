@@ -34,7 +34,12 @@ interface MacrosSlice {
   removeMacro: (id: string) => void;
 }
 
-type StoreState = DevicesSlice & MacrosSlice;
+interface PadsSlice {
+  padColours: Record<string, string>;
+  setPadColour: (id: string, colour: string) => void;
+}
+
+type StoreState = DevicesSlice & MacrosSlice & PadsSlice;
 
 const kvStore = createIdbStore('automidi-db', 'state');
 
@@ -61,6 +66,9 @@ export const useStore = create<StoreState>()(
         })),
       removeMacro: (id) =>
         set((state) => ({ macros: state.macros.filter((m) => m.id !== id) })),
+      padColours: {},
+      setPadColour: (id, colour) =>
+        set((state) => ({ padColours: { ...state.padColours, [id]: colour } })),
     }),
     {
       name: 'store',
