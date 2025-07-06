@@ -13,6 +13,8 @@ export default function ConfigManager() {
   const setPadLabels = useStore((s) => s.setPadLabels);
   const padColours = useStore((s) => s.padColours);
   const padLabels = useStore((s) => s.padLabels);
+  const padChannels = useStore((s) => s.padChannels);
+  const setPadChannels = useStore((s) => s.setPadChannels);
   const clearBeforeLoad = useStore((s) => s.settings.clearBeforeLoad);
   const updateConfig = useStore((s) => s.updateConfig);
   const addToast = useToastStore((s) => s.addToast);
@@ -29,6 +31,7 @@ export default function ConfigManager() {
       name: name.trim(),
       padColours,
       padLabels,
+      padChannels,
     };
     addConfig(cfg);
     setName('');
@@ -38,6 +41,7 @@ export default function ConfigManager() {
   const loadConfig = (cfg: PadConfig) => {
     setPadColours(cfg.padColours);
     if (cfg.padLabels) setPadLabels(cfg.padLabels);
+    if (cfg.padChannels) setPadChannels(cfg.padChannels);
     addToast('Config loaded', 'success');
   };
 
@@ -54,7 +58,7 @@ export default function ConfigManager() {
   };
 
   const saveToConfig = (cfg: PadConfig) => {
-    updateConfig({ ...cfg, padColours, padLabels });
+    updateConfig({ ...cfg, padColours, padLabels, padChannels });
     addToast('Config updated', 'success');
   };
 
@@ -67,12 +71,13 @@ export default function ConfigManager() {
     for (const [id, hex] of Object.entries(cfg.padColours)) {
       const color = LAUNCHPAD_COLORS.find((c) => c.color === hex)?.value;
       if (color === undefined) continue;
+      const channel = cfg.padChannels?.[id] || 1;
       if (id.startsWith('n-')) {
         const note = Number(id.slice(2));
-        if (!Number.isNaN(note)) ok = send(noteOn(note, color)) && ok;
+        if (!Number.isNaN(note)) ok = send(noteOn(note, color, channel)) && ok;
       } else if (id.startsWith('cc-')) {
         const num = Number(id.slice(3));
-        if (!Number.isNaN(num)) ok = send(cc(num, color)) && ok;
+        if (!Number.isNaN(num)) ok = send(cc(num, color, channel)) && ok;
       }
     }
     addToast(
@@ -111,6 +116,7 @@ export default function ConfigManager() {
           ...cfg,
           id: Date.now().toString(),
           padLabels: cfg.padLabels || {},
+          padChannels: cfg.padChannels || {},
         });
         addToast('Config imported', 'success');
       } catch {

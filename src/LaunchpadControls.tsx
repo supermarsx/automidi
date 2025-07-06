@@ -17,12 +17,15 @@ import {
   ledLighting,
   setLedFlashing,
   setLedPulsing,
+  CHANNEL_STATIC,
 } from './midiMessages';
 
 export default function LaunchpadControls() {
   const { send } = useMidi();
   const padColours = useStore((s) => s.padColours);
+  const padChannels = useStore((s) => s.padChannels);
   const setPadColours = useStore((s) => s.setPadColours);
+  const setPadChannels = useStore((s) => s.setPadChannels);
   const addToast = useToastStore((s) => s.addToast);
   const notify = (ok: boolean, action: string) => {
     addToast(
@@ -71,6 +74,7 @@ export default function LaunchpadControls() {
 
   const handleClearConfig = () => {
     setPadColours({});
+    setPadChannels({});
   };
 
   const handleLoadToLaunchpad = () => {
@@ -82,12 +86,13 @@ export default function LaunchpadControls() {
     for (const [id, hex] of Object.entries(padColours)) {
       const color = LAUNCHPAD_COLORS.find((c) => c.color === hex)?.value;
       if (color === undefined) continue;
+      const channel = padChannels[id] || CHANNEL_STATIC;
       if (id.startsWith('n-')) {
         const note = Number(id.slice(2));
-        if (!Number.isNaN(note)) ok = send(noteOn(note, color)) && ok;
+        if (!Number.isNaN(note)) ok = send(noteOn(note, color, channel)) && ok;
       } else if (id.startsWith('cc-')) {
         const num = Number(id.slice(3));
-        if (!Number.isNaN(num)) ok = send(cc(num, color)) && ok;
+        if (!Number.isNaN(num)) ok = send(cc(num, color, channel)) && ok;
       }
     }
     notify(ok, 'Load to Launchpad');
