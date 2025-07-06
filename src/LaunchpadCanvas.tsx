@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { noteOn, cc } from './midiMessages';
 import { useMidi } from './useMidi';
 import { useStore } from './store';
+import LAUNCHPAD_COLORS from './launchpadColors';
 
 // MIDI mappings for Launchpad X according to programmer's reference
 const NOTE_GRID: number[][] = [
@@ -17,48 +18,6 @@ const NOTE_GRID: number[][] = [
 
 const TOP_CC = [104, 105, 106, 107, 108, 109, 110, 111];
 const SIDE_CC = [89, 79, 69, 59, 49, 39, 29, 19];
-
-// Launchpad X color palette according to spec (exact values from programmer's reference)
-const LAUNCHPAD_COLORS = [
-  { name: 'OFF', value: 0, color: '#000000' },
-  { name: 'RED_LOW', value: 1, color: '#330000' },
-  { name: 'RED_MID', value: 2, color: '#660000' },
-  { name: 'RED_FULL', value: 3, color: '#FF0000' },
-  { name: 'AMBER_LOW', value: 17, color: '#331100' },
-  { name: 'AMBER_MID', value: 18, color: '#662200' },
-  { name: 'AMBER_FULL', value: 19, color: '#FF4400' },
-  { name: 'YELLOW_LOW', value: 33, color: '#333300' },
-  { name: 'YELLOW_MID', value: 34, color: '#666600' },
-  { name: 'YELLOW_FULL', value: 35, color: '#FFFF00' },
-  { name: 'LIME_LOW', value: 49, color: '#223300' },
-  { name: 'LIME_MID', value: 50, color: '#446600' },
-  { name: 'LIME_FULL', value: 51, color: '#88FF00' },
-  { name: 'GREEN_LOW', value: 65, color: '#003300' },
-  { name: 'GREEN_MID', value: 66, color: '#006600' },
-  { name: 'GREEN_FULL', value: 67, color: '#00FF00' },
-  { name: 'SPRING_LOW', value: 81, color: '#003322' },
-  { name: 'SPRING_MID', value: 82, color: '#006644' },
-  { name: 'SPRING_FULL', value: 83, color: '#00FF88' },
-  { name: 'CYAN_LOW', value: 97, color: '#003333' },
-  { name: 'CYAN_MID', value: 98, color: '#006666' },
-  { name: 'CYAN_FULL', value: 99, color: '#00FFFF' },
-  { name: 'SKY_LOW', value: 113, color: '#002233' },
-  { name: 'SKY_MID', value: 114, color: '#004466' },
-  { name: 'SKY_FULL', value: 115, color: '#0088FF' },
-  { name: 'BLUE_LOW', value: 129, color: '#000033' },
-  { name: 'BLUE_MID', value: 130, color: '#000066' },
-  { name: 'BLUE_FULL', value: 131, color: '#0000FF' },
-  { name: 'PURPLE_LOW', value: 145, color: '#220033' },
-  { name: 'PURPLE_MID', value: 146, color: '#440066' },
-  { name: 'PURPLE_FULL', value: 147, color: '#8800FF' },
-  { name: 'PINK_LOW', value: 161, color: '#330022' },
-  { name: 'PINK_MID', value: 162, color: '#660044' },
-  { name: 'PINK_FULL', value: 163, color: '#FF0088' },
-  { name: 'ORANGE_LOW', value: 177, color: '#331100' },
-  { name: 'ORANGE_MID', value: 178, color: '#662200' },
-  { name: 'ORANGE_FULL', value: 179, color: '#FF4400' },
-  { name: 'WHITE', value: 3, color: '#FFFFFF' },
-];
 
 interface PadProps {
   id: string;
