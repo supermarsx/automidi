@@ -158,8 +158,6 @@ WebMidi.enable({ sysex: true })
             } catch (err) {
               console.error('WebSocket MIDI send error:', err);
             }
-          } else if (data.type === 'ping') {
-            ws.send(JSON.stringify({ type: 'pong', ts: data.ts }));
           }
         } catch (err) {
           console.error('WebSocket message parse error:', err);
