@@ -1,5 +1,6 @@
 import { useMidi } from './useMidi';
 import LaunchpadCanvas from './LaunchpadCanvas';
+import MacroList from './MacroList';
 import './App.css';
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
         Inputs: {inputs.length} Outputs: {outputs.length}
       </p>
       <LaunchpadCanvas />
+      <MacroList />
     </div>
   );
 }
