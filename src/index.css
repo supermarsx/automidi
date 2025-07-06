@@ -141,7 +141,7 @@ body {
 #n-54 .midi-pad-container {
   border-radius: 0 0 20px 0;
 }
-#cc-99 .midi-pad-container {
+#cc-99.midi-pad-container {
   border-radius: 5px;
   margin-left: 10px;
 }
