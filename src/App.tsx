@@ -6,6 +6,7 @@ import MidiDevices from './MidiDevices';
 import ActionBar from './ActionBar';
 import FloatingActionBar from './FloatingActionBar';
 import ConfigManager from './ConfigManager';
+import ToastContainer from './ToastContainer';
 import './App.css';
 
 function App() {
@@ -48,6 +49,7 @@ function App() {
         </div>
       </div>
       <FloatingActionBar />
+      <ToastContainer />
     </div>
   );
 }

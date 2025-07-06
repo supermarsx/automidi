@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useStore, type PadConfig } from './store';
+import { useToastStore } from './toastStore';
 
 export default function ConfigManager() {
   const configs = useStore((s) => s.configs);
@@ -8,6 +9,7 @@ export default function ConfigManager() {
   const setPadColours = useStore((s) => s.setPadColours);
   const padColours = useStore((s) => s.padColours);
   const updateConfig = useStore((s) => s.updateConfig);
+  const addToast = useToastStore((s) => s.addToast);
   const [editing, setEditing] = useState<PadConfig | null>(null);
   const [editName, setEditName] = useState('');
   const [name, setName] = useState('');
@@ -21,10 +23,12 @@ export default function ConfigManager() {
     };
     addConfig(cfg);
     setName('');
+    addToast('Config saved', 'success');
   };
 
   const loadConfig = (cfg: PadConfig) => {
     setPadColours(cfg.padColours);
+    addToast('Config loaded', 'success');
   };
 
   const startEdit = (cfg: PadConfig) => {
@@ -36,6 +40,12 @@ export default function ConfigManager() {
     if (!editing) return;
     updateConfig({ ...editing, name: editName.trim() || editing.name });
     setEditing(null);
+    addToast('Config renamed', 'success');
+  };
+
+  const saveToConfig = (cfg: PadConfig) => {
+    updateConfig({ ...cfg, padColours });
+    addToast('Config updated', 'success');
   };
 
   const exportConfig = (cfg: PadConfig) => {
@@ -47,6 +57,7 @@ export default function ConfigManager() {
     a.download = `${cfg.name}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    addToast('Config exported', 'success');
   };
 
   const importConfig = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,8 +68,9 @@ export default function ConfigManager() {
       try {
         const cfg = JSON.parse(ev.target?.result as string) as PadConfig;
         addConfig({ ...cfg, id: Date.now().toString() });
+        addToast('Config imported', 'success');
       } catch {
-        /* ignore */
+        addToast('Failed to import config', 'error');
       }
     };
     reader.readAsText(file);
@@ -94,6 +106,12 @@ export default function ConfigManager() {
             </button>
             <button
               className="retro-button btn-sm me-1"
+              onClick={() => saveToConfig(cfg)}
+            >
+              SAVE
+            </button>
+            <button
+              className="retro-button btn-sm me-1"
               onClick={() => exportConfig(cfg)}
             >
               EXPORT
@@ -106,7 +124,10 @@ export default function ConfigManager() {
             </button>
             <button
               className="retro-button btn-sm"
-              onClick={() => removeConfig(cfg.id)}
+              onClick={() => {
+                removeConfig(cfg.id);
+                addToast('Config deleted', 'success');
+              }}
             >
               DEL
             </button>

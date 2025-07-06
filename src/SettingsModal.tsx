@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useStore } from './store';
+import { useToastStore } from './toastStore';
 import './SettingsModal.css';
 
 interface Props {
@@ -29,6 +30,7 @@ export default function SettingsModal({ onClose }: Props) {
   const setPingYellow = useStore((s) => s.setPingYellow);
   const setPingOrange = useStore((s) => s.setPingOrange);
   const setPingEnabled = useStore((s) => s.setPingEnabled);
+  const addToast = useToastStore((s) => s.addToast);
 
   const [h, setH] = useState(host);
   const [p, setP] = useState(port);
@@ -55,6 +57,7 @@ export default function SettingsModal({ onClose }: Props) {
     setPingYellow(py);
     setPingOrange(po);
     onClose();
+    addToast('Settings saved', 'success');
   };
 
   useEffect(() => {

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMidi } from './useMidi';
 import { useStore } from './store';
+import { useToastStore } from './toastStore';
 import LAUNCHPAD_COLORS from './launchpadColors';
 import {
   enterProgrammerMode,
@@ -22,6 +23,13 @@ export default function LaunchpadControls() {
   const { send } = useMidi();
   const padColours = useStore((s) => s.padColours);
   const setPadColours = useStore((s) => s.setPadColours);
+  const addToast = useToastStore((s) => s.addToast);
+  const notify = (ok: boolean, action: string) => {
+    addToast(
+      ok ? `${action} sent` : `${action} failed`,
+      ok ? 'success' : 'error',
+    );
+  };
   const [brightness, setBrightnessValue] = useState(127);
   const [sleepEnabled, setSleepEnabled] = useState(false);
   const [scrollTextValue, setScrollTextValue] = useState('HELLO WORLD');
@@ -29,35 +37,35 @@ export default function LaunchpadControls() {
   const [dawBank, setDawBank] = useState(0);
 
   const handleEnterProgrammer = () => {
-    send(enterProgrammerMode());
+    notify(send(enterProgrammerMode()), 'Programmer mode');
   };
 
   const handleExitProgrammer = () => {
-    send(exitProgrammerMode());
+    notify(send(exitProgrammerMode()), 'Live mode');
   };
 
   const handleSetBrightness = () => {
-    send(setBrightness(brightness));
+    notify(send(setBrightness(brightness)), 'Brightness');
   };
 
   const handleSetSleep = () => {
-    send(setSleepMode(sleepEnabled));
+    notify(send(setSleepMode(sleepEnabled)), 'Sleep mode');
   };
 
   const handleClearAll = () => {
-    send(clearAllLeds());
+    notify(send(clearAllLeds()), 'Clear all');
   };
 
   const handleScrollText = () => {
-    send(scrollText(scrollTextValue, false, 7));
+    notify(send(scrollText(scrollTextValue, false, 7)), 'Scroll text');
   };
 
   const handleSetLayout = () => {
-    send(setLayout(layout));
+    notify(send(setLayout(layout)), 'Layout');
   };
 
   const handleSetDAW = () => {
-    send(setDAWMode(dawBank));
+    notify(send(setDAWMode(dawBank)), 'DAW mode');
   };
 
   const handleClearConfig = () => {
@@ -65,18 +73,19 @@ export default function LaunchpadControls() {
   };
 
   const handleLoadToLaunchpad = () => {
-    send(enterProgrammerMode());
+    let ok = send(enterProgrammerMode());
     for (const [id, hex] of Object.entries(padColours)) {
       const color = LAUNCHPAD_COLORS.find((c) => c.color === hex)?.value;
       if (color === undefined) continue;
       if (id.startsWith('n-')) {
         const note = Number(id.slice(2));
-        if (!Number.isNaN(note)) send(noteOn(note, color));
+        if (!Number.isNaN(note)) ok = send(noteOn(note, color)) && ok;
       } else if (id.startsWith('cc-')) {
         const num = Number(id.slice(3));
-        if (!Number.isNaN(num)) send(cc(num, color));
+        if (!Number.isNaN(num)) ok = send(cc(num, color)) && ok;
       }
     }
+    notify(ok, 'Load to Launchpad');
   };
 
   const testRainbow = () => {

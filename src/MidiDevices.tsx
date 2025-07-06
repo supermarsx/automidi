@@ -14,7 +14,7 @@ export default function MidiDevices() {
       <div className="row">
         <div className="col-6">
           <h5 className="text-info">INPUT CHANNELS:</h5>
-          <select 
+          <select
             className="form-select retro-select mb-2"
             value={selectedInput || ''}
             onChange={(e) => setInputId(e.target.value || null)}
@@ -28,12 +28,14 @@ export default function MidiDevices() {
           </select>
           <div className="device-list">
             {inputs.length === 0 ? (
-              <div className="device-item text-warning">NO INPUT DEVICES DETECTED</div>
+              <div className="device-item text-warning">
+                NO INPUT DEVICES DETECTED
+              </div>
             ) : (
               inputs.map((input) => (
-                <div 
-                  key={input.id || input.name} 
-                  className={`device-item ${selectedInput == input.id ? 'selected' : ''}`}
+                <div
+                  key={input.id || input.name}
+                  className={`device-item ${selectedInput === String(input.id) ? 'selected' : ''}`}
                 >
                   ► {input.name ?? `DEVICE_${input.id}`}
                 </div>
@@ -43,7 +45,7 @@ export default function MidiDevices() {
         </div>
         <div className="col-6">
           <h5 className="text-info">OUTPUT CHANNELS:</h5>
-          <select 
+          <select
             className="form-select retro-select mb-2"
             value={selectedOutput || ''}
             onChange={(e) => setOutputId(e.target.value || null)}
@@ -57,12 +59,14 @@ export default function MidiDevices() {
           </select>
           <div className="device-list">
             {outputs.length === 0 ? (
-              <div className="device-item text-warning">NO OUTPUT DEVICES DETECTED</div>
+              <div className="device-item text-warning">
+                NO OUTPUT DEVICES DETECTED
+              </div>
             ) : (
               outputs.map((output) => (
-                <div 
-                  key={output.id || output.name} 
-                  className={`device-item ${selectedOutput == output.id ? 'selected' : ''}`}
+                <div
+                  key={output.id || output.name}
+                  className={`device-item ${selectedOutput === String(output.id) ? 'selected' : ''}`}
                 >
                   ► {output.name ?? `DEVICE_${output.id}`}
                 </div>
