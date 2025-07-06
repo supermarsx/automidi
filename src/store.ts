@@ -43,9 +43,13 @@ interface SettingsSlice {
   settings: {
     host: string;
     port: number;
+    autoReconnect: boolean;
+    reconnectInterval: number;
   };
   setHost: (h: string) => void;
   setPort: (p: number) => void;
+  setAutoReconnect: (enabled: boolean) => void;
+  setReconnectInterval: (interval: number) => void;
 }
 
 type StoreState = DevicesSlice & MacrosSlice & PadsSlice & SettingsSlice;
@@ -78,9 +82,16 @@ export const useStore = create<StoreState>()(
       padColours: {},
       setPadColour: (id, colour) =>
         set((state) => ({ padColours: { ...state.padColours, [id]: colour } })),
-      settings: { host: location.hostname, port: 3000 },
+      settings: { 
+        host: location.hostname, 
+        port: 3000,
+        autoReconnect: true,
+        reconnectInterval: 2000
+      },
       setHost: (h) => set((state) => ({ settings: { ...state.settings, host: h } })),
       setPort: (p) => set((state) => ({ settings: { ...state.settings, port: p } })),
+      setAutoReconnect: (enabled) => set((state) => ({ settings: { ...state.settings, autoReconnect: enabled } })),
+      setReconnectInterval: (interval) => set((state) => ({ settings: { ...state.settings, reconnectInterval: interval } })),
     }),
     {
       name: 'store',

@@ -18,18 +18,21 @@ const NOTE_GRID: number[][] = [
 const TOP_CC = [104, 105, 106, 107, 108, 109, 110, 111];
 const SIDE_CC = [89, 79, 69, 59, 49, 39, 29, 19];
 
-// Launchpad X color palette according to spec
+// Launchpad X color palette according to spec (page 10-11 of programmer's reference)
 const LAUNCHPAD_COLORS = {
   OFF: 0,
-  RED_LOW: 1, RED_FULL: 3,
-  AMBER_LOW: 17, AMBER_FULL: 19,
-  YELLOW_FULL: 35,
-  GREEN_LOW: 49, GREEN_FULL: 51,
-  SPRING_FULL: 67,
-  CYAN_FULL: 83,
-  BLUE_LOW: 97, BLUE_FULL: 99,
-  PURPLE_FULL: 115,
-  PINK_FULL: 131,
+  RED_LOW: 1, RED_MID: 2, RED_FULL: 3,
+  AMBER_LOW: 17, AMBER_MID: 18, AMBER_FULL: 19,
+  YELLOW_LOW: 33, YELLOW_MID: 34, YELLOW_FULL: 35,
+  LIME_LOW: 49, LIME_MID: 50, LIME_FULL: 51,
+  GREEN_LOW: 65, GREEN_MID: 66, GREEN_FULL: 67,
+  SPRING_LOW: 81, SPRING_MID: 82, SPRING_FULL: 83,
+  CYAN_LOW: 97, CYAN_MID: 98, CYAN_FULL: 99,
+  SKY_LOW: 113, SKY_MID: 114, SKY_FULL: 115,
+  BLUE_LOW: 129, BLUE_MID: 130, BLUE_FULL: 131,
+  PURPLE_LOW: 145, PURPLE_MID: 146, PURPLE_FULL: 147,
+  PINK_LOW: 161, PINK_MID: 162, PINK_FULL: 163,
+  ORANGE_LOW: 177, ORANGE_MID: 178, ORANGE_FULL: 179,
   WHITE: 3
 };
 
@@ -38,14 +41,53 @@ function hexToLaunchpadColor(hex: string): number {
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
   
-  // Map to closest Launchpad color
-  if (r > 200 && g < 100 && b < 100) return LAUNCHPAD_COLORS.RED_FULL;
-  if (r > 200 && g > 200 && b < 100) return LAUNCHPAD_COLORS.AMBER_FULL;
-  if (r > 200 && g > 200 && b > 200) return LAUNCHPAD_COLORS.WHITE;
-  if (r < 100 && g > 200 && b < 100) return LAUNCHPAD_COLORS.GREEN_FULL;
-  if (r < 100 && g < 100 && b > 200) return LAUNCHPAD_COLORS.BLUE_FULL;
-  if (r > 200 && g < 100 && b > 200) return LAUNCHPAD_COLORS.PURPLE_FULL;
-  if (r < 100 && g > 200 && b > 200) return LAUNCHPAD_COLORS.CYAN_FULL;
+  // Map to closest Launchpad color based on RGB values
+  const brightness = (r + g + b) / 3;
+  
+  if (r > 200 && g < 100 && b < 100) {
+    return brightness > 170 ? LAUNCHPAD_COLORS.RED_FULL : 
+           brightness > 85 ? LAUNCHPAD_COLORS.RED_MID : LAUNCHPAD_COLORS.RED_LOW;
+  }
+  if (r > 200 && g > 150 && b < 100) {
+    return brightness > 170 ? LAUNCHPAD_COLORS.AMBER_FULL : 
+           brightness > 85 ? LAUNCHPAD_COLORS.AMBER_MID : LAUNCHPAD_COLORS.AMBER_LOW;
+  }
+  if (r > 200 && g > 200 && b < 100) {
+    return brightness > 170 ? LAUNCHPAD_COLORS.YELLOW_FULL : 
+           brightness > 85 ? LAUNCHPAD_COLORS.YELLOW_MID : LAUNCHPAD_COLORS.YELLOW_LOW;
+  }
+  if (r < 150 && g > 200 && b < 100) {
+    return brightness > 170 ? LAUNCHPAD_COLORS.LIME_FULL : 
+           brightness > 85 ? LAUNCHPAD_COLORS.LIME_MID : LAUNCHPAD_COLORS.LIME_LOW;
+  }
+  if (r < 100 && g > 200 && b < 100) {
+    return brightness > 170 ? LAUNCHPAD_COLORS.GREEN_FULL : 
+           brightness > 85 ? LAUNCHPAD_COLORS.GREEN_MID : LAUNCHPAD_COLORS.GREEN_LOW;
+  }
+  if (r < 100 && g > 200 && b > 150) {
+    return brightness > 170 ? LAUNCHPAD_COLORS.SPRING_FULL : 
+           brightness > 85 ? LAUNCHPAD_COLORS.SPRING_MID : LAUNCHPAD_COLORS.SPRING_LOW;
+  }
+  if (r < 100 && g > 150 && b > 200) {
+    return brightness > 170 ? LAUNCHPAD_COLORS.CYAN_FULL : 
+           brightness > 85 ? LAUNCHPAD_COLORS.CYAN_MID : LAUNCHPAD_COLORS.CYAN_LOW;
+  }
+  if (r < 100 && g < 150 && b > 200) {
+    return brightness > 170 ? LAUNCHPAD_COLORS.BLUE_FULL : 
+           brightness > 85 ? LAUNCHPAD_COLORS.BLUE_MID : LAUNCHPAD_COLORS.BLUE_LOW;
+  }
+  if (r > 150 && g < 100 && b > 200) {
+    return brightness > 170 ? LAUNCHPAD_COLORS.PURPLE_FULL : 
+           brightness > 85 ? LAUNCHPAD_COLORS.PURPLE_MID : LAUNCHPAD_COLORS.PURPLE_LOW;
+  }
+  if (r > 200 && g < 150 && b > 150) {
+    return brightness > 170 ? LAUNCHPAD_COLORS.PINK_FULL : 
+           brightness > 85 ? LAUNCHPAD_COLORS.PINK_MID : LAUNCHPAD_COLORS.PINK_LOW;
+  }
+  if (r > 200 && g > 200 && b > 200) {
+    return LAUNCHPAD_COLORS.WHITE;
+  }
+  
   return LAUNCHPAD_COLORS.OFF;
 }
 
@@ -92,13 +134,14 @@ const Pad = memo(({ id, note, cc: ccNum, isEmpty }: PadProps) => {
 export function LaunchpadCanvas() {
   const grid: React.ReactElement[] = [];
 
-  // Top row - empty corner + 8 CC controls + empty corner
+  // Top row - empty corner + 8 CC controls + missing button on right
   grid.push(<Pad key="empty-top-left" id="empty-top-left" isEmpty={true} />);
   for (let x = 0; x < 8; x++) {
     const id = `cc-${TOP_CC[x]}`;
     grid.push(<Pad key={id} id={id} cc={TOP_CC[x]} />);
   }
-  grid.push(<Pad key="empty-top-right" id="empty-top-right" isEmpty={true} />);
+  // Right side button (CC 99 - Logo button)
+  grid.push(<Pad key="cc-99" id="cc-99" cc={99} />);
 
   // Main 8x8 grid with side controls
   for (let y = 0; y < 8; y++) {
