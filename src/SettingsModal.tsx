@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useStore } from './store';
+import './SettingsModal.css';
 
 interface Props {
   onClose: () => void;
