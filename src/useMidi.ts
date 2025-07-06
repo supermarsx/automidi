@@ -23,6 +23,7 @@ export function useMidi() {
   const autoReconnect = useStore((s) => s.settings.autoReconnect);
   const reconnectInterval = useStore((s) => s.settings.reconnectInterval);
   const maxReconnectAttempts = useStore((s) => s.settings.maxReconnectAttempts);
+  const pingIntervalSetting = useStore((s) => s.settings.pingInterval);
   const selectedOutput = useStore((s) => s.devices.outputId);
   const [inputs, setInputs] = useState<MidiDevice[]>([]);
   const [outputs, setOutputs] = useState<MidiDevice[]>([]);
@@ -38,9 +39,15 @@ export function useMidi() {
   const connectionAttemptsRef = useRef(0);
 
   const sendPing = useCallback(() => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+    if (
+      wsRef.current &&
+      wsRef.current.readyState === WebSocket.OPEN &&
+      pingSentAtRef.current === null
+    ) {
       pingSentAtRef.current = Date.now();
-      wsRef.current.send(JSON.stringify({ type: 'ping', ts: pingSentAtRef.current }));
+      wsRef.current.send(
+        JSON.stringify({ type: 'ping', ts: pingSentAtRef.current })
+      );
     }
   }, []);
 
@@ -99,7 +106,7 @@ export function useMidi() {
         // Start ping interval
         if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
         sendPing();
-        pingIntervalRef.current = setInterval(sendPing, 15000);
+        pingIntervalRef.current = setInterval(sendPing, pingIntervalSetting);
 
         // Request device list
         ws.send(JSON.stringify({ type: 'getDevices' }));
@@ -118,6 +125,7 @@ export function useMidi() {
           if (payload.type === 'pong' && typeof payload.ts === 'number') {
             if (pingSentAtRef.current !== null) {
               setPingDelay(Date.now() - payload.ts);
+              pingSentAtRef.current = null;
             }
             return;
           }
@@ -163,6 +171,7 @@ export function useMidi() {
           clearInterval(pingIntervalRef.current);
           pingIntervalRef.current = null;
         }
+        pingSentAtRef.current = null;
         
         // Auto-reconnect if enabled and not too many attempts
         if (autoReconnect && connectionAttemptsRef.current < maxReconnectAttempts && !reconnectTimeoutRef.current) {
@@ -187,13 +196,14 @@ export function useMidi() {
           clearInterval(pingIntervalRef.current);
           pingIntervalRef.current = null;
         }
+        pingSentAtRef.current = null;
       };
       
     } catch (err) {
       console.error('Failed to create WebSocket:', err);
       setStatus('closed');
     }
-  }, [host, port, autoReconnect, reconnectInterval, maxReconnectAttempts, sendPing]);
+  }, [host, port, autoReconnect, reconnectInterval, maxReconnectAttempts, pingIntervalSetting, sendPing]);
 
   // Manual reconnect function
   const reconnect = useCallback(() => {
@@ -227,6 +237,14 @@ export function useMidi() {
     }
   }, [host, port]);
 
+  // Update ping interval when setting changes
+  useEffect(() => {
+    if (status === 'connected' && wsRef.current) {
+      if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = setInterval(sendPing, pingIntervalSetting);
+    }
+  }, [pingIntervalSetting, status, sendPing]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -236,6 +254,7 @@ export function useMidi() {
       if (pingIntervalRef.current) {
         clearInterval(pingIntervalRef.current);
       }
+      pingSentAtRef.current = null;
       if (wsRef.current) {
         wsRef.current.close();
       }
