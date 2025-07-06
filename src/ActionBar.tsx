@@ -1,10 +1,7 @@
-import { useState } from 'react';
 import { useMidi } from './useMidi';
-import SettingsModal from './SettingsModal';
 
 export default function ActionBar() {
-  const { status, reconnect, launchpadDetected } = useMidi();
-  const [showSettings, setShowSettings] = useState(false);
+  const { status, reconnect, launchpadDetected, pingDelay } = useMidi();
 
   return (
     <div className="status-bar d-flex justify-content-between align-items-center">
@@ -12,6 +9,9 @@ export default function ActionBar() {
         <span className="text-warning me-3">SYSTEM STATUS:</span>
         <span className={`connection-status ${status} me-3`}>
           SOCKET: {status.toUpperCase()}
+        </span>
+        <span className="text-info me-3">
+          PING: {pingDelay === null ? '---' : `${pingDelay}ms`}
         </span>
         {launchpadDetected && (
           <span className="text-success me-3">
@@ -27,13 +27,6 @@ export default function ActionBar() {
           </button>
         )}
       </div>
-      <button 
-        className="retro-button"
-        onClick={() => setShowSettings(true)}
-      >
-        ◄ CONFIG ►
-      </button>
-      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
     </div>
   );
 }
