@@ -84,7 +84,7 @@ export default function LaunchpadControls() {
 
   return (
     <div className="retro-panel">
-      <h3>◄ Launchpad X Control Matrix ►</h3>
+      <h3>◄ Launchpad Toolbox Matrix ►</h3>
 
       <div className="row mb-3">
         <div className="col-md-4">

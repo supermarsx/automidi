@@ -107,9 +107,9 @@ export default function SettingsModal({ onClose }: Props) {
                 value={ll}
                 onChange={(e) => setLl(Number(e.target.value))}
                 min="1"
-                max="999"
+                max="9999"
               />
-              <small className="text-warning">Default: 999</small>
+              <small className="text-warning">Default: 9999</small>
             </div>
             <div className="mb-3">
               <label className="form-label text-info">

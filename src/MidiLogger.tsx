@@ -27,7 +27,10 @@ export default function MidiLogger({ onClose }: Props) {
     if (bytes.length === 0) return 'EMPTY';
     const status = bytes[0];
     if (status >= 0x80 && status <= 0x8F) return 'NOTE_OFF';
-    if (status >= 0x90 && status <= 0x9F) return 'NOTE_ON';
+    if (status >= 0x90 && status <= 0x9F) {
+      if (bytes.length >= 3 && bytes[2] === 0) return 'NOTE_OFF';
+      return 'NOTE_ON';
+    }
     if (status >= 0xA0 && status <= 0xAF) return 'AFTERTOUCH';
     if (status >= 0xB0 && status <= 0xBF) return 'CC';
     if (status >= 0xC0 && status <= 0xCF) return 'PROG_CHG';
