@@ -61,6 +61,12 @@ export default function MidiLogger({ onClose }: Props) {
     if (status >= 0x80 && status <= 0x8F && bytes.length >= 3) {
       return `Ch${(status & 0x0F) + 1} Note:${bytes[1]} Vel:${bytes[2]}`;
     }
+    if (status >= 0xA0 && status <= 0xAF && bytes.length >= 3) {
+      return `Ch${(status & 0x0F) + 1} Note:${bytes[1]} Pressure:${bytes[2]}`;
+    }
+    if (status >= 0xD0 && status <= 0xDF && bytes.length >= 2) {
+      return `Ch${(status & 0x0F) + 1} Pressure:${bytes[1]}`;
+    }
     if (status >= 0xB0 && status <= 0xBF && bytes.length >= 3) {
       return `Ch${(status & 0x0F) + 1} CC:${bytes[1]} Val:${bytes[2]}`;
     }

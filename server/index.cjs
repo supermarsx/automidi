@@ -88,14 +88,22 @@ WebMidi.enable({ sysex: true })
 
         // Listen to all MIDI messages
         input.addListener('midimessage', (e) => {
+          const bytes = Array.from(e.message.data || e.data || []);
           const message = {
             type: 'midi',
             direction: 'in',
-            message: Array.from(e.message.data || e.data || []),
+            message: bytes,
             timestamp: e.timestamp || Date.now(),
             source: input.name,
             port: index,
           };
+          // For aftertouch messages (poly or channel), capture the pressure
+          if (
+            bytes.length >= 3 &&
+            ((bytes[0] & 0xf0) === 0xa0 || (bytes[0] & 0xf0) === 0xd0)
+          ) {
+            message.pressure = bytes[2];
+          }
           console.log('MIDI IN:', message);
           broadcastToClients(message);
         });
@@ -147,14 +155,21 @@ WebMidi.enable({ sysex: true })
               console.log(`Sent MIDI via WebSocket to ${out.name}:`, bytes);
 
               // Broadcast the outgoing message to all clients for logging
-              broadcastToClients({
+              const outMsg = {
                 type: 'midi',
                 direction: 'out',
                 message: bytes,
                 timestamp: Date.now(),
                 target: out.name,
                 port: port,
-              });
+              };
+              if (
+                bytes.length >= 3 &&
+                ((bytes[0] & 0xf0) === 0xa0 || (bytes[0] & 0xf0) === 0xd0)
+              ) {
+                outMsg.pressure = bytes[2];
+              }
+              broadcastToClients(outMsg);
             } catch (err) {
               console.error('WebSocket MIDI send error:', err);
             }
