@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useStore } from './store';
 
 export interface MidiDevice {
   id: number;
@@ -11,52 +12,23 @@ export interface MidiMessage {
 }
 
 export function useMidi() {
+  const host = useStore((s) => s.settings.host);
+  const port = useStore((s) => s.settings.port);
   const [inputs, setInputs] = useState<MidiDevice[]>([]);
   const [outputs, setOutputs] = useState<MidiDevice[]>([]);
+  const [status, setStatus] = useState<'connected' | 'closed' | 'connecting'>('connecting');
   const launchpad = useRef<number | null>(null);
   const listeners = useRef(new Set<(msg: MidiMessage) => void>());
   const wsRef = useRef<WebSocket | null>(null);
 
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const update = () => {
-      fetch(`http://${location.hostname}:3000/midi/devices`)
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error(
-              `Failed to fetch MIDI devices: ${res.status} ${res.statusText}`,
-            );
-          }
-          return res.json();
-        })
-        .then((data) => {
-          if (cancelled) return;
-          setInputs(data.inputs);
-          setOutputs(data.outputs);
-          const lp = data.outputs.find((o: MidiDevice) =>
-            o.name.includes('Launchpad X'),
-          );
-          launchpad.current = lp ? lp.id : null;
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    };
-
-    update();
-    const id = setInterval(update, 2000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, []);
 
   useEffect(() => {
-    const ws = new WebSocket(`ws://${location.hostname}:3000`);
+    setStatus('connecting');
+    const ws = new WebSocket(`ws://${host}:${port}`);
     wsRef.current = ws;
     ws.onopen = () => {
+      setStatus('connected');
       ws.send(JSON.stringify({ type: 'getDevices' }));
     };
     ws.onmessage = (ev) => {
@@ -80,21 +52,23 @@ export function useMidi() {
         console.error(err);
       }
     };
+    ws.onclose = () => setStatus('closed');
+    ws.onerror = () => setStatus('closed');
     return () => {
       ws.close();
     };
-  }, []);
+  }, [host, port]);
 
   const send = useCallback(
     (bytes: number[] | Uint8Array, output?: MidiDevice | null) => {
       const port = output?.id ?? launchpad.current ?? 0;
-      fetch(`http://${location.hostname}:3000/midi/send`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ port, data: Array.from(bytes) }),
-      }).catch((err) => {
+      try {
+        wsRef.current?.send(
+          JSON.stringify({ type: 'send', port, bytes: Array.from(bytes) }),
+        );
+      } catch (err) {
         console.error(err);
-      });
+      }
     },
     [],
   );
@@ -126,5 +100,6 @@ export function useMidi() {
     send,
     listen,
     returnToLive,
+    status,
   };
 }
