@@ -60,35 +60,6 @@ const LAUNCHPAD_COLORS = [
   { name: 'WHITE', value: 3, color: '#FFFFFF' },
 ];
 
-function findClosestLaunchpadColor(hex: string): {
-  value: number;
-  color: string;
-} {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-
-  let closestColor = LAUNCHPAD_COLORS[0];
-  let minDistance = Infinity;
-
-  for (const color of LAUNCHPAD_COLORS) {
-    const cr = parseInt(color.color.slice(1, 3), 16);
-    const cg = parseInt(color.color.slice(3, 5), 16);
-    const cb = parseInt(color.color.slice(5, 7), 16);
-
-    const distance = Math.sqrt(
-      Math.pow(r - cr, 2) + Math.pow(g - cg, 2) + Math.pow(b - cb, 2),
-    );
-
-    if (distance < minDistance) {
-      minDistance = distance;
-      closestColor = color;
-    }
-  }
-
-  return { value: closestColor.value, color: closestColor.color };
-}
-
 interface PadProps {
   id: string;
   note?: number;
