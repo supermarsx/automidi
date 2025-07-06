@@ -102,7 +102,7 @@ export const useStore = create<StoreState>()(
         autoReconnect: true,
         reconnectInterval: 2000,
         maxReconnectAttempts: 10,
-        logLimit: 999,
+        logLimit: 9999,
         pingInterval: 15000,
         pingGreen: 10,
         pingYellow: 50,
@@ -135,7 +135,7 @@ export const useStore = create<StoreState>()(
         set((state) => ({
           settings: {
             ...state.settings,
-            logLimit: Math.min(999, Math.max(1, limit)),
+            logLimit: Math.min(9999, Math.max(1, limit)),
           },
         })),
       setPingInterval: (interval) =>

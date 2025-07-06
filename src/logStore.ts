@@ -23,7 +23,7 @@ export const useLogStore = create<LogStoreState>((set) => ({
       id: idCounter++,
       formattedTime: new Date(msg.timestamp).toLocaleTimeString(),
     };
-    const limit = useStore.getState().settings.logLimit || 999;
+    const limit = useStore.getState().settings.logLimit || 9999;
     set((state) => ({ logs: [...state.logs.slice(-(limit - 1)), entry] }));
   },
   clearLogs: () => set({ logs: [] }),

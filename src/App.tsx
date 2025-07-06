@@ -23,7 +23,7 @@ function App() {
             </div>
             <div className="col-md-6">
               <div className="retro-panel">
-                <h3>◄ Launchpad X Control Matrix ►</h3>
+                <h3>◄ Launchpad Mission Control ►</h3>
                 <LaunchpadCanvas />
               </div>
             </div>

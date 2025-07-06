@@ -88,18 +88,18 @@ export function LaunchpadCanvas() {
     grid.push(<Pad key={id} id={id} cc={TOP_CC[x]} />);
   }
 
-  // Main 8x8 grid with side controls
+  // Main 8x8 grid with side controls moved to the right
   for (let y = 0; y < 8; y++) {
-    // Side CC control (left)
-    const sideId = `cc-${SIDE_CC[y]}`;
-    grid.push(<Pad key={sideId} id={sideId} cc={SIDE_CC[y]} />);
-
     // Main 8x8 note grid
     for (let x = 0; x < 8; x++) {
       const note = NOTE_GRID[y][x];
       const id = `n-${note}`;
       grid.push(<Pad key={id} id={id} note={note} />);
     }
+
+    // Side CC control (right)
+    const sideId = `cc-${SIDE_CC[y]}`;
+    grid.push(<Pad key={sideId} id={sideId} cc={SIDE_CC[y]} />);
   }
 
   return <div className="midi-grid-fixed">{grid}</div>;
