@@ -15,6 +15,7 @@ export interface MidiMessage {
   source?: string;
   target?: string;
   port?: number;
+  pressure?: number;
 }
 
 export function useMidi() {
@@ -164,6 +165,7 @@ export function useMidi() {
               source: payload.source,
               target: payload.target,
               port: payload.port,
+              pressure: payload.pressure,
             };
 
             for (const fn of listeners.current) {

@@ -14,12 +14,12 @@ export function useRecorder(isRecording: boolean) {
       return;
     }
     const handler = (msg: MidiMessage) => {
-      const { data } = msg;
+      const { message } = msg;
       const now = performance.now();
       const prev = lastTime.current ?? now;
       lastTime.current = now;
       const delta = now - prev;
-      const bytes = Array.from(data);
+      const bytes = Array.from(message);
       setMessages((msgs) => [...msgs, { ts: delta, bytes }]);
     };
     const unlisten = listen(handler);
