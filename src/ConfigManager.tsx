@@ -7,6 +7,9 @@ export default function ConfigManager() {
   const removeConfig = useStore((s) => s.removeConfig);
   const setPadColours = useStore((s) => s.setPadColours);
   const padColours = useStore((s) => s.padColours);
+  const updateConfig = useStore((s) => s.updateConfig);
+  const [editing, setEditing] = useState<PadConfig | null>(null);
+  const [editName, setEditName] = useState('');
   const [name, setName] = useState('');
 
   const saveCurrent = () => {
@@ -22,6 +25,17 @@ export default function ConfigManager() {
 
   const loadConfig = (cfg: PadConfig) => {
     setPadColours(cfg.padColours);
+  };
+
+  const startEdit = (cfg: PadConfig) => {
+    setEditing(cfg);
+    setEditName(cfg.name);
+  };
+
+  const saveEdit = () => {
+    if (!editing) return;
+    updateConfig({ ...editing, name: editName.trim() || editing.name });
+    setEditing(null);
   };
 
   const exportConfig = (cfg: PadConfig) => {
@@ -85,6 +99,12 @@ export default function ConfigManager() {
               EXPORT
             </button>
             <button
+              className="retro-button btn-sm me-1"
+              onClick={() => startEdit(cfg)}
+            >
+              EDIT
+            </button>
+            <button
               className="retro-button btn-sm"
               onClick={() => removeConfig(cfg.id)}
             >
@@ -93,6 +113,24 @@ export default function ConfigManager() {
           </div>
         </div>
       ))}
+      {editing && (
+        <div className="retro-panel mt-3">
+          <h4 className="text-warning">EDIT CONFIG</h4>
+          <div className="mb-3">
+            <input
+              className="form-control retro-input"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+            />
+          </div>
+          <button className="retro-button me-2" onClick={saveEdit}>
+            SAVE
+          </button>
+          <button className="retro-button" onClick={() => setEditing(null)}>
+            CANCEL
+          </button>
+        </div>
+      )}
     </div>
   );
 }

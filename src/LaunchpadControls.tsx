@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { useMidi } from './useMidi';
+import { useStore } from './store';
+import LAUNCHPAD_COLORS from './launchpadColors';
 import {
   enterProgrammerMode,
   exitProgrammerMode,
   setBrightness,
   setSleepMode,
   clearAllLeds,
+  noteOn,
+  cc,
   scrollText,
   setLayout,
   setDAWMode,
@@ -16,6 +20,8 @@ import {
 
 export default function LaunchpadControls() {
   const { send } = useMidi();
+  const padColours = useStore((s) => s.padColours);
+  const setPadColours = useStore((s) => s.setPadColours);
   const [brightness, setBrightnessValue] = useState(127);
   const [sleepEnabled, setSleepEnabled] = useState(false);
   const [scrollTextValue, setScrollTextValue] = useState('HELLO WORLD');
@@ -52,6 +58,25 @@ export default function LaunchpadControls() {
 
   const handleSetDAW = () => {
     send(setDAWMode(dawBank));
+  };
+
+  const handleClearConfig = () => {
+    setPadColours({});
+  };
+
+  const handleLoadToLaunchpad = () => {
+    send(enterProgrammerMode());
+    for (const [id, hex] of Object.entries(padColours)) {
+      const color = LAUNCHPAD_COLORS.find((c) => c.color === hex)?.value;
+      if (color === undefined) continue;
+      if (id.startsWith('n-')) {
+        const note = Number(id.slice(2));
+        if (!Number.isNaN(note)) send(noteOn(note, color));
+      } else if (id.startsWith('cc-')) {
+        const num = Number(id.slice(3));
+        if (!Number.isNaN(num)) send(cc(num, color));
+      }
+    }
   };
 
   const testRainbow = () => {
@@ -178,6 +203,15 @@ export default function LaunchpadControls() {
           </div>
           <button className="retro-button me-2 mb-2" onClick={handleClearAll}>
             CLEAR ALL
+          </button>
+          <button
+            className="retro-button me-2 mb-2"
+            onClick={handleClearConfig}
+          >
+            CLEAR CONFIG
+          </button>
+          <button className="retro-button mb-2" onClick={handleLoadToLaunchpad}>
+            LOAD INTO LAUNCHPAD
           </button>
         </div>
 
