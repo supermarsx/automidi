@@ -2,6 +2,7 @@ import { useMidi } from './useMidi';
 import LaunchpadCanvas from './LaunchpadCanvas';
 import MacroList from './MacroList';
 import './App.css';
+import SysexWorkbench from './SysexWorkbench';
 
 function App() {
   const { inputs, outputs } = useMidi();
@@ -13,6 +14,7 @@ function App() {
       </p>
       <LaunchpadCanvas />
       <MacroList />
+      <SysexWorkbench />
     </div>
   );
 }
