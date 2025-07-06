@@ -7,7 +7,8 @@ app.use(express.json());
 
 let currentDevices = { inputs: [], outputs: [] };
 
-WebMidi.enable().then(() => {
+// Enable WebMidi with sysex support so we can send Launchpad commands
+WebMidi.enable({ sysex: true }).then(() => {
   console.log('WebMidi enabled successfully');
   
   function listDevices() {
