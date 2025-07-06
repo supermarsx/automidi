@@ -1,17 +1,13 @@
-import { useMidi } from './useMidi';
 import LaunchpadCanvas from './LaunchpadCanvas';
 import MacroList from './MacroList';
-import './App.css';
 import SysexWorkbench from './SysexWorkbench';
+import MidiDevices from './MidiDevices';
+import './App.css';
 
 function App() {
-  const { inputs, outputs } = useMidi();
-
   return (
     <div className="App">
-      <p>
-        Inputs: {inputs.length} Outputs: {outputs.length}
-      </p>
+      <MidiDevices />
       <LaunchpadCanvas />
       <MacroList />
       <SysexWorkbench />
