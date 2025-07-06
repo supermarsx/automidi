@@ -40,17 +40,8 @@ body {
 }
 
 @keyframes glow {
-  from {
-    text-shadow:
-      2px 2px 0px #ff00ff,
-      0 0 10px #ffff00;
-  }
-  to {
-    text-shadow:
-      2px 2px 0px #ff00ff,
-      0 0 20px #ffff00,
-      0 0 30px #ffff00;
-  }
+  from { text-shadow: 2px 2px 0px #ff00ff, 0 0 10px #ffff00; }
+  to { text-shadow: 2px 2px 0px #ff00ff, 0 0 20px #ffff00, 0 0 30px #ffff00; }
 }
 
 .status-bar {
@@ -282,47 +273,14 @@ body {
   display: inline-block;
   padding: 4px 8px;
   font-family: 'VT323', monospace;
-}
-
-.ping-value.blue {
   background: #000040;
   color: #00ffff;
   border: 1px solid #00ffff;
 }
 
-.ping-value.green {
-  background: #004000;
-  color: #00ff00;
-  border: 1px solid #00ff00;
-}
-
-.ping-value.yellow {
-  background: #404000;
-  color: #ffff00;
-  border: 1px solid #ffff00;
-}
-
-.ping-value.orange {
-  background: #402000;
-  color: #ffb000;
-  border: 1px solid #ffb000;
-}
-
-.ping-value.red {
-  background: #400000;
-  color: #ff0000;
-  border: 1px solid #ff0000;
-}
-
 @keyframes blink {
-  0%,
-  50% {
-    opacity: 1;
-  }
-  51%,
-  100% {
-    opacity: 0.3;
-  }
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.3; }
 }
 
 .retro-select {
@@ -363,18 +321,17 @@ body {
   right: 0;
   bottom: 0;
   pointer-events: none;
-  background: linear-gradient(transparent 50%, rgba(0, 255, 0, 0.03) 50%);
+  background: linear-gradient(
+    transparent 50%,
+    rgba(0, 255, 0, 0.03) 50%
+  );
   background-size: 100% 4px;
   animation: scan 0.1s linear infinite;
 }
 
 @keyframes scan {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(4px);
-  }
+  0% { transform: translateY(0); }
+  100% { transform: translateY(4px); }
 }
 
 /* Floating Action Bar */
