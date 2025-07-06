@@ -36,14 +36,18 @@ interface MacrosSlice {
 
 interface PadsSlice {
   padColours: Record<string, string>;
+  padLabels: Record<string, string>;
   setPadColour: (id: string, colour: string) => void;
   setPadColours: (colours: Record<string, string>) => void;
+  setPadLabel: (id: string, label: string) => void;
+  setPadLabels: (labels: Record<string, string>) => void;
 }
 
 export interface PadConfig {
   id: string;
   name: string;
   padColours: Record<string, string>;
+  padLabels?: Record<string, string>;
 }
 
 interface ConfigsSlice {
@@ -66,6 +70,7 @@ interface SettingsSlice {
     pingYellow: number;
     pingOrange: number;
     pingEnabled: boolean;
+    clearBeforeLoad: boolean;
   };
   setHost: (h: string) => void;
   setPort: (p: number) => void;
@@ -78,6 +83,7 @@ interface SettingsSlice {
   setPingYellow: (ms: number) => void;
   setPingOrange: (ms: number) => void;
   setPingEnabled: (enabled: boolean) => void;
+  setClearBeforeLoad: (enabled: boolean) => void;
 }
 
 type StoreState = DevicesSlice &
@@ -112,9 +118,13 @@ export const useStore = create<StoreState>()(
       removeMacro: (id) =>
         set((state) => ({ macros: state.macros.filter((m) => m.id !== id) })),
       padColours: {},
+      padLabels: {},
       setPadColour: (id, colour) =>
         set((state) => ({ padColours: { ...state.padColours, [id]: colour } })),
       setPadColours: (colours) => set(() => ({ padColours: { ...colours } })),
+      setPadLabel: (id, label) =>
+        set((state) => ({ padLabels: { ...state.padLabels, [id]: label } })),
+      setPadLabels: (labels) => set(() => ({ padLabels: { ...labels } })),
       configs: [],
       addConfig: (c) => set((s) => ({ configs: [...s.configs, c] })),
       updateConfig: (c) =>
@@ -135,6 +145,7 @@ export const useStore = create<StoreState>()(
         pingYellow: 50,
         pingOrange: 250,
         pingEnabled: true,
+        clearBeforeLoad: false,
       },
       setHost: (h) =>
         set((state) => ({ settings: { ...state.settings, host: h } })),
@@ -199,6 +210,10 @@ export const useStore = create<StoreState>()(
             ...state.settings,
             pingEnabled: enabled,
           },
+        })),
+      setClearBeforeLoad: (enabled) =>
+        set((state) => ({
+          settings: { ...state.settings, clearBeforeLoad: enabled },
         })),
     }),
     {

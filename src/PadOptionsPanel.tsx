@@ -16,7 +16,9 @@ interface Props {
 
 export default function PadOptionsPanel({ pad, onClose }: Props) {
   const colour = useStore((s) => s.padColours[pad.id] || '#000000');
+  const label = useStore((s) => s.padLabels[pad.id] || '');
   const setPadColour = useStore((s) => s.setPadColour);
+  const setPadLabel = useStore((s) => s.setPadLabel);
   const { send, status } = useMidi();
 
   const clearPad = () => {
@@ -43,6 +45,10 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
     }
   };
 
+  const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPadLabel(pad.id, e.target.value);
+  };
+
   return (
     <div className="pad-options-panel" onClick={(e) => e.stopPropagation()}>
       <h4>PAD {pad.id}</h4>
@@ -67,6 +73,15 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
             </option>
           ))}
         </select>
+      </div>
+      <div className="mb-3">
+        <label className="form-label text-info">LABEL:</label>
+        <input
+          className="form-control retro-input"
+          value={label}
+          onChange={handleLabelChange}
+          placeholder="Label"
+        />
       </div>
       <button className="retro-button me-2" onClick={clearPad}>
         CLEAR

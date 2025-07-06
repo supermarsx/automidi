@@ -1,18 +1,26 @@
 import { useState } from 'react';
 import { useStore, type PadConfig } from './store';
 import { useToastStore } from './toastStore';
+import { useMidi } from './useMidi';
+import LAUNCHPAD_COLORS from './launchpadColors';
+import { enterProgrammerMode, clearAllLeds, noteOn, cc } from './midiMessages';
 
 export default function ConfigManager() {
   const configs = useStore((s) => s.configs);
   const addConfig = useStore((s) => s.addConfig);
   const removeConfig = useStore((s) => s.removeConfig);
   const setPadColours = useStore((s) => s.setPadColours);
+  const setPadLabels = useStore((s) => s.setPadLabels);
   const padColours = useStore((s) => s.padColours);
+  const padLabels = useStore((s) => s.padLabels);
+  const clearBeforeLoad = useStore((s) => s.settings.clearBeforeLoad);
   const updateConfig = useStore((s) => s.updateConfig);
   const addToast = useToastStore((s) => s.addToast);
+  const { send } = useMidi();
   const [editing, setEditing] = useState<PadConfig | null>(null);
   const [editName, setEditName] = useState('');
   const [name, setName] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<PadConfig | null>(null);
 
   const saveCurrent = () => {
     if (!name.trim()) return;
@@ -20,6 +28,7 @@ export default function ConfigManager() {
       id: Date.now().toString(),
       name: name.trim(),
       padColours,
+      padLabels,
     };
     addConfig(cfg);
     setName('');
@@ -28,6 +37,7 @@ export default function ConfigManager() {
 
   const loadConfig = (cfg: PadConfig) => {
     setPadColours(cfg.padColours);
+    if (cfg.padLabels) setPadLabels(cfg.padLabels);
     addToast('Config loaded', 'success');
   };
 
@@ -44,8 +54,38 @@ export default function ConfigManager() {
   };
 
   const saveToConfig = (cfg: PadConfig) => {
-    updateConfig({ ...cfg, padColours });
+    updateConfig({ ...cfg, padColours, padLabels });
     addToast('Config updated', 'success');
+  };
+
+  const loadToLaunchpad = (cfg: PadConfig) => {
+    let ok = true;
+    if (clearBeforeLoad) {
+      ok = send(clearAllLeds());
+    }
+    ok = send(enterProgrammerMode()) && ok;
+    for (const [id, hex] of Object.entries(cfg.padColours)) {
+      const color = LAUNCHPAD_COLORS.find((c) => c.color === hex)?.value;
+      if (color === undefined) continue;
+      if (id.startsWith('n-')) {
+        const note = Number(id.slice(2));
+        if (!Number.isNaN(note)) ok = send(noteOn(note, color)) && ok;
+      } else if (id.startsWith('cc-')) {
+        const num = Number(id.slice(3));
+        if (!Number.isNaN(num)) ok = send(cc(num, color)) && ok;
+      }
+    }
+    addToast(
+      ok ? 'Loaded to Launchpad' : 'Load failed',
+      ok ? 'success' : 'error',
+    );
+  };
+
+  const confirmDeleteConfig = () => {
+    if (!confirmDelete) return;
+    removeConfig(confirmDelete.id);
+    setConfirmDelete(null);
+    addToast('Config deleted', 'success');
   };
 
   const exportConfig = (cfg: PadConfig) => {
@@ -67,7 +107,11 @@ export default function ConfigManager() {
     reader.onload = (ev) => {
       try {
         const cfg = JSON.parse(ev.target?.result as string) as PadConfig;
-        addConfig({ ...cfg, id: Date.now().toString() });
+        addConfig({
+          ...cfg,
+          id: Date.now().toString(),
+          padLabels: cfg.padLabels || {},
+        });
         addToast('Config imported', 'success');
       } catch {
         addToast('Failed to import config', 'error');
@@ -118,16 +162,19 @@ export default function ConfigManager() {
             </button>
             <button
               className="retro-button btn-sm me-1"
+              onClick={() => loadToLaunchpad(cfg)}
+            >
+              LOAD LP
+            </button>
+            <button
+              className="retro-button btn-sm me-1"
               onClick={() => startEdit(cfg)}
             >
               EDIT
             </button>
             <button
               className="retro-button btn-sm"
-              onClick={() => {
-                removeConfig(cfg.id);
-                addToast('Config deleted', 'success');
-              }}
+              onClick={() => setConfirmDelete(cfg)}
             >
               DEL
             </button>
@@ -135,21 +182,69 @@ export default function ConfigManager() {
         </div>
       ))}
       {editing && (
-        <div className="retro-panel mt-3">
-          <h4 className="text-warning">EDIT CONFIG</h4>
-          <div className="mb-3">
-            <input
-              className="form-control retro-input"
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-            />
+        <div
+          className="modal d-block"
+          style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
+          onClick={() => setEditing(null)}
+        >
+          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content modal-retro">
+              <div className="modal-header">
+                <h5 className="modal-title">RENAME CONFIG</h5>
+              </div>
+              <div className="modal-body">
+                <input
+                  className="form-control retro-input"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                />
+              </div>
+              <div className="modal-footer">
+                <button className="retro-button me-2" onClick={saveEdit}>
+                  SAVE
+                </button>
+                <button
+                  className="retro-button"
+                  onClick={() => setEditing(null)}
+                >
+                  CANCEL
+                </button>
+              </div>
+            </div>
           </div>
-          <button className="retro-button me-2" onClick={saveEdit}>
-            SAVE
-          </button>
-          <button className="retro-button" onClick={() => setEditing(null)}>
-            CANCEL
-          </button>
+        </div>
+      )}
+
+      {confirmDelete && (
+        <div
+          className="modal d-block"
+          style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
+          onClick={() => setConfirmDelete(null)}
+        >
+          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content modal-retro">
+              <div className="modal-header">
+                <h5 className="modal-title">DELETE CONFIG</h5>
+              </div>
+              <div className="modal-body">
+                Are you sure you want to delete "{confirmDelete.name}"?
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="retro-button me-2"
+                  onClick={confirmDeleteConfig}
+                >
+                  DELETE
+                </button>
+                <button
+                  className="retro-button"
+                  onClick={() => setConfirmDelete(null)}
+                >
+                  CANCEL
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
