@@ -9,10 +9,40 @@ import FloatingActionBar from './FloatingActionBar';
 import ConfigManager from './ConfigManager';
 import ToastContainer from './ToastContainer';
 import { usePadActions } from './usePadActions';
+import { useStore } from './store';
+import { useEffect } from 'react';
+import { useMidi } from './useMidi';
+import { setSleepMode } from './midiMessages';
 import './App.css';
 
 function App() {
   usePadActions();
+  const autoSleep = useStore((s) => s.settings.autoSleep);
+  const theme = useStore((s) => s.settings.theme);
+  const { send } = useMidi();
+
+  useEffect(() => {
+    document.body.className = `theme-${theme}`;
+  }, [theme]);
+
+  useEffect(() => {
+    if (autoSleep <= 0) return;
+    let t: ReturnType<typeof setTimeout>;
+    const reset = () => {
+      clearTimeout(t);
+      t = setTimeout(() => {
+        send(setSleepMode(true));
+      }, autoSleep * 1000);
+    };
+    reset();
+    window.addEventListener('mousemove', reset);
+    window.addEventListener('keydown', reset);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener('mousemove', reset);
+      window.removeEventListener('keydown', reset);
+    };
+  }, [autoSleep, send]);
   return (
     <div className="App">
       <div className="scan-lines"></div>

@@ -1,13 +1,17 @@
 import { useCallback } from 'react';
 import { useStore } from './store';
+import { useToastStore } from './toastStore';
 
 export function useKeyMacroPlayer() {
   const macros = useStore((s) => s.macros);
+  const addToast = useToastStore.getState().addToast;
 
   const playMacro = useCallback(
     async (macroId: string) => {
       const macro = macros.find((m) => m.id === macroId);
       if (!macro) return;
+      console.log('Playing macro', macro);
+      addToast(`Playing: ${macro.name}`, 'success');
       try {
         if (macro.type === 'app') {
           await fetch('/run/app', {

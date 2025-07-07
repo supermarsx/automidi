@@ -143,136 +143,162 @@ export default function LaunchpadControls() {
     notify(send(bytes), 'Clock');
   };
 
+  const [showMore, setShowMore] = useState(false);
+
   return (
     <div className="retro-panel">
       <h3>◄ Launchpad Toolbox Matrix ►</h3>
+      <div className="mb-3">
+        <button className="retro-button me-2" onClick={handleClearAll}>
+          CLEAR ALL
+        </button>
+        <button className="retro-button me-2" onClick={handleClearConfig}>
+          CLEAR CONFIG
+        </button>
+        <button className="retro-button me-2" onClick={handleLoadToLaunchpad}>
+          LOAD INTO LAUNCHPAD
+        </button>
+        <button
+          className="retro-button btn-sm"
+          onClick={() => setShowMore(!showMore)}
+        >
+          {showMore ? 'LESS' : 'MORE'}
+        </button>
+      </div>
+      {showMore && (
+        <div className="row mb-3">
+          <div className="col-md-4">
+            <h5 className="text-info">MODE CONTROL:</h5>
+            <button
+              className="retro-button me-2 mb-2"
+              onClick={handleEnterProgrammer}
+            >
+              PROGRAMMER MODE
+            </button>
+            <button
+              className="retro-button me-2 mb-2"
+              onClick={handleExitProgrammer}
+            >
+              LIVE MODE
+            </button>
+            <div className="mb-2">
+              <label className="form-label text-info">LAYOUT:</label>
+              <div className="d-flex align-items-center">
+                <select
+                  className="form-select retro-select me-2"
+                  value={layout}
+                  onChange={(e) => setLayoutValue(Number(e.target.value))}
+                  style={{ width: 'auto' }}
+                >
+                  <option value={0}>Session</option>
+                  <option value={1}>Note</option>
+                  <option value={2}>Custom</option>
+                  <option value={3}>DAW Faders</option>
+                  <option value={4}>Programmer</option>
+                </select>
+                <button
+                  className="retro-button btn-sm"
+                  onClick={handleSetLayout}
+                >
+                  SET
+                </button>
+              </div>
+            </div>
+            <div className="mb-2">
+              <label className="form-label text-info">DAW BANK:</label>
+              <div className="d-flex align-items-center">
+                <input
+                  type="number"
+                  className="form-control retro-input me-2"
+                  style={{ width: '80px' }}
+                  min="0"
+                  max="7"
+                  value={dawBank}
+                  onChange={(e) => setDawBank(Number(e.target.value))}
+                />
+                <button className="retro-button btn-sm" onClick={handleSetDAW}>
+                  SET
+                </button>
+              </div>
+            </div>
+          </div>
 
-      <div className="row mb-3">
-        <div className="col-md-4">
-          <h5 className="text-info">MODE CONTROL:</h5>
-          <button
-            className="retro-button me-2 mb-2"
-            onClick={handleEnterProgrammer}
-          >
-            PROGRAMMER MODE
-          </button>
-          <button
-            className="retro-button me-2 mb-2"
-            onClick={handleExitProgrammer}
-          >
-            LIVE MODE
-          </button>
-          <div className="mb-2">
-            <label className="form-label text-info">LAYOUT:</label>
-            <div className="d-flex align-items-center">
-              <select
-                className="form-select retro-select me-2"
-                value={layout}
-                onChange={(e) => setLayoutValue(Number(e.target.value))}
-                style={{ width: 'auto' }}
-              >
-                <option value={0}>Session</option>
-                <option value={1}>Note</option>
-                <option value={2}>Custom</option>
-                <option value={3}>DAW Faders</option>
-                <option value={4}>Programmer</option>
-              </select>
-              <button className="retro-button btn-sm" onClick={handleSetLayout}>
-                SET
-              </button>
+          <div className="col-md-4">
+            <h5 className="text-info">LED CONTROL:</h5>
+            <div className="mb-3">
+              <label className="form-label text-info">BRIGHTNESS:</label>
+              <div className="d-flex align-items-center">
+                <input
+                  type="range"
+                  className="form-range me-2"
+                  min="0"
+                  max="127"
+                  value={brightness}
+                  onChange={(e) => setBrightnessValue(Number(e.target.value))}
+                />
+                <span className="text-info me-2">{brightness}</span>
+                <button
+                  className="retro-button btn-sm"
+                  onClick={handleSetBrightness}
+                >
+                  SET
+                </button>
+              </div>
             </div>
-          </div>
-          <div className="mb-2">
-            <label className="form-label text-info">DAW BANK:</label>
-            <div className="d-flex align-items-center">
+            <div className="mb-3">
+              <label className="form-check-label text-info me-2">
+                SLEEP MODE:
+              </label>
               <input
-                type="number"
-                className="form-control retro-input me-2"
-                style={{ width: '80px' }}
-                min="0"
-                max="7"
-                value={dawBank}
-                onChange={(e) => setDawBank(Number(e.target.value))}
+                type="checkbox"
+                className="form-check-input me-2"
+                checked={sleepEnabled}
+                onChange={(e) => setSleepEnabled(e.target.checked)}
               />
-              <button className="retro-button btn-sm" onClick={handleSetDAW}>
-                SET
+              <button className="retro-button btn-sm" onClick={handleSetSleep}>
+                APPLY
               </button>
             </div>
-          </div>
-        </div>
-
-        <div className="col-md-4">
-          <h5 className="text-info">LED CONTROL:</h5>
-          <div className="mb-3">
-            <label className="form-label text-info">BRIGHTNESS:</label>
-            <div className="d-flex align-items-center">
-              <input
-                type="range"
-                className="form-range me-2"
-                min="0"
-                max="127"
-                value={brightness}
-                onChange={(e) => setBrightnessValue(Number(e.target.value))}
-              />
-              <span className="text-info me-2">{brightness}</span>
-              <button
-                className="retro-button btn-sm"
-                onClick={handleSetBrightness}
-              >
-                SET
-              </button>
-            </div>
-          </div>
-          <div className="mb-3">
-            <label className="form-check-label text-info me-2">
-              SLEEP MODE:
-            </label>
-            <input
-              type="checkbox"
-              className="form-check-input me-2"
-              checked={sleepEnabled}
-              onChange={(e) => setSleepEnabled(e.target.checked)}
-            />
-            <button className="retro-button btn-sm" onClick={handleSetSleep}>
-              APPLY
+            <button className="retro-button me-2 mb-2" onClick={handleClearAll}>
+              CLEAR ALL
+            </button>
+            <button
+              className="retro-button me-2 mb-2"
+              onClick={handleClearConfig}
+            >
+              CLEAR CONFIG
+            </button>
+            <button
+              className="retro-button mb-2"
+              onClick={handleLoadToLaunchpad}
+            >
+              LOAD INTO LAUNCHPAD
             </button>
           </div>
-          <button className="retro-button me-2 mb-2" onClick={handleClearAll}>
-            CLEAR ALL
-          </button>
-          <button
-            className="retro-button me-2 mb-2"
-            onClick={handleClearConfig}
-          >
-            CLEAR CONFIG
-          </button>
-          <button className="retro-button mb-2" onClick={handleLoadToLaunchpad}>
-            LOAD INTO LAUNCHPAD
-          </button>
-        </div>
 
-        <div className="col-md-4">
-          <h5 className="text-info">TEXT DISPLAY:</h5>
-          <div className="mb-3">
-            <label className="form-label text-info">MESSAGE:</label>
-            <div className="d-flex">
-              <input
-                type="text"
-                className="form-control retro-input me-2"
-                value={scrollTextValue}
-                onChange={(e) => setScrollTextValue(e.target.value)}
-                maxLength={32}
-              />
-              <button
-                className="retro-button btn-sm"
-                onClick={handleScrollText}
-              >
-                SCROLL
-              </button>
+          <div className="col-md-4">
+            <h5 className="text-info">TEXT DISPLAY:</h5>
+            <div className="mb-3">
+              <label className="form-label text-info">MESSAGE:</label>
+              <div className="d-flex">
+                <input
+                  type="text"
+                  className="form-control retro-input me-2"
+                  value={scrollTextValue}
+                  onChange={(e) => setScrollTextValue(e.target.value)}
+                  maxLength={32}
+                />
+                <button
+                  className="retro-button btn-sm"
+                  onClick={handleScrollText}
+                >
+                  SCROLL
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="row">
         <div className="col-12">

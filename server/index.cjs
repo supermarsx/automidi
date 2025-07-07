@@ -2,7 +2,7 @@ const express = require('express');
 const { WebSocketServer } = require('ws');
 const { WebMidi } = require('webmidi');
 const keySender = require('node-key-sender');
-const notifier = require('node-notifier');
+const notifier = require('toasted-notifier');
 const cors = require('cors');
 const { exec } = require('child_process');
 
@@ -63,6 +63,7 @@ WebMidi.enable({ sysex: true })
 
     app.post('/notify', (req, res) => {
       const { title = 'Automidi', message } = req.body || {};
+      console.log('Notify request:', title, message);
       if (!message) {
         res.status(400).json({ error: 'message is required' });
         return;
@@ -75,6 +76,7 @@ WebMidi.enable({ sysex: true })
 
     app.post('/keys/type', async (req, res) => {
       const { sequence = [], interval = 50 } = req.body || {};
+      console.log('Keys type request:', sequence, interval);
       if (!Array.isArray(sequence)) {
         res.status(400).json({ error: 'sequence must be an array of keys' });
         return;
@@ -95,6 +97,7 @@ WebMidi.enable({ sysex: true })
 
     app.post('/run/app', (req, res) => {
       const { app: appPath } = req.body || {};
+      console.log('Run app request:', appPath);
       if (!appPath) {
         res.status(400).json({ error: 'app path required' });
         return;
@@ -111,6 +114,7 @@ WebMidi.enable({ sysex: true })
 
     app.post('/run/shell', (req, res) => {
       const { cmd } = req.body || {};
+      console.log('Run shell request:', cmd);
       if (!cmd) {
         res.status(400).json({ error: 'cmd required' });
         return;

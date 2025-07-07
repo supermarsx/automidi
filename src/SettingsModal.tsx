@@ -21,6 +21,8 @@ export default function SettingsModal({ onClose }: Props) {
   const pingEnabled = useStore((s) => s.settings.pingEnabled);
   const clearBeforeLoad = useStore((s) => s.settings.clearBeforeLoad);
   const sysexColorMode = useStore((s) => s.settings.sysexColorMode);
+  const autoSleep = useStore((s) => s.settings.autoSleep);
+  const theme = useStore((s) => s.settings.theme);
   const clock = useStore((s) => s.settings.clock ?? [0xf8]);
   const setHost = useStore((s) => s.setHost);
   const setPort = useStore((s) => s.setPort);
@@ -35,6 +37,8 @@ export default function SettingsModal({ onClose }: Props) {
   const setPingEnabled = useStore((s) => s.setPingEnabled);
   const setClearBeforeLoad = useStore((s) => s.setClearBeforeLoad);
   const setSysexColorMode = useStore((s) => s.setSysexColorMode);
+  const setAutoSleep = useStore((s) => s.setAutoSleep);
+  const setTheme = useStore((s) => s.setTheme);
   const setClock = useStore((s) => s.setClock);
   const addToast = useToastStore((s) => s.addToast);
 
@@ -51,6 +55,8 @@ export default function SettingsModal({ onClose }: Props) {
   const [pe, setPe] = useState(pingEnabled);
   const [cbl, setCbl] = useState(clearBeforeLoad);
   const [scm, setScm] = useState(sysexColorMode);
+  const [asleep, setAsleep] = useState(autoSleep);
+  const [thm, setThm] = useState(theme);
   const [clk, setClk] = useState(clock.join(' '));
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -68,6 +74,8 @@ export default function SettingsModal({ onClose }: Props) {
     setPingOrange(po);
     setClearBeforeLoad(cbl);
     setSysexColorMode(scm);
+    setAutoSleep(asleep);
+    setTheme(thm);
     setClock(
       clk
         .split(/\s+/)
@@ -111,6 +119,8 @@ export default function SettingsModal({ onClose }: Props) {
         setPingOrange(cfg.pingOrange ?? po);
         setClearBeforeLoad(cfg.clearBeforeLoad ?? cbl);
         setSysexColorMode(cfg.sysexColorMode ?? scm);
+        setAutoSleep(cfg.autoSleep ?? asleep);
+        setTheme(cfg.theme ?? thm);
         setClock(Array.isArray(cfg.clock) ? cfg.clock : clock);
         setH(cfg.host ?? h);
         setP(cfg.port ?? p);
@@ -125,6 +135,8 @@ export default function SettingsModal({ onClose }: Props) {
         setPe(cfg.pingEnabled ?? pe);
         setCbl(cfg.clearBeforeLoad ?? cbl);
         setScm(cfg.sysexColorMode ?? scm);
+        setAsleep(cfg.autoSleep ?? asleep);
+        setThm(cfg.theme ?? thm);
         setClk(
           (Array.isArray(cfg.clock) ? cfg.clock : clock)
             .map((n: number) => n.toString())
@@ -306,6 +318,31 @@ export default function SettingsModal({ onClose }: Props) {
               >
                 SYSEX COLOR MODE
               </label>
+            </div>
+            <div className="mb-3">
+              <label className="form-label text-info">AUTO SLEEP (SEC):</label>
+              <input
+                type="number"
+                className="form-control retro-input"
+                value={asleep}
+                onChange={(e) => setAsleep(Number(e.target.value))}
+                min="0"
+              />
+              <small className="text-warning">0 disables auto sleep</small>
+            </div>
+            <div className="mb-3">
+              <label className="form-label text-info">THEME:</label>
+              <select
+                className="form-select retro-select"
+                value={thm}
+                onChange={(e) =>
+                  setThm(e.target.value as 'default' | 'dark' | 'light')
+                }
+              >
+                <option value="default">Default</option>
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+              </select>
             </div>
             <div className="mb-3">
               <label className="form-label text-info">CLOCK MESSAGE:</label>

@@ -61,110 +61,122 @@ export default function MacroList() {
         <div>
           {macros.map((m) => (
             <div key={m.id} className="macro-list-item">
-              {editingId === m.id ? (
-                <div className="w-100">
-                  <div className="d-flex flex-wrap mb-1">
-                    <input
-                      className="form-control retro-input me-2 mb-1"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                    <select
-                      className="form-control retro-input me-2 mb-1"
-                      value={type}
-                      onChange={(e) =>
-                        setType(e.target.value as 'keys' | 'app' | 'shell')
-                      }
-                    >
-                      <option value="keys">Keys</option>
-                      <option value="app">Application</option>
-                      <option value="shell">Shell</option>
-                    </select>
-                    {type === 'keys' ? (
-                      <>
-                        <input
-                          className="form-control retro-input me-2 mb-1"
-                          value={sequence}
-                          onChange={(e) => setSequence(e.target.value)}
-                        />
-                        <input
-                          type="number"
-                          className="form-control retro-input me-2 mb-1"
-                          style={{ width: '80px' }}
-                          value={interval}
-                          onChange={(e) => setInterval(Number(e.target.value))}
-                        />
-                      </>
-                    ) : (
-                      <input
-                        className="form-control retro-input me-2 mb-1"
-                        value={command}
-                        onChange={(e) => setCommand(e.target.value)}
-                      />
-                    )}
-                    <select
-                      className="form-control retro-input me-2 mb-1"
-                      value={nextId}
-                      onChange={(e) => setNextId(e.target.value)}
-                    >
-                      <option value="">-- next macro --</option>
-                      {macros.map((o) => (
-                        <option key={o.id} value={o.id}>
-                          {o.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <button
-                      className="retro-button btn-sm me-1"
-                      onClick={saveEdit}
-                    >
-                      SAVE
-                    </button>
-                    <button
-                      className="retro-button btn-sm"
-                      onClick={cancelEdit}
-                    >
-                      CANCEL
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <span className="macro-name">{m.name}</span>
-                  <div>
-                    <button
-                      className="retro-button btn-sm me-1"
-                      onClick={() => playMacro(m.id)}
-                    >
-                      PLAY
-                    </button>
-                    <span className="ms-2 text-info">
-                      {m.type === 'keys'
-                        ? `${m.sequence?.join(' ')} (${m.interval}ms)`
-                        : m.command}
-                    </span>
-                    <button
-                      className="retro-button btn-sm ms-1"
-                      onClick={() => startEdit(m.id)}
-                    >
-                      EDIT
-                    </button>
-                    <button
-                      className="retro-button btn-sm ms-1"
-                      onClick={() => {
-                        removeMacro(m.id);
-                        addToast('Macro deleted', 'success');
-                      }}
-                    >
-                      DEL
-                    </button>
-                  </div>
-                </>
-              )}
+              <span className="macro-name">
+                {m.name}
+                <small className="ms-1 text-info">
+                  (
+                  {(() => {
+                    const txt =
+                      m.type === 'keys'
+                        ? `${(m.sequence || []).join(' ')} (${m.interval ?? 0}ms)`
+                        : m.command || '';
+                    return txt.length > 20 ? `${txt.slice(0, 20)}…` : txt;
+                  })()}
+                  )
+                </small>
+              </span>
+              <div>
+                <button
+                  className="retro-button btn-sm me-1"
+                  onClick={() => playMacro(m.id)}
+                >
+                  PLAY
+                </button>
+                <button
+                  className="retro-button btn-sm me-1"
+                  onClick={() => startEdit(m.id)}
+                >
+                  PREVIEW
+                </button>
+                <button
+                  className="retro-button btn-sm me-1"
+                  onClick={() => {
+                    removeMacro(m.id);
+                    addToast('Macro deleted', 'success');
+                  }}
+                >
+                  DEL
+                </button>
+              </div>
             </div>
           ))}
+        </div>
+      )}
+      {editingId && (
+        <div
+          className="modal d-block"
+          style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
+          onClick={cancelEdit}
+        >
+          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content modal-retro">
+              <div className="modal-header">
+                <h5 className="modal-title">EDIT MACRO</h5>
+              </div>
+              <div className="modal-body">
+                <div className="d-flex flex-wrap mb-2">
+                  <input
+                    className="form-control retro-input me-2 mb-1"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                  <select
+                    className="form-control retro-input me-2 mb-1"
+                    value={type}
+                    onChange={(e) =>
+                      setType(e.target.value as 'keys' | 'app' | 'shell')
+                    }
+                  >
+                    <option value="keys">Keys</option>
+                    <option value="app">Application</option>
+                    <option value="shell">Shell</option>
+                  </select>
+                  {type === 'keys' ? (
+                    <>
+                      <input
+                        className="form-control retro-input me-2 mb-1"
+                        value={sequence}
+                        onChange={(e) => setSequence(e.target.value)}
+                      />
+                      <input
+                        type="number"
+                        className="form-control retro-input me-2 mb-1"
+                        style={{ width: '80px' }}
+                        value={interval}
+                        onChange={(e) => setInterval(Number(e.target.value))}
+                      />
+                    </>
+                  ) : (
+                    <input
+                      className="form-control retro-input me-2 mb-1"
+                      value={command}
+                      onChange={(e) => setCommand(e.target.value)}
+                    />
+                  )}
+                  <select
+                    className="form-control retro-input me-2 mb-1"
+                    value={nextId}
+                    onChange={(e) => setNextId(e.target.value)}
+                  >
+                    <option value="">-- next macro --</option>
+                    {macros.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button className="retro-button me-2" onClick={saveEdit}>
+                  SAVE
+                </button>
+                <button className="retro-button" onClick={cancelEdit}>
+                  CANCEL
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
