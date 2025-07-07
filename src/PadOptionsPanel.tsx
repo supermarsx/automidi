@@ -15,7 +15,8 @@ interface Props {
 }
 
 export default function PadOptionsPanel({ pad, onClose }: Props) {
-  const colours = useStore((s) => s.padColours[pad.id] || {});
+  const storeColours = useStore((s) => s.padColours[pad.id]);
+  const colours = storeColours || {};
   const label = useStore((s) => s.padLabels[pad.id] || '');
   const channel = useStore((s) => s.padChannels[pad.id] || 1);
   const setPadColour = useStore((s) => s.setPadColour);
