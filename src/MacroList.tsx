@@ -1,22 +1,12 @@
-import { useState } from 'react';
-import MacroEditor from './MacroEditor';
-import { useMacroPlayer } from './useMacroPlayer';
-import { useStore, type Macro } from './store';
+import { useKeyMacroPlayer } from './useKeyMacroPlayer';
+import { useStore } from './store';
 import { useToastStore } from './toastStore';
 
 export default function MacroList() {
   const macros = useStore((s) => s.macros);
   const removeMacro = useStore((s) => s.removeMacro);
-  const updateMacro = useStore((s) => s.updateMacro);
   const addToast = useToastStore((s) => s.addToast);
-  const { playMacro } = useMacroPlayer();
-  const [editing, setEditing] = useState<Macro | null>(null);
-
-  const handleSave = (macro: Macro) => {
-    updateMacro(macro);
-    setEditing(null);
-    addToast('Macro saved', 'success');
-  };
+  const { playMacro } = useKeyMacroPlayer();
 
   return (
     <div className="retro-panel">
@@ -35,18 +25,9 @@ export default function MacroList() {
                 >
                   PLAY
                 </button>
-                <button
-                  className="retro-button btn-sm me-1"
-                  onClick={() => playMacro(m.id, { loop: true })}
-                >
-                  LOOP
-                </button>
-                <button
-                  className="retro-button btn-sm me-1"
-                  onClick={() => setEditing(m)}
-                >
-                  EDIT
-                </button>
+                <span className="ms-2 text-info">
+                  {m.sequence.join(' ')} ({m.interval}ms)
+                </span>
                 <button
                   className="retro-button btn-sm"
                   onClick={() => {
@@ -60,13 +41,6 @@ export default function MacroList() {
             </div>
           ))}
         </div>
-      )}
-      {editing && (
-        <MacroEditor
-          macro={editing}
-          onSave={handleSave}
-          onCancel={() => setEditing(null)}
-        />
       )}
     </div>
   );

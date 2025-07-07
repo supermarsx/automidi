@@ -1,6 +1,7 @@
 import LaunchpadCanvas from './LaunchpadCanvas';
 import LaunchpadControls from './LaunchpadControls';
 import MacroList from './MacroList';
+import MacroBuilder from './MacroBuilder';
 import SysexWorkbench from './SysexWorkbench';
 import MidiDevices from './MidiDevices';
 import ActionBar from './ActionBar';
@@ -46,6 +47,11 @@ function App() {
             </div>
             <div className="col-md-6">
               <SysexWorkbench />
+            </div>
+          </div>
+          <div className="row">
+            <div className="col-12">
+              <MacroBuilder />
             </div>
           </div>
         </div>

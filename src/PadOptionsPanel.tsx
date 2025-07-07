@@ -231,6 +231,23 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
           ))}
         </select>
       </div>
+      <div className="form-check mb-3">
+        <input
+          className="form-check-input"
+          type="checkbox"
+          id={`confirm-${pad.id}`}
+          checked={action.confirm || false}
+          onChange={(e) =>
+            setPadAction(pad.id, { ...action, confirm: e.target.checked })
+          }
+        />
+        <label
+          className="form-check-label text-info"
+          htmlFor={`confirm-${pad.id}`}
+        >
+          CONFIRM BEFORE PLAY
+        </label>
+      </div>
       <button className="retro-button me-2" onClick={clearPad}>
         CLEAR
       </button>

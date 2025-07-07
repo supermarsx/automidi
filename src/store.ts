@@ -7,15 +7,11 @@ import {
   del as idbDel,
 } from 'idb-keyval';
 
-export type MidiMsg = {
-  ts: number;
-  bytes: number[];
-};
-
 export interface Macro {
   id: string;
   name: string;
-  messages: MidiMsg[];
+  sequence: string[];
+  interval: number;
 }
 
 interface DevicesSlice {
@@ -39,6 +35,7 @@ export type PadColourMap = Record<number, string>;
 export interface PadActions {
   noteOn?: string;
   noteOff?: string;
+  confirm?: boolean;
 }
 
 interface PadsSlice {

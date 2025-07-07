@@ -1,12 +1,41 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useMidi, type MidiMessage } from './useMidi';
 import { useStore } from './store';
-import { useMacroPlayer } from './useMacroPlayer';
+import { useKeyMacroPlayer } from './useKeyMacroPlayer';
+import { notify } from './notify';
 
 export function usePadActions() {
   const padActions = useStore((s) => s.padActions);
+  const padChannels = useStore((s) => s.padChannels);
+  const setPadChannel = useStore((s) => s.setPadChannel);
   const { listen } = useMidi();
-  const { playMacro } = useMacroPlayer();
+  const { playMacro } = useKeyMacroPlayer();
+  const confirmRef = useRef<
+    Record<string, { t: ReturnType<typeof setTimeout>; prev: number }>
+  >({});
+
+  const handleMacro = (macroId: string, id: string, confirm?: boolean) => {
+    if (!confirm) {
+      playMacro(macroId);
+      return;
+    }
+    const entry = confirmRef.current[id];
+    if (!entry) {
+      const prev = padChannels[id] || 1;
+      setPadChannel(id, 3);
+      notify('Press pad again to confirm');
+      const t = setTimeout(() => {
+        setPadChannel(id, prev);
+        delete confirmRef.current[id];
+      }, 2000);
+      confirmRef.current[id] = { t, prev };
+    } else {
+      clearTimeout(entry.t);
+      setPadChannel(id, entry.prev);
+      delete confirmRef.current[id];
+      playMacro(macroId);
+    }
+  };
 
   useEffect(() => {
     const handler = (msg: MidiMessage) => {
@@ -32,13 +61,13 @@ export function usePadActions() {
       const action = padActions[padId];
       if (!action) return;
       if (isOn && action.noteOn) {
-        playMacro(action.noteOn);
+        handleMacro(action.noteOn, padId, action.confirm);
       } else if (!isOn && action.noteOff) {
-        playMacro(action.noteOff);
+        handleMacro(action.noteOff, padId, action.confirm);
       }
     };
 
     const unlisten = listen(handler);
     return () => unlisten();
-  }, [listen, playMacro, padActions]);
+  }, [listen, padActions, handleMacro]);
 }
