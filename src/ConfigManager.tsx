@@ -20,7 +20,9 @@ export default function ConfigManager() {
   const padColours = useStore((s) => s.padColours);
   const padLabels = useStore((s) => s.padLabels);
   const padChannels = useStore((s) => s.padChannels);
+  const padActions = useStore((s) => s.padActions);
   const setPadChannels = useStore((s) => s.setPadChannels);
+  const setPadActions = useStore((s) => s.setPadActions);
   const clearBeforeLoad = useStore((s) => s.settings.clearBeforeLoad);
   const sysexColorMode = useStore((s) => s.settings.sysexColorMode);
   const updateConfig = useStore((s) => s.updateConfig);
@@ -39,6 +41,7 @@ export default function ConfigManager() {
       padColours,
       padLabels,
       padChannels,
+      padActions,
     };
     addConfig(cfg);
     setName('');
@@ -49,6 +52,7 @@ export default function ConfigManager() {
     setPadColours(cfg.padColours);
     if (cfg.padLabels) setPadLabels(cfg.padLabels);
     if (cfg.padChannels) setPadChannels(cfg.padChannels);
+    if (cfg.padActions) setPadActions(cfg.padActions);
     addToast('Config loaded', 'success');
   };
 
@@ -65,7 +69,7 @@ export default function ConfigManager() {
   };
 
   const saveToConfig = (cfg: PadConfig) => {
-    updateConfig({ ...cfg, padColours, padLabels, padChannels });
+    updateConfig({ ...cfg, padColours, padLabels, padChannels, padActions });
     addToast('Config updated', 'success');
   };
 
@@ -134,6 +138,7 @@ export default function ConfigManager() {
           id: Date.now().toString(),
           padLabels: cfg.padLabels || {},
           padChannels: cfg.padChannels || {},
+          padActions: cfg.padActions || {},
         });
         addToast('Config imported', 'success');
       } catch {

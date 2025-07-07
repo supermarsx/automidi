@@ -7,9 +7,11 @@ import ActionBar from './ActionBar';
 import FloatingActionBar from './FloatingActionBar';
 import ConfigManager from './ConfigManager';
 import ToastContainer from './ToastContainer';
+import { usePadActions } from './usePadActions';
 import './App.css';
 
 function App() {
+  usePadActions();
   return (
     <div className="App">
       <div className="scan-lines"></div>
