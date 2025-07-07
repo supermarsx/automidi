@@ -1,28 +1,47 @@
 import { useState } from 'react';
-import { useStore } from './store';
+import { useStore, type Macro } from './store';
 import { useToastStore } from './toastStore';
 
 export default function MacroBuilder() {
   const addMacro = useStore((s) => s.addMacro);
+  const macros = useStore((s) => s.macros);
   const addToast = useToastStore((s) => s.addToast);
   const [name, setName] = useState('');
   const [sequence, setSequence] = useState('');
   const [interval, setInterval] = useState(50);
+  const [type, setType] = useState<'keys' | 'app' | 'shell'>('keys');
+  const [command, setCommand] = useState('');
+  const [nextId, setNextId] = useState('');
 
-  const clear = () => setSequence('');
+  const clear = () => {
+    setSequence('');
+    setCommand('');
+    setType('keys');
+    setInterval(50);
+    setNextId('');
+  };
 
   const save = () => {
-    const keys = sequence
-      .split(/\s+/)
-      .map((k) => k.trim())
-      .filter(Boolean);
-    if (!name.trim() || keys.length === 0) return;
-    addMacro({
+    const macro: Macro = {
       id: Date.now().toString(),
       name: name.trim(),
-      sequence: keys,
-      interval: Math.max(0, interval),
-    });
+      type,
+    };
+    if (nextId) macro.nextId = nextId;
+    if (type === 'keys') {
+      const keys = sequence
+        .split(/\s+/)
+        .map((k) => k.trim())
+        .filter(Boolean);
+      if (keys.length === 0) return;
+      macro.sequence = keys;
+      macro.interval = Math.max(0, interval);
+    } else {
+      if (!command.trim()) return;
+      macro.command = command.trim();
+    }
+    if (!macro.name) return;
+    addMacro(macro);
     addToast('Macro saved', 'success');
     setName('');
     clear();
@@ -31,31 +50,61 @@ export default function MacroBuilder() {
   return (
     <div className="retro-panel mt-3">
       <h3>◄ Macro Builder ►</h3>
-      <div className="mb-2 d-flex">
+      <div className="mb-2 d-flex flex-wrap">
         <input
-          className="form-control retro-input me-2"
+          className="form-control retro-input me-2 mb-1"
           placeholder="Macro name"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <input
-          className="form-control retro-input me-2"
-          placeholder="Key sequence (space separated)"
-          value={sequence}
-          onChange={(e) => setSequence(e.target.value)}
-        />
-        <input
-          type="number"
-          className="form-control retro-input me-2"
-          style={{ width: '80px' }}
-          value={interval}
-          onChange={(e) => setInterval(Number(e.target.value))}
-        />
-        <button
-          className="retro-button btn-sm"
-          onClick={clear}
-          disabled={!sequence.trim()}
+        <select
+          className="form-control retro-input me-2 mb-1"
+          value={type}
+          onChange={(e) =>
+            setType(e.target.value as 'keys' | 'app' | 'shell')
+          }
         >
+          <option value="keys">Keys</option>
+          <option value="app">Application</option>
+          <option value="shell">Shell</option>
+        </select>
+        {type === 'keys' ? (
+          <>
+            <input
+              className="form-control retro-input me-2 mb-1"
+              placeholder="Key sequence"
+              value={sequence}
+              onChange={(e) => setSequence(e.target.value)}
+            />
+            <input
+              type="number"
+              className="form-control retro-input me-2 mb-1"
+              style={{ width: '80px' }}
+              value={interval}
+              onChange={(e) => setInterval(Number(e.target.value))}
+            />
+          </>
+        ) : (
+          <input
+            className="form-control retro-input me-2 mb-1"
+            placeholder={type === 'app' ? 'App path' : 'Shell command'}
+            value={command}
+            onChange={(e) => setCommand(e.target.value)}
+          />
+        )}
+        <select
+          className="form-control retro-input me-2 mb-1"
+          value={nextId}
+          onChange={(e) => setNextId(e.target.value)}
+        >
+          <option value="">-- next macro --</option>
+          {macros.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name}
+            </option>
+          ))}
+        </select>
+        <button className="retro-button btn-sm mb-1" onClick={clear}>
           CLEAR
         </button>
       </div>
@@ -63,13 +112,18 @@ export default function MacroBuilder() {
         <button
           className="retro-button btn-sm"
           onClick={save}
-          disabled={!name.trim() || !sequence.trim()}
+          disabled={
+            !name.trim() ||
+            (type === 'keys' ? !sequence.trim() : !command.trim())
+          }
         >
           SAVE
         </button>
-        <span className="ms-2 text-info">
-          {sequence.split(/\s+/).filter(Boolean).length} keys
-        </span>
+        {type === 'keys' && (
+          <span className="ms-2 text-info">
+            {sequence.split(/\s+/).filter(Boolean).length} keys
+          </span>
+        )}
       </div>
     </div>
   );

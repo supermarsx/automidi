@@ -44,14 +44,10 @@ function App() {
           <div className="row">
             <div className="col-md-6">
               <MacroList />
+              <MacroBuilder />
             </div>
             <div className="col-md-6">
               <SysexWorkbench />
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-12">
-              <MacroBuilder />
             </div>
           </div>
         </div>
