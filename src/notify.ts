@@ -1,22 +1,18 @@
 import { useToastStore } from './toastStore';
+import { useStore } from './store';
 
-export function notify(message: string) {
+export async function notify(message: string) {
   const addToast = useToastStore.getState().addToast;
-  if (typeof window !== 'undefined' && 'Notification' in window) {
-    if (Notification.permission === 'granted') {
-      new Notification(message);
-    } else if (Notification.permission === 'default') {
-      Notification.requestPermission().then((perm) => {
-        if (perm === 'granted') {
-          new Notification(message);
-        } else {
-          addToast(message, 'success');
-        }
-      });
-    } else {
-      addToast(message, 'success');
-    }
-  } else {
+  const { host, port } = useStore.getState().settings;
+  try {
+    const res = await fetch(`http://${host}:${port}/notify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message }),
+    });
+    if (!res.ok) throw new Error('Request failed');
+  } catch (err) {
+    console.error('OS notification failed:', err);
     addToast(message, 'success');
   }
 }

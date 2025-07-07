@@ -2,9 +2,12 @@ const express = require('express');
 const { WebSocketServer } = require('ws');
 const { WebMidi } = require('webmidi');
 const keySender = require('node-key-sender');
+const notifier = require('node-notifier');
+const cors = require('cors');
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 let currentDevices = { inputs: [], outputs: [] };
 
@@ -55,6 +58,18 @@ WebMidi.enable({ sysex: true })
         console.error('MIDI send error:', err);
         res.status(500).json({ error: err.message });
       }
+    });
+
+    app.post('/notify', (req, res) => {
+      const { title = 'Automidi', message } = req.body || {};
+      if (!message) {
+        res.status(400).json({ error: 'message is required' });
+        return;
+      }
+      notifier.notify({ title, message }, (err) => {
+        if (err) console.error('Notification error:', err);
+      });
+      res.json({ ok: true });
     });
 
     app.post('/keys/type', async (req, res) => {
