@@ -1,6 +1,6 @@
-# automidi
+![image](https://github.com/user-attachments/assets/010b9f3d-9d22-4e4c-b033-274f3ef24bd2)
 
-![image](https://github.com/user-attachments/assets/357e1fc6-8640-4ead-b2c0-3a472c8f1599)
+# automidi
 
 **automidi** is a Vite + React application that provides a simple interface for
 controlling MIDI devices. When a Launchpad X is detected the app automatically
