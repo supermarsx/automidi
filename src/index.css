@@ -228,6 +228,10 @@ body {
   color: #000080 !important;
 }
 
+.confirm-armed {
+  animation: pulse-shadow 1s infinite;
+}
+
 .retro-input {
   background: #000020 !important;
   border: 1px solid #00ff00 !important;

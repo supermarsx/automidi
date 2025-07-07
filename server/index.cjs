@@ -1,6 +1,7 @@
 const express = require('express');
 const { WebSocketServer } = require('ws');
 const { WebMidi } = require('webmidi');
+const keySender = require('node-key-sender');
 
 const app = express();
 app.use(express.json());
@@ -52,6 +53,26 @@ WebMidi.enable({ sysex: true })
         res.json({ ok: true });
       } catch (err) {
         console.error('MIDI send error:', err);
+        res.status(500).json({ error: err.message });
+      }
+    });
+
+    app.post('/keys/type', async (req, res) => {
+      const { sequence = [], interval = 50 } = req.body || {};
+      if (!Array.isArray(sequence)) {
+        res.status(400).json({ error: 'sequence must be an array of keys' });
+        return;
+      }
+      try {
+        for (const key of sequence) {
+          await keySender.sendKey(key);
+          if (interval > 0) {
+            await new Promise((r) => setTimeout(r, interval));
+          }
+        }
+        res.json({ ok: true });
+      } catch (err) {
+        console.error('Key send error:', err);
         res.status(500).json({ error: err.message });
       }
     });
@@ -174,7 +195,9 @@ WebMidi.enable({ sysex: true })
               console.error('WebSocket MIDI send error:', err);
             }
           } else if (data.type === 'ping') {
-            ws.send(JSON.stringify({ type: 'pong', ts: data.ts || Date.now() }));
+            ws.send(
+              JSON.stringify({ type: 'pong', ts: data.ts || Date.now() }),
+            );
           }
         } catch (err) {
           console.error('WebSocket message parse error:', err);
