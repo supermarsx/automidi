@@ -95,6 +95,10 @@ export function setLedPulsing(id: number, color: number): number[] {
   return sysex(0x28, clamp7(id), clamp7(color));
 }
 
+export function midiClock(): number[] {
+  return [0xf8];
+}
+
 export function setLedRGB(
   id: number,
   red: number,

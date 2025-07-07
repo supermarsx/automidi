@@ -20,6 +20,7 @@ export default function SettingsModal({ onClose }: Props) {
   const pingOrange = useStore((s) => s.settings.pingOrange);
   const pingEnabled = useStore((s) => s.settings.pingEnabled);
   const clearBeforeLoad = useStore((s) => s.settings.clearBeforeLoad);
+  const clock = useStore((s) => s.settings.clock);
   const setHost = useStore((s) => s.setHost);
   const setPort = useStore((s) => s.setPort);
   const setAutoReconnect = useStore((s) => s.setAutoReconnect);
@@ -32,6 +33,7 @@ export default function SettingsModal({ onClose }: Props) {
   const setPingOrange = useStore((s) => s.setPingOrange);
   const setPingEnabled = useStore((s) => s.setPingEnabled);
   const setClearBeforeLoad = useStore((s) => s.setClearBeforeLoad);
+  const setClock = useStore((s) => s.setClock);
   const addToast = useToastStore((s) => s.addToast);
 
   const [h, setH] = useState(host);
@@ -46,6 +48,7 @@ export default function SettingsModal({ onClose }: Props) {
   const [po, setPo] = useState(pingOrange);
   const [pe, setPe] = useState(pingEnabled);
   const [cbl, setCbl] = useState(clearBeforeLoad);
+  const [clk, setClk] = useState(clock.join(' '));
   const fileRef = useRef<HTMLInputElement>(null);
 
   const save = () => {
@@ -61,6 +64,13 @@ export default function SettingsModal({ onClose }: Props) {
     setPingYellow(py);
     setPingOrange(po);
     setClearBeforeLoad(cbl);
+    setClock(
+      clk
+        .split(/\s+/)
+        .map((v) => parseInt(v, 10))
+        .filter((n) => !Number.isNaN(n))
+        .map((n) => Math.min(255, Math.max(0, n))),
+    );
     onClose();
     addToast('Settings saved', 'success');
   };
@@ -96,6 +106,7 @@ export default function SettingsModal({ onClose }: Props) {
         setPingYellow(cfg.pingYellow ?? py);
         setPingOrange(cfg.pingOrange ?? po);
         setClearBeforeLoad(cfg.clearBeforeLoad ?? cbl);
+        setClock(Array.isArray(cfg.clock) ? cfg.clock : clock);
         setH(cfg.host ?? h);
         setP(cfg.port ?? p);
         setAr(cfg.autoReconnect ?? ar);
@@ -108,6 +119,11 @@ export default function SettingsModal({ onClose }: Props) {
         setPo(cfg.pingOrange ?? po);
         setPe(cfg.pingEnabled ?? pe);
         setCbl(cfg.clearBeforeLoad ?? cbl);
+        setClk(
+          (Array.isArray(cfg.clock) ? cfg.clock : clock)
+            .map((n: number) => n.toString())
+            .join(' '),
+        );
         addToast('Config imported', 'success');
       } catch {
         addToast('Failed to import config', 'error');
@@ -269,6 +285,18 @@ export default function SettingsModal({ onClose }: Props) {
               >
                 CLEAR BEFORE LOAD
               </label>
+            </div>
+            <div className="mb-3">
+              <label className="form-label text-info">CLOCK MESSAGE:</label>
+              <input
+                className="form-control retro-input"
+                value={clk}
+                onChange={(e) => setClk(e.target.value)}
+                placeholder="248"
+              />
+              <small className="text-warning">
+                Space-separated decimal bytes
+              </small>
             </div>
             {ar && (
               <>

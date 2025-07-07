@@ -75,6 +75,7 @@ interface SettingsSlice {
     pingOrange: number;
     pingEnabled: boolean;
     clearBeforeLoad: boolean;
+    clock: number[];
   };
   setHost: (h: string) => void;
   setPort: (p: number) => void;
@@ -88,6 +89,7 @@ interface SettingsSlice {
   setPingOrange: (ms: number) => void;
   setPingEnabled: (enabled: boolean) => void;
   setClearBeforeLoad: (enabled: boolean) => void;
+  setClock: (data: number[]) => void;
 }
 
 type StoreState = DevicesSlice &
@@ -157,6 +159,7 @@ export const useStore = create<StoreState>()(
         pingOrange: 250,
         pingEnabled: true,
         clearBeforeLoad: false,
+        clock: [0xf8],
       },
       setHost: (h) =>
         set((state) => ({ settings: { ...state.settings, host: h } })),
@@ -225,6 +228,10 @@ export const useStore = create<StoreState>()(
       setClearBeforeLoad: (enabled) =>
         set((state) => ({
           settings: { ...state.settings, clearBeforeLoad: enabled },
+        })),
+      setClock: (data) =>
+        set((state) => ({
+          settings: { ...state.settings, clock: data },
         })),
     }),
     {

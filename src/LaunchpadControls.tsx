@@ -18,6 +18,7 @@ import {
   setLedFlashing,
   setLedPulsing,
   CHANNEL_STATIC,
+  midiClock,
 } from './midiMessages';
 
 export default function LaunchpadControls() {
@@ -26,6 +27,7 @@ export default function LaunchpadControls() {
   const padChannels = useStore((s) => s.padChannels);
   const setPadColours = useStore((s) => s.setPadColours);
   const setPadChannels = useStore((s) => s.setPadChannels);
+  const clockBytes = useStore((s) => s.settings.clock);
   const addToast = useToastStore((s) => s.addToast);
   const notify = (ok: boolean, action: string) => {
     addToast(
@@ -124,6 +126,11 @@ export default function LaunchpadControls() {
     for (let i = 21; i <= 28; i++) {
       send(setLedPulsing(i, 51)); // Green pulsing
     }
+  };
+
+  const handleSendClock = () => {
+    const bytes = clockBytes.length ? clockBytes : midiClock();
+    notify(send(bytes), 'Clock');
   };
 
   return (
@@ -268,6 +275,9 @@ export default function LaunchpadControls() {
           </button>
           <button className="retro-button me-2" onClick={testPulsing}>
             PULSE TEST
+          </button>
+          <button className="retro-button" onClick={handleSendClock}>
+            SEND CLOCK
           </button>
         </div>
       </div>

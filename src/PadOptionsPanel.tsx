@@ -25,6 +25,7 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
 
   const clearPad = () => {
     setPadColour(pad.id, '#000000');
+    setPadLabel(pad.id, '');
     if (status === 'connected') {
       if (pad.note !== undefined) {
         send(noteOn(pad.note, 0, channel));
