@@ -4,6 +4,7 @@ const { WebMidi } = require('webmidi');
 const keySender = require('node-key-sender');
 const notifier = require('node-notifier');
 const cors = require('cors');
+const { exec } = require('child_process');
 
 const app = express();
 app.use(express.json());
@@ -90,6 +91,38 @@ WebMidi.enable({ sysex: true })
         console.error('Key send error:', err);
         res.status(500).json({ error: err.message });
       }
+    });
+
+    app.post('/run/app', (req, res) => {
+      const { app: appPath } = req.body || {};
+      if (!appPath) {
+        res.status(400).json({ error: 'app path required' });
+        return;
+      }
+      exec(`"${appPath}"`, (err) => {
+        if (err) {
+          console.error('App exec error:', err);
+          res.status(500).json({ error: err.message });
+        } else {
+          res.json({ ok: true });
+        }
+      });
+    });
+
+    app.post('/run/shell', (req, res) => {
+      const { cmd } = req.body || {};
+      if (!cmd) {
+        res.status(400).json({ error: 'cmd required' });
+        return;
+      }
+      exec(cmd, (err) => {
+        if (err) {
+          console.error('Shell exec error:', err);
+          res.status(500).json({ error: err.message });
+        } else {
+          res.json({ ok: true });
+        }
+      });
     });
 
     const server = app.listen(process.env.PORT || 3000, () => {

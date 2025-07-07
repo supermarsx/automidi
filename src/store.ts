@@ -10,8 +10,11 @@ import {
 export interface Macro {
   id: string;
   name: string;
-  sequence: string[];
-  interval: number;
+  sequence?: string[];
+  interval?: number;
+  type?: 'keys' | 'app' | 'shell';
+  command?: string;
+  nextId?: string;
 }
 
 interface DevicesSlice {
