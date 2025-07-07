@@ -27,7 +27,7 @@ export default function LaunchpadControls() {
   const padChannels = useStore((s) => s.padChannels);
   const setPadColours = useStore((s) => s.setPadColours);
   const setPadChannels = useStore((s) => s.setPadChannels);
-  const clockBytes = useStore((s) => s.settings.clock);
+  const clockBytes = useStore((s) => s.settings.clock ?? [0xf8]);
   const addToast = useToastStore((s) => s.addToast);
   const notify = (ok: boolean, action: string) => {
     addToast(

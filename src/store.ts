@@ -237,6 +237,18 @@ export const useStore = create<StoreState>()(
     {
       name: 'store',
       storage: createJSONStorage(() => idbStorage),
+      merge: (persisted: unknown, current: StoreState): StoreState => {
+        const p = persisted as Partial<StoreState>;
+        return {
+          ...current,
+          ...p,
+          settings: {
+            ...current.settings,
+            ...p.settings,
+            clock: p.settings?.clock ?? current.settings.clock,
+          },
+        };
+      },
     },
   ),
 );
