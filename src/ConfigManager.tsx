@@ -3,7 +3,13 @@ import { useStore, type PadConfig } from './store';
 import { useToastStore } from './toastStore';
 import { useMidi } from './useMidi';
 import LAUNCHPAD_COLORS from './launchpadColors';
-import { enterProgrammerMode, clearAllLeds, noteOn, cc } from './midiMessages';
+import {
+  enterProgrammerMode,
+  clearAllLeds,
+  noteOn,
+  cc,
+  lightingSysEx,
+} from './midiMessages';
 
 export default function ConfigManager() {
   const configs = useStore((s) => s.configs);
@@ -16,6 +22,7 @@ export default function ConfigManager() {
   const padChannels = useStore((s) => s.padChannels);
   const setPadChannels = useStore((s) => s.setPadChannels);
   const clearBeforeLoad = useStore((s) => s.settings.clearBeforeLoad);
+  const sysexColorMode = useStore((s) => s.settings.sysexColorMode);
   const updateConfig = useStore((s) => s.updateConfig);
   const addToast = useToastStore((s) => s.addToast);
   const { send } = useMidi();
@@ -73,13 +80,20 @@ export default function ConfigManager() {
         const channel = Number(chStr);
         const color = LAUNCHPAD_COLORS.find((c) => c.color === hex)?.value;
         if (color === undefined) continue;
-        if (id.startsWith('n-')) {
-          const note = Number(id.slice(2));
-          if (!Number.isNaN(note))
-            ok = send(noteOn(note, color, channel)) && ok;
+        const padId = id.startsWith('n-')
+          ? Number(id.slice(2))
+          : id.startsWith('cc-')
+            ? Number(id.slice(3))
+            : NaN;
+        if (Number.isNaN(padId)) continue;
+        if (sysexColorMode) {
+          const type = channel === 1 ? 0 : channel === 2 ? 1 : 2;
+          const data = channel === 2 ? [0, color] : [color];
+          ok = send(lightingSysEx([{ type, index: padId, data }])) && ok;
+        } else if (id.startsWith('n-')) {
+          ok = send(noteOn(padId, color, channel)) && ok;
         } else if (id.startsWith('cc-')) {
-          const num = Number(id.slice(3));
-          if (!Number.isNaN(num)) ok = send(cc(num, color, channel)) && ok;
+          ok = send(cc(padId, color, channel)) && ok;
         }
       }
     }

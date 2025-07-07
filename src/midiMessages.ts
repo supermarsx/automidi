@@ -107,3 +107,17 @@ export function setLedRGB(
 ): number[] {
   return sysex(0x03, clamp7(id), clamp7(red), clamp7(green), clamp7(blue));
 }
+
+export interface LightingSpec {
+  type: number;
+  index: number;
+  data: number[];
+}
+
+export function lightingSysEx(specs: LightingSpec[]): number[] {
+  const data: number[] = [];
+  for (const s of specs) {
+    data.push(clamp7(s.type), clamp7(s.index), ...s.data.map(clamp7));
+  }
+  return sysex(0x03, ...data);
+}

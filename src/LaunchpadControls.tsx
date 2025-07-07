@@ -15,6 +15,7 @@ import {
   setLayout,
   setDAWMode,
   ledLighting,
+  lightingSysEx,
   setLedFlashing,
   setLedPulsing,
   midiClock,
@@ -26,6 +27,7 @@ export default function LaunchpadControls() {
   const setPadColours = useStore((s) => s.setPadColours);
   const setPadChannels = useStore((s) => s.setPadChannels);
   const clockBytes = useStore((s) => s.settings.clock ?? [0xf8]);
+  const sysexColorMode = useStore((s) => s.settings.sysexColorMode);
   const addToast = useToastStore((s) => s.addToast);
   const notify = (ok: boolean, action: string) => {
     addToast(
@@ -88,13 +90,20 @@ export default function LaunchpadControls() {
         const channel = Number(chStr);
         const color = LAUNCHPAD_COLORS.find((c) => c.color === hex)?.value;
         if (color === undefined) continue;
-        if (id.startsWith('n-')) {
-          const note = Number(id.slice(2));
-          if (!Number.isNaN(note))
-            ok = send(noteOn(note, color, channel)) && ok;
+        const padId = id.startsWith('n-')
+          ? Number(id.slice(2))
+          : id.startsWith('cc-')
+            ? Number(id.slice(3))
+            : NaN;
+        if (Number.isNaN(padId)) continue;
+        if (sysexColorMode) {
+          const type = channel === 1 ? 0 : channel === 2 ? 1 : 2;
+          const data = channel === 2 ? [0, color] : [color];
+          ok = send(lightingSysEx([{ type, index: padId, data }])) && ok;
+        } else if (id.startsWith('n-')) {
+          ok = send(noteOn(padId, color, channel)) && ok;
         } else if (id.startsWith('cc-')) {
-          const num = Number(id.slice(3));
-          if (!Number.isNaN(num)) ok = send(cc(num, color, channel)) && ok;
+          ok = send(cc(padId, color, channel)) && ok;
         }
       }
     }

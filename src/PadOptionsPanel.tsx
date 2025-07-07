@@ -1,6 +1,6 @@
 import { useStore } from './store';
 import { useMidi } from './useMidi';
-import { noteOn, cc } from './midiMessages';
+import { noteOn, cc, lightingSysEx } from './midiMessages';
 import LAUNCHPAD_COLORS from './launchpadColors';
 
 interface PadInfo {
@@ -19,6 +19,7 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
   const colours = storeColours || {};
   const label = useStore((s) => s.padLabels[pad.id] || '');
   const channel = useStore((s) => s.padChannels[pad.id] || 1);
+  const sysexColorMode = useStore((s) => s.settings.sysexColorMode);
   const setPadColour = useStore((s) => s.setPadColour);
   const setPadLabel = useStore((s) => s.setPadLabel);
   const setPadChannel = useStore((s) => s.setPadChannel);
@@ -28,10 +29,15 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
     [1, 2, 3].forEach((ch) => setPadColour(pad.id, '#000000', ch));
     setPadLabel(pad.id, '');
     if (status === 'connected') {
-      if (pad.note !== undefined) {
-        send(noteOn(pad.note, 0, channel));
-      } else if (pad.cc !== undefined) {
-        send(cc(pad.cc, 0, channel));
+      const id = pad.note ?? pad.cc;
+      if (id !== undefined) {
+        if (sysexColorMode) {
+          send(lightingSysEx([{ type: 0, index: id, data: [0] }]));
+        } else if (pad.note !== undefined) {
+          send(noteOn(id, 0, channel));
+        } else if (pad.cc !== undefined) {
+          send(cc(id, 0, channel));
+        }
       }
     }
   };
@@ -42,10 +48,17 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
       if (!selected) return;
       setPadColour(pad.id, selected.color, ch);
       if (status === 'connected') {
-        if (pad.note !== undefined) {
-          send(noteOn(pad.note, selected.value, ch));
-        } else if (pad.cc !== undefined) {
-          send(cc(pad.cc, selected.value, ch));
+        const id = pad.note ?? pad.cc;
+        if (id !== undefined) {
+          if (sysexColorMode) {
+            const type = ch === 1 ? 0 : ch === 2 ? 1 : 2;
+            const data = ch === 2 ? [0, selected.value] : [selected.value];
+            send(lightingSysEx([{ type, index: id, data }]));
+          } else if (pad.note !== undefined) {
+            send(noteOn(id, selected.value, ch));
+          } else if (pad.cc !== undefined) {
+            send(cc(id, selected.value, ch));
+          }
         }
       }
     };
@@ -60,10 +73,17 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
     const colorVal =
       LAUNCHPAD_COLORS.find((c) => c.color === colorHex)?.value || 0;
     if (status === 'connected') {
-      if (pad.note !== undefined) {
-        send(noteOn(pad.note, colorVal, ch));
-      } else if (pad.cc !== undefined) {
-        send(cc(pad.cc, colorVal, ch));
+      const id = pad.note ?? pad.cc;
+      if (id !== undefined) {
+        if (sysexColorMode) {
+          const type = ch === 1 ? 0 : ch === 2 ? 1 : 2;
+          const data = ch === 2 ? [0, colorVal] : [colorVal];
+          send(lightingSysEx([{ type, index: id, data }]));
+        } else if (pad.note !== undefined) {
+          send(noteOn(id, colorVal, ch));
+        } else if (pad.cc !== undefined) {
+          send(cc(id, colorVal, ch));
+        }
       }
     }
   };
