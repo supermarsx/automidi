@@ -1,5 +1,5 @@
 import React, { memo, useState } from 'react';
-import { useStore } from './store';
+import { useStore, type PadColourMap } from './store';
 import PadOptionsPanel from './PadOptionsPanel';
 
 // MIDI mappings for Launchpad X according to programmer's reference
@@ -16,6 +16,8 @@ const NOTE_GRID: number[][] = [
 
 const TOP_CC = [91, 92, 93, 94, 95, 96, 97, 98, 99];
 const SIDE_CC = [89, 79, 69, 59, 49, 39, 29, 19];
+
+const EMPTY_COLORS: PadColourMap = {};
 
 interface PadProps {
   id: string;
@@ -39,7 +41,8 @@ const Pad = memo(
     extraClass?: string;
   }) => {
     const channel = useStore((s) => s.padChannels[id] || 1);
-    const colours = useStore((s) => s.padColours[id] || {});
+    const storeColours = useStore((s) => s.padColours[id]);
+    const colours = storeColours || EMPTY_COLORS;
     const staticColour = colours[1] || '#000000';
     const flashColour = colours[2] || staticColour;
     const pulseColour = colours[3] || '#000000';
