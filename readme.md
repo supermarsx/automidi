@@ -1,5 +1,7 @@
 # automidi
 
+![image](https://github.com/user-attachments/assets/357e1fc6-8640-4ead-b2c0-3a472c8f1599)
+
 **automidi** is a Vite + React application that provides a simple interface for
 controlling MIDI devices. When a Launchpad X is detected the app automatically
 switches the controller into _Programmer_ mode so that every pad can be
