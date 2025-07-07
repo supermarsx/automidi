@@ -7,15 +7,11 @@ import {
   del as idbDel,
 } from 'idb-keyval';
 
-export type MidiMsg = {
-  ts: number;
-  bytes: number[];
-};
-
 export interface Macro {
   id: string;
   name: string;
-  messages: MidiMsg[];
+  keys: string[];
+  timeBetween: number;
 }
 
 interface DevicesSlice {

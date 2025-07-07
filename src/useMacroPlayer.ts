@@ -1,14 +1,12 @@
 import { useCallback } from 'react';
-import { useMidi } from './useMidi';
 import { useStore } from './store';
 
 interface PlayOptions {
   loop?: boolean;
-  tempo?: number;
+  timeBetween?: number;
 }
 
 export function useMacroPlayer() {
-  const { send } = useMidi();
   const macros = useStore((s) => s.macros);
 
   const playMacro = useCallback(
@@ -16,23 +14,23 @@ export function useMacroPlayer() {
       const macro = macros.find((m) => m.id === macroId);
       if (!macro) return;
 
-      const tempo = opts.tempo ?? 120;
-      const scale = 120 / tempo;
+      const step = opts.timeBetween ?? macro.timeBetween;
 
-      const schedule = () => {
+      const run = () => {
         let delay = 0;
-        for (const msg of macro.messages) {
-          delay += msg.ts * scale;
+        for (const key of macro.keys) {
+          delay += step;
           setTimeout(() => {
-            queueMicrotask(() => send(msg.bytes));
+            document.dispatchEvent(new KeyboardEvent('keydown', { key }));
+            document.dispatchEvent(new KeyboardEvent('keyup', { key }));
           }, delay);
         }
-        if (opts.loop) setTimeout(schedule, delay);
+        if (opts.loop) setTimeout(run, delay + step);
       };
 
-      queueMicrotask(schedule);
+      queueMicrotask(run);
     },
-    [macros, send],
+    [macros],
   );
 
   return { playMacro };

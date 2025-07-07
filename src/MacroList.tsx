@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import MacroEditor from './MacroEditor';
+import ConfirmButton from './ConfirmButton';
 import { useMacroPlayer } from './useMacroPlayer';
 import { useStore, type Macro } from './store';
 import { useToastStore } from './toastStore';
@@ -28,6 +29,7 @@ export default function MacroList() {
           {macros.map((m) => (
             <div key={m.id} className="macro-list-item">
               <span className="macro-name">{m.name}</span>
+              <span className="ms-2 text-info">[{m.keys.join(' ')}]</span>
               <div>
                 <button
                   className="retro-button btn-sm me-1"
@@ -47,15 +49,15 @@ export default function MacroList() {
                 >
                   EDIT
                 </button>
-                <button
-                  className="retro-button btn-sm"
-                  onClick={() => {
+                <ConfirmButton
+                  className="btn-sm"
+                  onConfirm={() => {
                     removeMacro(m.id);
                     addToast('Macro deleted', 'success');
                   }}
                 >
                   DEL
-                </button>
+                </ConfirmButton>
               </div>
             </div>
           ))}
