@@ -38,7 +38,8 @@ const Pad = memo(
     selected?: boolean;
     extraClass?: string;
   }) => {
-    const colour = useStore((s) => s.padColours[id] || '#000000');
+    const channel = useStore((s) => s.padChannels[id] || 1);
+    const colour = useStore((s) => s.padColours[id]?.[channel] || '#000000');
     const label = useStore((s) => s.padLabels[id] || '');
     const displayLabel = label.length > 6 ? `${label.slice(0, 5)}…` : label;
 

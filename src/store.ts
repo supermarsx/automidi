@@ -34,12 +34,14 @@ interface MacrosSlice {
   removeMacro: (id: string) => void;
 }
 
+export type PadColourMap = Record<number, string>;
+
 interface PadsSlice {
-  padColours: Record<string, string>;
+  padColours: Record<string, PadColourMap>;
   padLabels: Record<string, string>;
   padChannels: Record<string, number>;
-  setPadColour: (id: string, colour: string) => void;
-  setPadColours: (colours: Record<string, string>) => void;
+  setPadColour: (id: string, colour: string, channel: number) => void;
+  setPadColours: (colours: Record<string, PadColourMap>) => void;
   setPadLabel: (id: string, label: string) => void;
   setPadLabels: (labels: Record<string, string>) => void;
   setPadChannel: (id: string, channel: number) => void;
@@ -49,7 +51,7 @@ interface PadsSlice {
 export interface PadConfig {
   id: string;
   name: string;
-  padColours: Record<string, string>;
+  padColours: Record<string, PadColourMap>;
   padLabels?: Record<string, string>;
   padChannels?: Record<string, number>;
 }
@@ -126,8 +128,13 @@ export const useStore = create<StoreState>()(
       padColours: {},
       padLabels: {},
       padChannels: {},
-      setPadColour: (id, colour) =>
-        set((state) => ({ padColours: { ...state.padColours, [id]: colour } })),
+      setPadColour: (id, colour, channel) =>
+        set((state) => ({
+          padColours: {
+            ...state.padColours,
+            [id]: { ...state.padColours[id], [channel]: colour },
+          },
+        })),
       setPadColours: (colours) => set(() => ({ padColours: { ...colours } })),
       setPadLabel: (id, label) =>
         set((state) => ({ padLabels: { ...state.padLabels, [id]: label } })),
@@ -239,9 +246,21 @@ export const useStore = create<StoreState>()(
       storage: createJSONStorage(() => idbStorage),
       merge: (persisted: unknown, current: StoreState): StoreState => {
         const p = persisted as Partial<StoreState>;
+        const migratedColours: Record<string, PadColourMap> = {};
+        if (p.padColours) {
+          for (const [id, val] of Object.entries(
+            p.padColours as Record<string, PadColourMap | string>,
+          )) {
+            migratedColours[id] =
+              typeof val === 'string' ? { 1: val } : (val as PadColourMap);
+          }
+        }
         return {
           ...current,
           ...p,
+          padColours: Object.keys(migratedColours).length
+            ? migratedColours
+            : current.padColours,
           settings: {
             ...current.settings,
             ...p.settings,
