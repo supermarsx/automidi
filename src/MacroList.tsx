@@ -2,6 +2,7 @@ import { useKeyMacroPlayer } from './useKeyMacroPlayer';
 import { useStore, type Macro } from './store';
 import { useToastStore } from './toastStore';
 import { useState } from 'react';
+import MacroImportModal from './MacroImportModal';
 
 export default function MacroList() {
   const macros = useStore((s) => s.macros);
@@ -16,6 +17,7 @@ export default function MacroList() {
   const [type, setType] = useState<'keys' | 'app' | 'shell'>('keys');
   const [command, setCommand] = useState('');
   const [nextId, setNextId] = useState('');
+  const [showImport, setShowImport] = useState(false);
 
   const startEdit = (id: string) => {
     const m = macros.find((x) => x.id === id);
@@ -52,9 +54,34 @@ export default function MacroList() {
 
   const cancelEdit = () => setEditingId(null);
 
+  const exportMacros = () => {
+    const data = JSON.stringify(macros);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'macros.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    addToast('Macros exported', 'success');
+  };
+
   return (
     <div className="retro-panel">
-      <h3>◄ Macro Sequencer ►</h3>
+      <div className="d-flex justify-content-between align-items-center mb-2">
+        <h3 className="m-0">◄ Macro Sequencer ►</h3>
+        <div>
+          <button className="retro-button btn-sm me-1" onClick={exportMacros}>
+            EXPORT
+          </button>
+          <button
+            className="retro-button btn-sm"
+            onClick={() => setShowImport(true)}
+          >
+            IMPORT
+          </button>
+        </div>
+      </div>
       {macros.length === 0 ? (
         <div className="text-warning text-center p-3">NO MACROS LOADED</div>
       ) : (
@@ -179,6 +206,7 @@ export default function MacroList() {
           </div>
         </div>
       )}
+      {showImport && <MacroImportModal onClose={() => setShowImport(false)} />}
     </div>
   );
 }
