@@ -57,8 +57,8 @@ can be previewed locally using `npm run preview`.
   - **Channel 1** (`0x90`/`0xB0`) for static colours
   - **Channel 2** (`0x91`/`0xB1`) for flashing colours
   - **Channel 3** (`0x92`/`0xB2`) for pulsing colours
-  - Each pad's side panel now offers **STATIC**, **FLASH** and **PULSE**
-    buttons. Selecting a button sends the current colour on the
+  - Each pad's side panel now offers colour pickers for **STATIC**, **FLASH**
+    and **PULSE** modes. Selecting a mode button sends the chosen colour on the
     corresponding channel so modes can be mixed across the grid.
 
 ---

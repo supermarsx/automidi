@@ -68,16 +68,19 @@ export default function ConfigManager() {
       ok = send(clearAllLeds());
     }
     ok = send(enterProgrammerMode()) && ok;
-    for (const [id, hex] of Object.entries(cfg.padColours)) {
-      const color = LAUNCHPAD_COLORS.find((c) => c.color === hex)?.value;
-      if (color === undefined) continue;
-      const channel = cfg.padChannels?.[id] || 1;
-      if (id.startsWith('n-')) {
-        const note = Number(id.slice(2));
-        if (!Number.isNaN(note)) ok = send(noteOn(note, color, channel)) && ok;
-      } else if (id.startsWith('cc-')) {
-        const num = Number(id.slice(3));
-        if (!Number.isNaN(num)) ok = send(cc(num, color, channel)) && ok;
+    for (const [id, chMap] of Object.entries(cfg.padColours)) {
+      for (const [chStr, hex] of Object.entries(chMap)) {
+        const channel = Number(chStr);
+        const color = LAUNCHPAD_COLORS.find((c) => c.color === hex)?.value;
+        if (color === undefined) continue;
+        if (id.startsWith('n-')) {
+          const note = Number(id.slice(2));
+          if (!Number.isNaN(note))
+            ok = send(noteOn(note, color, channel)) && ok;
+        } else if (id.startsWith('cc-')) {
+          const num = Number(id.slice(3));
+          if (!Number.isNaN(num)) ok = send(cc(num, color, channel)) && ok;
+        }
       }
     }
     addToast(
