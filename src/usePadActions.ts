@@ -13,7 +13,6 @@ export function usePadActions() {
       const bytes = msg.message;
       if (!bytes || bytes.length < 2) return;
       const status = bytes[0] & 0xf0;
-      const channel = bytes[0] & 0x0f;
       let padId: string | null = null;
       let isOn = false;
 

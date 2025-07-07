@@ -1,4 +1,4 @@
-import { useStore, type PadColourMap } from './store';
+import { useStore, type PadColourMap, type PadActions } from './store';
 import { useMidi } from './useMidi';
 import { noteOn, cc, lightingSysEx } from './midiMessages';
 import LAUNCHPAD_COLORS from './launchpadColors';
@@ -15,13 +15,14 @@ interface Props {
 }
 
 const EMPTY_COLORS: PadColourMap = {};
+const EMPTY_ACTIONS: PadActions = {};
 
 export default function PadOptionsPanel({ pad, onClose }: Props) {
   const storeColours = useStore((s) => s.padColours[pad.id]);
   const colours = storeColours || EMPTY_COLORS;
   const label = useStore((s) => s.padLabels[pad.id] || '');
   const channel = useStore((s) => s.padChannels[pad.id] || 1);
-  const action = useStore((s) => s.padActions[pad.id] || {});
+  const action = useStore((s) => s.padActions[pad.id] || EMPTY_ACTIONS);
   const sysexColorMode = useStore((s) => s.settings.sysexColorMode);
   const setPadColour = useStore((s) => s.setPadColour);
   const setPadLabel = useStore((s) => s.setPadLabel);
