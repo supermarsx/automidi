@@ -73,6 +73,27 @@ body {
   }
 }
 
+@keyframes pad-flash {
+  0%,
+  49% {
+    background-color: var(--static-color);
+  }
+  50%,
+  100% {
+    background-color: var(--flash-color);
+  }
+}
+
+@keyframes pad-pulse {
+  0%,
+  100% {
+    filter: brightness(0.6);
+  }
+  50% {
+    filter: brightness(1.2);
+  }
+}
+
 .status-bar {
   background: #000040;
   border: 1px solid #00ff00;
@@ -133,6 +154,15 @@ body {
 .midi-pad-container:hover {
   border-color: #ffff00;
   box-shadow: 0 0 10px #ffff00;
+}
+
+.midi-pad-container.flash {
+  animation: pad-flash 1s steps(2, start) infinite;
+}
+
+.midi-pad-container.pulse {
+  animation: pad-pulse 1s infinite;
+  background-color: var(--pulse-color);
 }
 
 .midi-pad-empty {
