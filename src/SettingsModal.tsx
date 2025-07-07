@@ -20,6 +20,7 @@ export default function SettingsModal({ onClose }: Props) {
   const pingOrange = useStore((s) => s.settings.pingOrange);
   const pingEnabled = useStore((s) => s.settings.pingEnabled);
   const clearBeforeLoad = useStore((s) => s.settings.clearBeforeLoad);
+  const sysexColorMode = useStore((s) => s.settings.sysexColorMode);
   const clock = useStore((s) => s.settings.clock ?? [0xf8]);
   const setHost = useStore((s) => s.setHost);
   const setPort = useStore((s) => s.setPort);
@@ -33,6 +34,7 @@ export default function SettingsModal({ onClose }: Props) {
   const setPingOrange = useStore((s) => s.setPingOrange);
   const setPingEnabled = useStore((s) => s.setPingEnabled);
   const setClearBeforeLoad = useStore((s) => s.setClearBeforeLoad);
+  const setSysexColorMode = useStore((s) => s.setSysexColorMode);
   const setClock = useStore((s) => s.setClock);
   const addToast = useToastStore((s) => s.addToast);
 
@@ -48,6 +50,7 @@ export default function SettingsModal({ onClose }: Props) {
   const [po, setPo] = useState(pingOrange);
   const [pe, setPe] = useState(pingEnabled);
   const [cbl, setCbl] = useState(clearBeforeLoad);
+  const [scm, setScm] = useState(sysexColorMode);
   const [clk, setClk] = useState(clock.join(' '));
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -64,6 +67,7 @@ export default function SettingsModal({ onClose }: Props) {
     setPingYellow(py);
     setPingOrange(po);
     setClearBeforeLoad(cbl);
+    setSysexColorMode(scm);
     setClock(
       clk
         .split(/\s+/)
@@ -106,6 +110,7 @@ export default function SettingsModal({ onClose }: Props) {
         setPingYellow(cfg.pingYellow ?? py);
         setPingOrange(cfg.pingOrange ?? po);
         setClearBeforeLoad(cfg.clearBeforeLoad ?? cbl);
+        setSysexColorMode(cfg.sysexColorMode ?? scm);
         setClock(Array.isArray(cfg.clock) ? cfg.clock : clock);
         setH(cfg.host ?? h);
         setP(cfg.port ?? p);
@@ -119,6 +124,7 @@ export default function SettingsModal({ onClose }: Props) {
         setPo(cfg.pingOrange ?? po);
         setPe(cfg.pingEnabled ?? pe);
         setCbl(cfg.clearBeforeLoad ?? cbl);
+        setScm(cfg.sysexColorMode ?? scm);
         setClk(
           (Array.isArray(cfg.clock) ? cfg.clock : clock)
             .map((n: number) => n.toString())
@@ -284,6 +290,21 @@ export default function SettingsModal({ onClose }: Props) {
                 htmlFor="clearBeforeLoad"
               >
                 CLEAR BEFORE LOAD
+              </label>
+            </div>
+            <div className="mb-3 form-check">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="sysexColorMode"
+                checked={scm}
+                onChange={(e) => setScm(e.target.checked)}
+              />
+              <label
+                className="form-check-label text-info"
+                htmlFor="sysexColorMode"
+              >
+                SYSEX COLOR MODE
               </label>
             </div>
             <div className="mb-3">

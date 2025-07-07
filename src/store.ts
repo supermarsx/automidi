@@ -77,6 +77,7 @@ interface SettingsSlice {
     pingOrange: number;
     pingEnabled: boolean;
     clearBeforeLoad: boolean;
+    sysexColorMode: boolean;
     clock: number[];
   };
   setHost: (h: string) => void;
@@ -91,6 +92,7 @@ interface SettingsSlice {
   setPingOrange: (ms: number) => void;
   setPingEnabled: (enabled: boolean) => void;
   setClearBeforeLoad: (enabled: boolean) => void;
+  setSysexColorMode: (enabled: boolean) => void;
   setClock: (data: number[]) => void;
 }
 
@@ -166,6 +168,7 @@ export const useStore = create<StoreState>()(
         pingOrange: 250,
         pingEnabled: true,
         clearBeforeLoad: false,
+        sysexColorMode: false,
         clock: [0xf8],
       },
       setHost: (h) =>
@@ -236,6 +239,10 @@ export const useStore = create<StoreState>()(
         set((state) => ({
           settings: { ...state.settings, clearBeforeLoad: enabled },
         })),
+      setSysexColorMode: (enabled) =>
+        set((state) => ({
+          settings: { ...state.settings, sysexColorMode: enabled },
+        })),
       setClock: (data) =>
         set((state) => ({
           settings: { ...state.settings, clock: data },
@@ -265,6 +272,8 @@ export const useStore = create<StoreState>()(
             ...current.settings,
             ...p.settings,
             clock: p.settings?.clock ?? current.settings.clock,
+            sysexColorMode:
+              p.settings?.sysexColorMode ?? current.settings.sysexColorMode,
           },
         };
       },
