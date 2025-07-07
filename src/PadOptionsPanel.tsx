@@ -104,6 +104,15 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
     <div className="pad-options-panel" onClick={(e) => e.stopPropagation()}>
       <h4>PAD {pad.id}</h4>
       <div className="mb-3">
+        <label className="form-label text-info">LABEL:</label>
+        <input
+          className="form-control retro-input"
+          value={label}
+          onChange={handleLabelChange}
+          placeholder="Label"
+        />
+      </div>
+      <div className="mb-3">
         <label className="form-label text-info">STATIC COLOR:</label>
         <select
           className="form-select retro-select"
@@ -193,15 +202,6 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
         </div>
       </div>
       <div className="mb-3">
-        <label className="form-label text-info">LABEL:</label>
-        <input
-          className="form-control retro-input"
-          value={label}
-          onChange={handleLabelChange}
-          placeholder="Label"
-        />
-      </div>
-      <div className="mb-3">
         <label className="form-label text-info">ON NOTE ON:</label>
         <select
           className="form-select retro-select"
@@ -246,6 +246,26 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
           htmlFor={`confirm-${pad.id}`}
         >
           CONFIRM BEFORE PLAY
+        </label>
+      </div>
+      <div className="form-check mb-3">
+        <input
+          className="form-check-input"
+          type="checkbox"
+          id={`toast-${pad.id}`}
+          checked={action.confirmToast || false}
+          onChange={(e) =>
+            setPadAction(pad.id, {
+              ...action,
+              confirmToast: e.target.checked,
+            })
+          }
+        />
+        <label
+          className="form-check-label text-info"
+          htmlFor={`toast-${pad.id}`}
+        >
+          TOAST CONFIRMATION
         </label>
       </div>
       <button className="retro-button me-2" onClick={clearPad}>

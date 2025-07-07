@@ -3,6 +3,7 @@ import { useMidi, type MidiMessage } from './useMidi';
 import { useStore } from './store';
 import { useKeyMacroPlayer } from './useKeyMacroPlayer';
 import { notify } from './notify';
+import { useToastStore } from './toastStore';
 import LAUNCHPAD_COLORS from './launchpadColors';
 import { noteOn, cc, lightingSysEx } from './midiMessages';
 
@@ -40,7 +41,13 @@ export function usePadActions() {
     }
   };
 
-  const handleMacro = (macroId: string, id: string, confirm?: boolean) => {
+  const handleMacro = (
+    macroId: string,
+    id: string,
+    confirm?: boolean,
+    toastConfirm?: boolean,
+  ) => {
+    console.log('Pad macro trigger', { macroId, id, confirm, toastConfirm });
     if (!confirm) {
       playMacro(macroId);
       return;
@@ -50,7 +57,13 @@ export function usePadActions() {
       const prev = padChannels[id] || 1;
       setPadChannel(id, 3);
       sendPadState(id, 3);
-      notify('Press pad again to confirm');
+      if (toastConfirm) {
+        useToastStore
+          .getState()
+          .addToast('Press pad again to confirm', 'success');
+      } else {
+        notify('Press pad again to confirm');
+      }
       const t = setTimeout(() => {
         setPadChannel(id, prev);
         sendPadState(id, prev);
@@ -90,9 +103,9 @@ export function usePadActions() {
       const action = padActions[padId];
       if (!action) return;
       if (isOn && action.noteOn) {
-        handleMacro(action.noteOn, padId, action.confirm);
+        handleMacro(action.noteOn, padId, action.confirm, action.confirmToast);
       } else if (!isOn && action.noteOff) {
-        handleMacro(action.noteOff, padId, action.confirm);
+        handleMacro(action.noteOff, padId, action.confirm, action.confirmToast);
       }
     };
 

@@ -39,6 +39,7 @@ export interface PadActions {
   noteOn?: string;
   noteOff?: string;
   confirm?: boolean;
+  confirmToast?: boolean;
 }
 
 interface PadsSlice {
@@ -87,6 +88,8 @@ interface SettingsSlice {
     pingEnabled: boolean;
     clearBeforeLoad: boolean;
     sysexColorMode: boolean;
+    autoSleep: number;
+    theme: 'default' | 'dark' | 'light';
     clock: number[];
   };
   setHost: (h: string) => void;
@@ -102,6 +105,8 @@ interface SettingsSlice {
   setPingEnabled: (enabled: boolean) => void;
   setClearBeforeLoad: (enabled: boolean) => void;
   setSysexColorMode: (enabled: boolean) => void;
+  setAutoSleep: (s: number) => void;
+  setTheme: (t: 'default' | 'dark' | 'light') => void;
   setClock: (data: number[]) => void;
 }
 
@@ -184,6 +189,8 @@ export const useStore = create<StoreState>()(
         pingEnabled: true,
         clearBeforeLoad: false,
         sysexColorMode: false,
+        autoSleep: 0,
+        theme: 'default',
         clock: [0xf8],
       },
       setHost: (h) =>
@@ -258,6 +265,14 @@ export const useStore = create<StoreState>()(
         set((state) => ({
           settings: { ...state.settings, sysexColorMode: enabled },
         })),
+      setAutoSleep: (s) =>
+        set((state) => ({
+          settings: { ...state.settings, autoSleep: Math.max(0, s) },
+        })),
+      setTheme: (t) =>
+        set((state) => ({
+          settings: { ...state.settings, theme: t },
+        })),
       setClock: (data) =>
         set((state) => ({
           settings: { ...state.settings, clock: data },
@@ -289,6 +304,8 @@ export const useStore = create<StoreState>()(
             clock: p.settings?.clock ?? current.settings.clock,
             sysexColorMode:
               p.settings?.sysexColorMode ?? current.settings.sysexColorMode,
+            autoSleep: p.settings?.autoSleep ?? current.settings.autoSleep,
+            theme: p.settings?.theme ?? current.settings.theme,
           },
         };
       },
