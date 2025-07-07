@@ -20,7 +20,7 @@ export default function SettingsModal({ onClose }: Props) {
   const pingOrange = useStore((s) => s.settings.pingOrange);
   const pingEnabled = useStore((s) => s.settings.pingEnabled);
   const clearBeforeLoad = useStore((s) => s.settings.clearBeforeLoad);
-  const clock = useStore((s) => s.settings.clock);
+  const clock = useStore((s) => s.settings.clock ?? [0xf8]);
   const setHost = useStore((s) => s.setHost);
   const setPort = useStore((s) => s.setPort);
   const setAutoReconnect = useStore((s) => s.setAutoReconnect);
