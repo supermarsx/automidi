@@ -2,7 +2,7 @@
 
 **automidi** is a Vite + React application that provides a simple interface for
 controlling MIDI devices. When a Launchpad X is detected the app automatically
-switches the controller into *Programmer* mode so that every pad can be
+switches the controller into _Programmer_ mode so that every pad can be
 addressed individually.
 
 ---
@@ -53,10 +53,13 @@ can be previewed locally using `npm run preview`.
   Programmer mode automatically.
 - Top and side pads are mapped to CC numbers while the main grid is mapped to
   notes, letting you experiment with lighting and macros.
-MIDI channels map LED behaviours:
-- **Channel 1** (`0x90`/`0xB0`) for static colours
-- **Channel 2** (`0x91`/`0xB1`) for flashing colours
-- **Channel 3** (`0x92`/`0xB2`) for pulsing colours
+  Color modes are chosen independently via the MIDI channel:
+  - **Channel 1** (`0x90`/`0xB0`) for static colours
+  - **Channel 2** (`0x91`/`0xB1`) for flashing colours
+  - **Channel 3** (`0x92`/`0xB2`) for pulsing colours
+  - Each pad's side panel now offers **STATIC**, **FLASH** and **PULSE**
+    buttons. Selecting a button sends the current colour on the
+    corresponding channel so modes can be mixed across the grid.
 
 ---
 

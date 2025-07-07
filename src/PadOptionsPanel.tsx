@@ -52,8 +52,7 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
     setPadLabel(pad.id, e.target.value);
   };
 
-  const handleChannelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const ch = Number(e.target.value);
+  const handleModeClick = (ch: number) => {
     setPadChannel(pad.id, ch);
     const colorVal =
       LAUNCHPAD_COLORS.find((c) => c.color === colour)?.value || 0;
@@ -93,15 +92,26 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
       </div>
       <div className="mb-3">
         <label className="form-label text-info">MODE:</label>
-        <select
-          className="form-select retro-select"
-          value={channel}
-          onChange={handleChannelChange}
-        >
-          <option value={1}>Static</option>
-          <option value={2}>Flashing</option>
-          <option value={3}>Pulsing</option>
-        </select>
+        <div className="mode-buttons d-flex">
+          <button
+            className={`retro-button btn-sm me-2${channel === 1 ? ' selected' : ''}`}
+            onClick={() => handleModeClick(1)}
+          >
+            STATIC
+          </button>
+          <button
+            className={`retro-button btn-sm me-2${channel === 2 ? ' selected' : ''}`}
+            onClick={() => handleModeClick(2)}
+          >
+            FLASH
+          </button>
+          <button
+            className={`retro-button btn-sm${channel === 3 ? ' selected' : ''}`}
+            onClick={() => handleModeClick(3)}
+          >
+            PULSE
+          </button>
+        </div>
       </div>
       <div className="mb-3">
         <label className="form-label text-info">LABEL:</label>

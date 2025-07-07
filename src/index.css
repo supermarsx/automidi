@@ -193,6 +193,11 @@ body {
   box-shadow: 0 0 15px #00ffff;
 }
 
+.retro-button.selected {
+  background: #00ffff !important;
+  color: #000080 !important;
+}
+
 .retro-input {
   background: #000020 !important;
   border: 1px solid #00ff00 !important;
