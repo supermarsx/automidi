@@ -39,7 +39,10 @@ const Pad = memo(
     extraClass?: string;
   }) => {
     const channel = useStore((s) => s.padChannels[id] || 1);
-    const colour = useStore((s) => s.padColours[id]?.[channel] || '#000000');
+    const colours = useStore((s) => s.padColours[id] || {});
+    const staticColour = colours[1] || '#000000';
+    const flashColour = colours[2] || staticColour;
+    const pulseColour = colours[3] || '#000000';
     const label = useStore((s) => s.padLabels[id] || '');
     const displayLabel = label.length > 6 ? `${label.slice(0, 5)}…` : label;
 
@@ -51,9 +54,16 @@ const Pad = memo(
       <div
         className={`midi-pad-container ${selected ? 'selected' : ''} ${
           extraClass || ''
-        }`}
+        } ${channel === 2 ? 'flash' : ''} ${channel === 3 ? 'pulse' : ''}`}
         id={id}
-        style={{ backgroundColor: colour }}
+        style={
+          {
+            backgroundColor: channel === 3 ? pulseColour : staticColour,
+            '--static-color': staticColour,
+            '--flash-color': flashColour,
+            '--pulse-color': pulseColour,
+          } as React.CSSProperties
+        }
         title={note !== undefined ? `Note ${note}` : `CC ${ccNum}`}
         onClick={() => onSelect({ id, note, cc: ccNum })}
       >
