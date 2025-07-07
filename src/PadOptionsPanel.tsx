@@ -19,10 +19,13 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
   const colours = storeColours || {};
   const label = useStore((s) => s.padLabels[pad.id] || '');
   const channel = useStore((s) => s.padChannels[pad.id] || 1);
+  const action = useStore((s) => s.padActions[pad.id] || {});
   const sysexColorMode = useStore((s) => s.settings.sysexColorMode);
   const setPadColour = useStore((s) => s.setPadColour);
   const setPadLabel = useStore((s) => s.setPadLabel);
   const setPadChannel = useStore((s) => s.setPadChannel);
+  const setPadAction = useStore((s) => s.setPadAction);
+  const macros = useStore((s) => s.macros);
   const { send, status } = useMidi();
 
   const clearPad = () => {
@@ -66,6 +69,12 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
   const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPadLabel(pad.id, e.target.value);
   };
+
+  const handleActionChange =
+    (type: 'noteOn' | 'noteOff') =>
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setPadAction(pad.id, { ...action, [type]: e.target.value || undefined });
+    };
 
   const handleModeClick = (ch: number) => {
     setPadChannel(pad.id, ch);
@@ -188,6 +197,36 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
           onChange={handleLabelChange}
           placeholder="Label"
         />
+      </div>
+      <div className="mb-3">
+        <label className="form-label text-info">ON NOTE ON:</label>
+        <select
+          className="form-select retro-select"
+          value={action.noteOn || ''}
+          onChange={handleActionChange('noteOn')}
+        >
+          <option value="">NONE</option>
+          {macros.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="mb-3">
+        <label className="form-label text-info">ON NOTE OFF:</label>
+        <select
+          className="form-select retro-select"
+          value={action.noteOff || ''}
+          onChange={handleActionChange('noteOff')}
+        >
+          <option value="">NONE</option>
+          {macros.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name}
+            </option>
+          ))}
+        </select>
       </div>
       <button className="retro-button me-2" onClick={clearPad}>
         CLEAR
