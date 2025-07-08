@@ -90,6 +90,7 @@ interface SettingsSlice {
     sysexColorMode: boolean;
     autoSleep: number;
     theme: 'default' | 'dark' | 'light';
+    autoLoadFirstConfig: boolean;
     clock: number[];
   };
   setHost: (h: string) => void;
@@ -107,6 +108,7 @@ interface SettingsSlice {
   setSysexColorMode: (enabled: boolean) => void;
   setAutoSleep: (s: number) => void;
   setTheme: (t: 'default' | 'dark' | 'light') => void;
+  setAutoLoadFirstConfig: (b: boolean) => void;
   setClock: (data: number[]) => void;
 }
 
@@ -191,6 +193,7 @@ export const useStore = create<StoreState>()(
         sysexColorMode: false,
         autoSleep: 0,
         theme: 'default',
+        autoLoadFirstConfig: false,
         clock: [0xf8],
       },
       setHost: (h) =>
@@ -273,6 +276,10 @@ export const useStore = create<StoreState>()(
         set((state) => ({
           settings: { ...state.settings, theme: t },
         })),
+      setAutoLoadFirstConfig: (b) =>
+        set((state) => ({
+          settings: { ...state.settings, autoLoadFirstConfig: b },
+        })),
       setClock: (data) =>
         set((state) => ({
           settings: { ...state.settings, clock: data },
@@ -306,6 +313,9 @@ export const useStore = create<StoreState>()(
               p.settings?.sysexColorMode ?? current.settings.sysexColorMode,
             autoSleep: p.settings?.autoSleep ?? current.settings.autoSleep,
             theme: p.settings?.theme ?? current.settings.theme,
+            autoLoadFirstConfig:
+              p.settings?.autoLoadFirstConfig ??
+              current.settings.autoLoadFirstConfig,
           },
         };
       },

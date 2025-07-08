@@ -22,6 +22,7 @@ export default function SettingsModal({ onClose }: Props) {
   const clearBeforeLoad = useStore((s) => s.settings.clearBeforeLoad);
   const sysexColorMode = useStore((s) => s.settings.sysexColorMode);
   const autoSleep = useStore((s) => s.settings.autoSleep);
+  const autoLoadFirstConfig = useStore((s) => s.settings.autoLoadFirstConfig);
   const theme = useStore((s) => s.settings.theme);
   const clock = useStore((s) => s.settings.clock ?? [0xf8]);
   const setHost = useStore((s) => s.setHost);
@@ -38,6 +39,7 @@ export default function SettingsModal({ onClose }: Props) {
   const setClearBeforeLoad = useStore((s) => s.setClearBeforeLoad);
   const setSysexColorMode = useStore((s) => s.setSysexColorMode);
   const setAutoSleep = useStore((s) => s.setAutoSleep);
+  const setAutoLoadFirstConfig = useStore((s) => s.setAutoLoadFirstConfig);
   const setTheme = useStore((s) => s.setTheme);
   const setClock = useStore((s) => s.setClock);
   const addToast = useToastStore((s) => s.addToast);
@@ -56,6 +58,7 @@ export default function SettingsModal({ onClose }: Props) {
   const [cbl, setCbl] = useState(clearBeforeLoad);
   const [scm, setScm] = useState(sysexColorMode);
   const [asleep, setAsleep] = useState(autoSleep);
+  const [alfc, setAlfc] = useState(autoLoadFirstConfig);
   const [thm, setThm] = useState(theme);
   const [clk, setClk] = useState(clock.join(' '));
   const fileRef = useRef<HTMLInputElement>(null);
@@ -75,6 +78,7 @@ export default function SettingsModal({ onClose }: Props) {
     setClearBeforeLoad(cbl);
     setSysexColorMode(scm);
     setAutoSleep(asleep);
+    setAutoLoadFirstConfig(alfc);
     setTheme(thm);
     setClock(
       clk
@@ -120,6 +124,7 @@ export default function SettingsModal({ onClose }: Props) {
         setClearBeforeLoad(cfg.clearBeforeLoad ?? cbl);
         setSysexColorMode(cfg.sysexColorMode ?? scm);
         setAutoSleep(cfg.autoSleep ?? asleep);
+        setAutoLoadFirstConfig(cfg.autoLoadFirstConfig ?? alfc);
         setTheme(cfg.theme ?? thm);
         setClock(Array.isArray(cfg.clock) ? cfg.clock : clock);
         setH(cfg.host ?? h);
@@ -136,6 +141,7 @@ export default function SettingsModal({ onClose }: Props) {
         setCbl(cfg.clearBeforeLoad ?? cbl);
         setScm(cfg.sysexColorMode ?? scm);
         setAsleep(cfg.autoSleep ?? asleep);
+        setAlfc(cfg.autoLoadFirstConfig ?? alfc);
         setThm(cfg.theme ?? thm);
         setClk(
           (Array.isArray(cfg.clock) ? cfg.clock : clock)
@@ -317,6 +323,21 @@ export default function SettingsModal({ onClose }: Props) {
                 htmlFor="sysexColorMode"
               >
                 SYSEX COLOR MODE
+              </label>
+            </div>
+            <div className="mb-3 form-check">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="autoLoadFirstConfig"
+                checked={alfc}
+                onChange={(e) => setAlfc(e.target.checked)}
+              />
+              <label
+                className="form-check-label text-info"
+                htmlFor="autoLoadFirstConfig"
+              >
+                AUTO-LOAD FIRST CONFIG
               </label>
             </div>
             <div className="mb-3">
