@@ -12,7 +12,7 @@ export interface Macro {
   name: string;
   sequence?: string[];
   interval?: number;
-  type?: 'keys' | 'app' | 'shell';
+  type?: 'keys' | 'app' | 'shell' | 'shell_win' | 'shell_bg';
   command?: string;
   nextId?: string;
 }

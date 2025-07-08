@@ -14,7 +14,9 @@ export default function MacroList() {
   const [name, setName] = useState('');
   const [sequence, setSequence] = useState('');
   const [interval, setInterval] = useState(50);
-  const [type, setType] = useState<'keys' | 'app' | 'shell'>('keys');
+  const [type, setType] = useState<
+    'keys' | 'app' | 'shell' | 'shell_win' | 'shell_bg'
+  >('keys');
   const [command, setCommand] = useState('');
   const [nextId, setNextId] = useState('');
   const [showImport, setShowImport] = useState(false);
@@ -165,12 +167,21 @@ export default function MacroList() {
                     className="form-control retro-input me-2 mb-1"
                     value={type}
                     onChange={(e) =>
-                      setType(e.target.value as 'keys' | 'app' | 'shell')
+                      setType(
+                        e.target.value as
+                          | 'keys'
+                          | 'app'
+                          | 'shell'
+                          | 'shell_win'
+                          | 'shell_bg',
+                      )
                     }
                   >
                     <option value="keys">Keys</option>
                     <option value="app">Application</option>
                     <option value="shell">Shell</option>
+                    <option value="shell_win">Shell (Window)</option>
+                    <option value="shell_bg">Shell (Hidden)</option>
                   </select>
                   {type === 'keys' ? (
                     <>
