@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useStore, type Macro } from './store';
 import { useToastStore } from './toastStore';
+import MacroInstructions from './MacroInstructions';
 
 export default function MacroBuilder() {
   const addMacro = useStore((s) => s.addMacro);
@@ -14,6 +15,7 @@ export default function MacroBuilder() {
   >('keys');
   const [command, setCommand] = useState('');
   const [nextId, setNextId] = useState('');
+  const [showHelp, setShowHelp] = useState(false);
 
   const clear = () => {
     setSequence('');
@@ -51,7 +53,15 @@ export default function MacroBuilder() {
 
   return (
     <div className="retro-panel mt-3">
-      <h3>◄ Macro Builder ►</h3>
+      <div className="d-flex justify-content-between align-items-center mb-2">
+        <h3 className="m-0">◄ Macro Builder ►</h3>
+        <button
+          className="retro-button btn-sm"
+          onClick={() => setShowHelp(true)}
+        >
+          HELP
+        </button>
+      </div>
       <div className="mb-2 d-flex flex-wrap">
         <input
           className="form-control retro-input me-2 mb-1"
@@ -136,6 +146,7 @@ export default function MacroBuilder() {
           </span>
         )}
       </div>
+      {showHelp && <MacroInstructions onClose={() => setShowHelp(false)} />}
     </div>
   );
 }
