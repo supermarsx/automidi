@@ -109,6 +109,10 @@ body {
   color: #00ff00;
 }
 
+.launchpad-canvas-wrapper {
+  position: relative;
+}
+
 .midi-grid-fixed {
   display: grid;
   grid-template-columns: repeat(9, 40px);
