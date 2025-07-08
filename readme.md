@@ -33,6 +33,24 @@ MIDI messages are forwarded as `midi` events so the UI can react in real time.
 The React code uses `fetch` for the REST calls and opens a WebSocket connection
 to receive device updates and MIDI messages.
 
+### Shell command security
+
+The server exposes endpoints that can execute local shell commands. To avoid
+accidental or malicious use these routes now validate commands against a
+whitelist defined in the `ALLOWED_CMDS` environment variable. Commands that do
+not match the whitelist or contain characters commonly used for injection are
+rejected with a `403` response.
+
+Example:
+
+```bash
+ALLOWED_CMDS="ffmpeg,ls" npm run server
+```
+
+Only `ffmpeg` and `ls` will be accepted by `/run/shell*` routes. Review your
+allowed commands carefully as running arbitrary processes can compromise your
+system.
+
 ---
 
 ## Development workflow

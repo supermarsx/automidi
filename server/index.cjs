@@ -6,6 +6,18 @@ const notifier = require('toasted-notifier');
 const cors = require('cors');
 const { exec, spawn } = require('child_process');
 
+const allowedCmds = (process.env.ALLOWED_CMDS || '')
+  .split(',')
+  .map((c) => c.trim())
+  .filter(Boolean);
+
+function isValidCmd(cmd) {
+  if (typeof cmd !== 'string' || !cmd.trim()) return false;
+  if (/[;&|<>`$]/.test(cmd)) return false;
+  const base = cmd.trim().split(/\s+/)[0];
+  return allowedCmds.includes(base);
+}
+
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -102,6 +114,10 @@ WebMidi.enable({ sysex: true })
         res.status(400).json({ error: 'app path required' });
         return;
       }
+      if (!isValidCmd(appPath)) {
+        res.status(403).json({ error: 'command not allowed' });
+        return;
+      }
       exec(`"${appPath}"`, (err) => {
         if (err) {
           console.error('App exec error:', err);
@@ -119,6 +135,10 @@ WebMidi.enable({ sysex: true })
         res.status(400).json({ error: 'cmd required' });
         return;
       }
+      if (!isValidCmd(cmd)) {
+        res.status(403).json({ error: 'command not allowed' });
+        return;
+      }
       exec(cmd, (err) => {
         if (err) {
           console.error('Shell exec error:', err);
@@ -134,6 +154,10 @@ WebMidi.enable({ sysex: true })
       console.log('Run shellWin request:', cmd);
       if (!cmd) {
         res.status(400).json({ error: 'cmd required' });
+        return;
+      }
+      if (!isValidCmd(cmd)) {
+        res.status(403).json({ error: 'command not allowed' });
         return;
       }
       try {
@@ -155,6 +179,10 @@ WebMidi.enable({ sysex: true })
       console.log('Run shellBg request:', cmd);
       if (!cmd) {
         res.status(400).json({ error: 'cmd required' });
+        return;
+      }
+      if (!isValidCmd(cmd)) {
+        res.status(403).json({ error: 'command not allowed' });
         return;
       }
       exec(cmd, { windowsHide: true }, (err) => {
