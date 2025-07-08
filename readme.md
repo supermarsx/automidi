@@ -7,6 +7,16 @@ controlling MIDI devices. When a Launchpad X is detected the app automatically
 switches the controller into _Programmer_ mode so that every pad can be
 addressed individually.
 
+## Setup
+
+Install dependencies before running any lint or build steps:
+
+```bash
+npm run setup
+```
+
+This script simply runs `npm install` to fetch all project packages.
+
 ---
 
 ## Node server
@@ -80,6 +90,7 @@ testing device specific commands.
 ## Useful scripts
 
 - `npm run dev` – start both the backend and Vite dev server
+- `npm run setup` – install all dependencies
 - `npm run build` – build the React application for production
 - `npm run preview` – preview the production build locally
 - `npm run lint` – run ESLint
