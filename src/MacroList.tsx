@@ -21,6 +21,8 @@ export default function MacroList() {
   >('keys');
   const [command, setCommand] = useState('');
   const [nextId, setNextId] = useState('');
+  const [tags, setTags] = useState('');
+  const [filterTag, setFilterTag] = useState('');
   const [showImport, setShowImport] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [previewId, setPreviewId] = useState<string | null>(null);
@@ -35,6 +37,7 @@ export default function MacroList() {
     setType(m.type || 'keys');
     setCommand(m.command || '');
     setNextId(m.nextId || '');
+    setTags((m.tags || []).join(', '));
   };
 
   const startPreview = (id: string) => {
@@ -45,7 +48,15 @@ export default function MacroList() {
 
   const saveEdit = () => {
     if (!editingId) return;
-    const m: Macro = { id: editingId, name: name.trim(), type };
+    const m: Macro = {
+      id: editingId,
+      name: name.trim(),
+      type,
+      tags: tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean),
+    };
     if (nextId) m.nextId = nextId;
     if (type === 'keys') {
       const keys = sequence
@@ -64,7 +75,10 @@ export default function MacroList() {
     setEditingId(null);
   };
 
-  const cancelEdit = () => setEditingId(null);
+  const cancelEdit = () => {
+    setEditingId(null);
+    setTags('');
+  };
   const closePreview = () => setPreviewId(null);
 
   const exportMacros = () => {
@@ -101,71 +115,88 @@ export default function MacroList() {
           </button>
         </div>
       </div>
+      <div className="mb-2">
+        <input
+          className="form-control retro-input"
+          placeholder="filter tag"
+          value={filterTag}
+          onChange={(e) => setFilterTag(e.target.value)}
+        />
+      </div>
       {macros.length === 0 ? (
         <div className="text-warning text-center p-3">NO MACROS LOADED</div>
       ) : (
         <div>
-          {macros.map((m, idx) => (
-            <div key={m.id} className="macro-list-item">
-              <span className="macro-name">
-                {m.name}
-                <small className="ms-1 text-info">
-                  (
-                  {(() => {
-                    const txt =
-                      m.type === 'keys'
-                        ? `${(m.sequence || []).join(' ')} (${m.interval ?? 0}ms)`
-                        : m.command || '';
-                    return txt.length > 20 ? `${txt.slice(0, 20)}…` : txt;
-                  })()}
-                  )
-                </small>
-              </span>
-              <div>
-                <button
-                  className="retro-button btn-sm me-1"
-                  disabled={idx === 0}
-                  onClick={() => reorderMacro(idx, idx - 1)}
-                >
-                  ↑
-                </button>
-                <button
-                  className="retro-button btn-sm me-1"
-                  disabled={idx === macros.length - 1}
-                  onClick={() => reorderMacro(idx, idx + 1)}
-                >
-                  ↓
-                </button>
-                <button
-                  className="retro-button btn-sm me-1"
-                  onClick={() => playMacro(m.id)}
-                >
-                  PLAY
-                </button>
-                <button
-                  className="retro-button btn-sm me-1"
-                  onClick={() => startPreview(m.id)}
-                >
-                  PREVIEW
-                </button>
-                <button
-                  className="retro-button btn-sm me-1"
-                  onClick={() => startEdit(m.id)}
-                >
-                  EDIT
-                </button>
-                <button
-                  className="retro-button btn-sm me-1"
-                  onClick={() => {
-                    removeMacro(m.id);
-                    addToast('Macro deleted', 'success');
-                  }}
-                >
-                  DEL
-                </button>
+          {macros
+            .filter(
+              (m) => !filterTag.trim() || m.tags?.includes(filterTag.trim()),
+            )
+            .map((m, idx) => (
+              <div key={m.id} className="macro-list-item">
+                <span className="macro-name">
+                  {m.name}
+                  <small className="ms-1 text-info">
+                    (
+                    {(() => {
+                      const txt =
+                        m.type === 'keys'
+                          ? `${(m.sequence || []).join(' ')} (${m.interval ?? 0}ms)`
+                          : m.command || '';
+                      return txt.length > 20 ? `${txt.slice(0, 20)}…` : txt;
+                    })()}
+                    )
+                  </small>
+                  {m.tags && m.tags.length > 0 && (
+                    <small className="ms-1 text-warning">
+                      [{m.tags.join(', ')}]
+                    </small>
+                  )}
+                </span>
+                <div>
+                  <button
+                    className="retro-button btn-sm me-1"
+                    disabled={idx === 0}
+                    onClick={() => reorderMacro(idx, idx - 1)}
+                  >
+                    ↑
+                  </button>
+                  <button
+                    className="retro-button btn-sm me-1"
+                    disabled={idx === macros.length - 1}
+                    onClick={() => reorderMacro(idx, idx + 1)}
+                  >
+                    ↓
+                  </button>
+                  <button
+                    className="retro-button btn-sm me-1"
+                    onClick={() => playMacro(m.id)}
+                  >
+                    PLAY
+                  </button>
+                  <button
+                    className="retro-button btn-sm me-1"
+                    onClick={() => startPreview(m.id)}
+                  >
+                    PREVIEW
+                  </button>
+                  <button
+                    className="retro-button btn-sm me-1"
+                    onClick={() => startEdit(m.id)}
+                  >
+                    EDIT
+                  </button>
+                  <button
+                    className="retro-button btn-sm me-1"
+                    onClick={() => {
+                      removeMacro(m.id);
+                      addToast('Macro deleted', 'success');
+                    }}
+                  >
+                    DEL
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       )}
       {editingId && (
@@ -185,6 +216,12 @@ export default function MacroList() {
                     className="form-control retro-input me-2 mb-1"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                  />
+                  <input
+                    className="form-control retro-input me-2 mb-1"
+                    placeholder="tags"
+                    value={tags}
+                    onChange={(e) => setTags(e.target.value)}
                   />
                   <select
                     className="form-control retro-input me-2 mb-1"
@@ -300,6 +337,11 @@ export default function MacroList() {
                           <strong>Next Macro:</strong>{' '}
                           {macros.find((x) => x.id === m.nextId)?.name ||
                             m.nextId}
+                        </p>
+                      )}
+                      {m.tags && m.tags.length > 0 && (
+                        <p>
+                          <strong>Tags:</strong> {m.tags.join(', ')}
                         </p>
                       )}
                     </div>

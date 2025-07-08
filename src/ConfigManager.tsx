@@ -32,7 +32,10 @@ export default function ConfigManager() {
   const { send } = useMidi();
   const [editing, setEditing] = useState<PadConfig | null>(null);
   const [editName, setEditName] = useState('');
+  const [editTags, setEditTags] = useState('');
   const [name, setName] = useState('');
+  const [tags, setTags] = useState('');
+  const [filterTag, setFilterTag] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<PadConfig | null>(null);
   const [confirmOverwrite, setConfirmOverwrite] = useState<PadConfig | null>(
     null,
@@ -54,6 +57,10 @@ export default function ConfigManager() {
       padLabels,
       padChannels,
       padActions,
+      tags: tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean),
     };
     const existing = configs.find((c) => c.name === cfg.name);
     if (existing) {
@@ -62,6 +69,7 @@ export default function ConfigManager() {
     }
     addConfig(cfg);
     setName('');
+    setTags('');
     addToast('Config saved', 'success');
   };
 
@@ -76,12 +84,21 @@ export default function ConfigManager() {
   const startEdit = (cfg: PadConfig) => {
     setEditing(cfg);
     setEditName(cfg.name);
+    setEditTags((cfg.tags || []).join(', '));
   };
 
   const saveEdit = () => {
     if (!editing) return;
-    updateConfig({ ...editing, name: editName.trim() || editing.name });
+    updateConfig({
+      ...editing,
+      name: editName.trim() || editing.name,
+      tags: editTags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean),
+    });
     setEditing(null);
+    setEditTags('');
     addToast('Config renamed', 'success');
   };
 
@@ -170,6 +187,7 @@ export default function ConfigManager() {
           padLabels: cfg.padLabels || {},
           padChannels: cfg.padChannels || {},
           padActions: cfg.padActions || {},
+          tags: cfg.tags || [],
         });
         addToast('Config imported', 'success');
       } catch {
@@ -190,6 +208,12 @@ export default function ConfigManager() {
           onChange={(e) => setName(e.target.value)}
           placeholder="Config name"
         />
+        <input
+          className="form-control retro-input me-2"
+          value={tags}
+          onChange={(e) => setTags(e.target.value)}
+          placeholder="tags"
+        />
         <button className="retro-button btn-sm" onClick={saveCurrent}>
           SAVE
         </button>
@@ -197,68 +221,88 @@ export default function ConfigManager() {
       <div className="mb-3">
         <input type="file" accept="application/json" onChange={importConfig} />
       </div>
-      {configs.map((cfg, idx) => (
-        <div key={cfg.id} className="macro-list-item">
-          <span className="macro-name">{cfg.name}</span>
-          <div>
-            <button
-              className="retro-button btn-sm me-1"
-              disabled={idx === 0}
-              onClick={() => reorderConfig(idx, idx - 1)}
-            >
-              ↑
-            </button>
-            <button
-              className="retro-button btn-sm me-1"
-              disabled={idx === configs.length - 1}
-              onClick={() => reorderConfig(idx, idx + 1)}
-            >
-              ↓
-            </button>
-            <button
-              className="retro-button btn-sm me-1"
-              onClick={() => loadConfig(cfg)}
-            >
-              LOAD
-            </button>
-            <button
-              className="retro-button btn-sm me-1"
-              onClick={() => saveToConfig(cfg)}
-            >
-              SAVE
-            </button>
-            <button
-              className="retro-button btn-sm me-1"
-              onClick={() => exportConfig(cfg)}
-            >
-              EXPORT
-            </button>
-            <button
-              className="retro-button btn-sm me-1"
-              onClick={() => loadToLaunchpad(cfg)}
-            >
-              LOAD LP
-            </button>
-            <button
-              className="retro-button btn-sm me-1"
-              onClick={() => startEdit(cfg)}
-            >
-              EDIT
-            </button>
-            <button
-              className="retro-button btn-sm"
-              onClick={() => setConfirmDelete(cfg)}
-            >
-              DEL
-            </button>
+      <div className="mb-3">
+        <input
+          className="form-control retro-input"
+          placeholder="filter tag"
+          value={filterTag}
+          onChange={(e) => setFilterTag(e.target.value)}
+        />
+      </div>
+      {configs
+        .filter((c) => !filterTag.trim() || c.tags?.includes(filterTag.trim()))
+        .map((cfg, idx) => (
+          <div key={cfg.id} className="macro-list-item">
+            <span className="macro-name">
+              {cfg.name}
+              {cfg.tags && cfg.tags.length > 0 && (
+                <small className="ms-1 text-warning">
+                  [{cfg.tags.join(', ')}]
+                </small>
+              )}
+            </span>
+            <div>
+              <button
+                className="retro-button btn-sm me-1"
+                disabled={idx === 0}
+                onClick={() => reorderConfig(idx, idx - 1)}
+              >
+                ↑
+              </button>
+              <button
+                className="retro-button btn-sm me-1"
+                disabled={idx === configs.length - 1}
+                onClick={() => reorderConfig(idx, idx + 1)}
+              >
+                ↓
+              </button>
+              <button
+                className="retro-button btn-sm me-1"
+                onClick={() => loadConfig(cfg)}
+              >
+                LOAD
+              </button>
+              <button
+                className="retro-button btn-sm me-1"
+                onClick={() => saveToConfig(cfg)}
+              >
+                SAVE
+              </button>
+              <button
+                className="retro-button btn-sm me-1"
+                onClick={() => exportConfig(cfg)}
+              >
+                EXPORT
+              </button>
+              <button
+                className="retro-button btn-sm me-1"
+                onClick={() => loadToLaunchpad(cfg)}
+              >
+                LOAD LP
+              </button>
+              <button
+                className="retro-button btn-sm me-1"
+                onClick={() => startEdit(cfg)}
+              >
+                EDIT
+              </button>
+              <button
+                className="retro-button btn-sm"
+                onClick={() => setConfirmDelete(cfg)}
+              >
+                DEL
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
       {editing && (
         <div
           className="modal d-block"
           style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
-          onClick={() => setEditing(null)}
+          onClick={() => {
+            setEditing(null);
+            setEditTags('');
+          }}
         >
           <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
             <div className="modal-content modal-retro">
@@ -271,6 +315,12 @@ export default function ConfigManager() {
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                 />
+                <input
+                  className="form-control retro-input mt-2"
+                  value={editTags}
+                  onChange={(e) => setEditTags(e.target.value)}
+                  placeholder="tags"
+                />
               </div>
               <div className="modal-footer">
                 <button className="retro-button me-2" onClick={saveEdit}>
@@ -278,7 +328,10 @@ export default function ConfigManager() {
                 </button>
                 <button
                   className="retro-button"
-                  onClick={() => setEditing(null)}
+                  onClick={() => {
+                    setEditing(null);
+                    setEditTags('');
+                  }}
                 >
                   CANCEL
                 </button>

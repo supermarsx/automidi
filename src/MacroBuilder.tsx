@@ -16,6 +16,7 @@ export default function MacroBuilder() {
   >('keys');
   const [command, setCommand] = useState('');
   const [nextId, setNextId] = useState('');
+  const [tags, setTags] = useState('');
   const [showHelp, setShowHelp] = useState(false);
 
   const clear = () => {
@@ -24,6 +25,7 @@ export default function MacroBuilder() {
     setType('keys');
     setInterval(50);
     setNextId('');
+    setTags('');
   };
 
   const save = () => {
@@ -31,6 +33,10 @@ export default function MacroBuilder() {
       id: Date.now().toString(),
       name: name.trim(),
       type,
+      tags: tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean),
     };
     if (nextId) macro.nextId = nextId;
     if (type === 'keys') {
@@ -73,6 +79,12 @@ export default function MacroBuilder() {
           placeholder="Macro name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          className="form-control retro-input me-2 mb-1"
+          placeholder="tags"
+          value={tags}
+          onChange={(e) => setTags(e.target.value)}
         />
         <select
           className="form-control retro-input me-2 mb-1"

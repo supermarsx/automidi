@@ -15,6 +15,7 @@ export interface Macro {
   type?: 'keys' | 'app' | 'shell' | 'shell_win' | 'shell_bg';
   command?: string;
   nextId?: string;
+  tags?: string[];
 }
 
 interface DevicesSlice {
@@ -65,6 +66,7 @@ export interface PadConfig {
   padLabels?: Record<string, string>;
   padChannels?: Record<string, number>;
   padActions?: Record<string, PadActions>;
+  tags?: string[];
 }
 
 interface ConfigsSlice {
@@ -329,9 +331,19 @@ export const useStore = create<StoreState>()(
               typeof val === 'string' ? { 1: val } : (val as PadColourMap);
           }
         }
+        const macros = (p.macros || current.macros).map((m) => ({
+          ...m,
+          tags: m.tags ?? [],
+        }));
+        const configs = (p.configs || current.configs).map((c) => ({
+          ...c,
+          tags: c.tags ?? [],
+        }));
         return {
           ...current,
           ...p,
+          macros,
+          configs,
           padColours: Object.keys(migratedColours).length
             ? migratedColours
             : current.padColours,
