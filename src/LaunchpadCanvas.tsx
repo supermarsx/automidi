@@ -125,13 +125,21 @@ export function LaunchpadCanvas() {
       />,
     );
   }
+  const handleWrapperClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!selected) return;
+    const target = e.target as HTMLElement;
+    if (target.closest('.pad-options-panel')) return;
+    if (target.closest('.midi-pad-container')) return;
+    setSelected(null);
+  };
+
   return (
-    <>
+    <div className="launchpad-canvas-wrapper" onClick={handleWrapperClick}>
       <div className="midi-grid-fixed">{grid}</div>
       {selected && (
         <PadOptionsPanel pad={selected} onClose={() => setSelected(null)} />
       )}
-    </>
+    </div>
   );
 }
 
