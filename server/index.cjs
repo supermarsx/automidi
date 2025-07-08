@@ -5,6 +5,10 @@ const keySender = require('node-key-sender');
 const notifier = require('toasted-notifier');
 const cors = require('cors');
 const { exec, spawn } = require('child_process');
+const crypto = require('crypto');
+
+const API_KEY = process.env.API_KEY || crypto.randomBytes(16).toString('hex');
+console.log('API key:', API_KEY);
 
 const allowedCmds = (process.env.ALLOWED_CMDS || '')
   .split(',')
@@ -21,6 +25,17 @@ function isValidCmd(cmd) {
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+function checkKey(req, res, next) {
+  const key = req.headers['x-api-key'];
+  if (key !== API_KEY) {
+    res.status(401).json({ error: 'unauthorized' });
+    return;
+  }
+  next();
+}
+
+app.use(checkKey);
 
 let currentDevices = { inputs: [], outputs: [] };
 
@@ -271,7 +286,12 @@ WebMidi.enable({ sysex: true })
     // Initial setup
     setupMidiListeners();
 
-    wss.on('connection', (ws) => {
+    wss.on('connection', (ws, req) => {
+      const url = new URL(req.url, 'http://localhost');
+      if (url.searchParams.get('key') !== API_KEY) {
+        ws.close();
+        return;
+      }
       console.log('WebSocket client connected');
       sendDevices(ws);
 
