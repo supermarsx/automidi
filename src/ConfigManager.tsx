@@ -34,6 +34,9 @@ export default function ConfigManager() {
   const [editName, setEditName] = useState('');
   const [name, setName] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<PadConfig | null>(null);
+  const [confirmOverwrite, setConfirmOverwrite] = useState<PadConfig | null>(
+    null,
+  );
 
   useEffect(() => {
     if (autoLoadFirstConfig && configs.length > 0) {
@@ -52,6 +55,11 @@ export default function ConfigManager() {
       padChannels,
       padActions,
     };
+    const existing = configs.find((c) => c.name === cfg.name);
+    if (existing) {
+      setConfirmOverwrite({ ...cfg, id: existing.id });
+      return;
+    }
     addConfig(cfg);
     setName('');
     addToast('Config saved', 'success');
@@ -78,7 +86,13 @@ export default function ConfigManager() {
   };
 
   const saveToConfig = (cfg: PadConfig) => {
-    updateConfig({ ...cfg, padColours, padLabels, padChannels, padActions });
+    const updated = { ...cfg, padColours, padLabels, padChannels, padActions };
+    const dup = configs.find((c) => c.name === cfg.name && c.id !== cfg.id);
+    if (dup) {
+      setConfirmOverwrite(updated);
+      return;
+    }
+    updateConfig(updated);
     addToast('Config updated', 'success');
   };
 
@@ -121,6 +135,14 @@ export default function ConfigManager() {
     removeConfig(confirmDelete.id);
     setConfirmDelete(null);
     addToast('Config deleted', 'success');
+  };
+
+  const confirmOverwriteConfig = () => {
+    if (!confirmOverwrite) return;
+    updateConfig(confirmOverwrite);
+    setConfirmOverwrite(null);
+    setName('');
+    addToast('Config updated', 'success');
   };
 
   const exportConfig = (cfg: PadConfig) => {
@@ -292,6 +314,38 @@ export default function ConfigManager() {
                   onClick={() => setConfirmDelete(null)}
                 >
                   CANCEL
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {confirmOverwrite && (
+        <div
+          className="modal d-block"
+          style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
+          onClick={() => setConfirmOverwrite(null)}
+        >
+          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content modal-retro">
+              <div className="modal-header">
+                <h5 className="modal-title">OVERWRITE CONFIG</h5>
+              </div>
+              <div className="modal-body">
+                Overwrite existing config "{confirmOverwrite.name}"?
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="retro-button me-2"
+                  onClick={confirmOverwriteConfig}
+                >
+                  YES
+                </button>
+                <button
+                  className="retro-button"
+                  onClick={() => setConfirmOverwrite(null)}
+                >
+                  NO
                 </button>
               </div>
             </div>
