@@ -18,6 +18,7 @@ export default function MacroList() {
   const [command, setCommand] = useState('');
   const [nextId, setNextId] = useState('');
   const [showImport, setShowImport] = useState(false);
+  const [previewId, setPreviewId] = useState<string | null>(null);
 
   const startEdit = (id: string) => {
     const m = macros.find((x) => x.id === id);
@@ -29,6 +30,12 @@ export default function MacroList() {
     setType(m.type || 'keys');
     setCommand(m.command || '');
     setNextId(m.nextId || '');
+  };
+
+  const startPreview = (id: string) => {
+    const m = macros.find((x) => x.id === id);
+    if (!m) return;
+    setPreviewId(id);
   };
 
   const saveEdit = () => {
@@ -53,6 +60,7 @@ export default function MacroList() {
   };
 
   const cancelEdit = () => setEditingId(null);
+  const closePreview = () => setPreviewId(null);
 
   const exportMacros = () => {
     const data = JSON.stringify(macros);
@@ -111,9 +119,15 @@ export default function MacroList() {
                 </button>
                 <button
                   className="retro-button btn-sm me-1"
-                  onClick={() => startEdit(m.id)}
+                  onClick={() => startPreview(m.id)}
                 >
                   PREVIEW
+                </button>
+                <button
+                  className="retro-button btn-sm me-1"
+                  onClick={() => startEdit(m.id)}
+                >
+                  EDIT
                 </button>
                 <button
                   className="retro-button btn-sm me-1"
@@ -200,6 +214,67 @@ export default function MacroList() {
                 </button>
                 <button className="retro-button" onClick={cancelEdit}>
                   CANCEL
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {previewId && (
+        <div
+          className="modal d-block"
+          style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
+          onClick={closePreview}
+        >
+          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content modal-retro">
+              <div className="modal-header">
+                <h5 className="modal-title">MACRO DETAILS</h5>
+              </div>
+              <div className="modal-body">
+                {(() => {
+                  const m = macros.find((x) => x.id === previewId);
+                  if (!m) return null;
+                  return (
+                    <div>
+                      <p>
+                        <strong>Name:</strong> {m.name}
+                      </p>
+                      <p>
+                        <strong>Type:</strong> {m.type || 'keys'}
+                      </p>
+                      {m.type === 'keys' ? (
+                        <>
+                          <p>
+                            <strong>Sequence:</strong>{' '}
+                            {(m.sequence || []).join(' ')}
+                          </p>
+                          <p>
+                            <strong>Interval:</strong> {m.interval ?? 0}ms
+                          </p>
+                        </>
+                      ) : (
+                        <p>
+                          <strong>
+                            {m.type === 'app' ? 'App Path' : 'Command'}:
+                          </strong>{' '}
+                          {m.command}
+                        </p>
+                      )}
+                      {m.nextId && (
+                        <p>
+                          <strong>Next Macro:</strong>{' '}
+                          {macros.find((x) => x.id === m.nextId)?.name ||
+                            m.nextId}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+              <div className="modal-footer">
+                <button className="retro-button" onClick={closePreview}>
+                  CLOSE
                 </button>
               </div>
             </div>
