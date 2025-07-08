@@ -7,6 +7,7 @@ export default function MacroBuilder() {
   const addMacro = useStore((s) => s.addMacro);
   const macros = useStore((s) => s.macros);
   const addToast = useToastStore((s) => s.addToast);
+  const [confirmOverwrite, setConfirmOverwrite] = useState<Macro | null>(null);
   const [name, setName] = useState('');
   const [sequence, setSequence] = useState('');
   const [interval, setInterval] = useState(50);
@@ -45,6 +46,10 @@ export default function MacroBuilder() {
       macro.command = command.trim();
     }
     if (!macro.name) return;
+    if (macros.some((m) => m.name === macro.name)) {
+      setConfirmOverwrite(macro);
+      return;
+    }
     addMacro(macro);
     addToast('Macro saved', 'success');
     setName('');
@@ -147,6 +152,44 @@ export default function MacroBuilder() {
         )}
       </div>
       {showHelp && <MacroInstructions onClose={() => setShowHelp(false)} />}
+      {confirmOverwrite && (
+        <div
+          className="modal d-block"
+          style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
+          onClick={() => setConfirmOverwrite(null)}
+        >
+          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content modal-retro">
+              <div className="modal-header">
+                <h5 className="modal-title">OVERWRITE MACRO</h5>
+              </div>
+              <div className="modal-body">
+                Overwrite existing macro "{confirmOverwrite.name}"?
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="retro-button me-2"
+                  onClick={() => {
+                    addMacro(confirmOverwrite);
+                    addToast('Macro saved', 'success');
+                    setName('');
+                    clear();
+                    setConfirmOverwrite(null);
+                  }}
+                >
+                  YES
+                </button>
+                <button
+                  className="retro-button"
+                  onClick={() => setConfirmOverwrite(null)}
+                >
+                  NO
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
