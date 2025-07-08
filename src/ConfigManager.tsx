@@ -15,6 +15,7 @@ export default function ConfigManager() {
   const configs = useStore((s) => s.configs);
   const addConfig = useStore((s) => s.addConfig);
   const removeConfig = useStore((s) => s.removeConfig);
+  const reorderConfig = useStore((s) => s.reorderConfig);
   const setPadColours = useStore((s) => s.setPadColours);
   const setPadLabels = useStore((s) => s.setPadLabels);
   const padColours = useStore((s) => s.padColours);
@@ -174,10 +175,24 @@ export default function ConfigManager() {
       <div className="mb-3">
         <input type="file" accept="application/json" onChange={importConfig} />
       </div>
-      {configs.map((cfg) => (
+      {configs.map((cfg, idx) => (
         <div key={cfg.id} className="macro-list-item">
           <span className="macro-name">{cfg.name}</span>
           <div>
+            <button
+              className="retro-button btn-sm me-1"
+              disabled={idx === 0}
+              onClick={() => reorderConfig(idx, idx - 1)}
+            >
+              ↑
+            </button>
+            <button
+              className="retro-button btn-sm me-1"
+              disabled={idx === configs.length - 1}
+              onClick={() => reorderConfig(idx, idx + 1)}
+            >
+              ↓
+            </button>
             <button
               className="retro-button btn-sm me-1"
               onClick={() => loadConfig(cfg)}

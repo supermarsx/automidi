@@ -72,6 +72,7 @@ interface ConfigsSlice {
   addConfig: (c: PadConfig) => void;
   updateConfig: (c: PadConfig) => void;
   removeConfig: (id: string) => void;
+  reorderConfig: (from: number, to: number) => void;
 }
 
 interface SettingsSlice {
@@ -192,6 +193,20 @@ export const useStore = create<StoreState>()(
         })),
       removeConfig: (id) =>
         set((s) => ({ configs: s.configs.filter((p) => p.id !== id) })),
+      reorderConfig: (from, to) =>
+        set((s) => {
+          const configs = [...s.configs];
+          if (
+            from < 0 ||
+            from >= configs.length ||
+            to < 0 ||
+            to >= configs.length
+          )
+            return { configs };
+          const [c] = configs.splice(from, 1);
+          configs.splice(to, 0, c);
+          return { configs };
+        }),
       settings: {
         host: location.hostname || 'localhost',
         port: 3000,
