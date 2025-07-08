@@ -3,6 +3,7 @@ import { useStore, type Macro } from './store';
 import { useToastStore } from './toastStore';
 import { useState } from 'react';
 import MacroImportModal from './MacroImportModal';
+import MacroInstructions from './MacroInstructions';
 
 export default function MacroList() {
   const macros = useStore((s) => s.macros);
@@ -20,6 +21,7 @@ export default function MacroList() {
   const [command, setCommand] = useState('');
   const [nextId, setNextId] = useState('');
   const [showImport, setShowImport] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [previewId, setPreviewId] = useState<string | null>(null);
 
   const startEdit = (id: string) => {
@@ -81,6 +83,12 @@ export default function MacroList() {
       <div className="d-flex justify-content-between align-items-center mb-2">
         <h3 className="m-0">◄ Macro Sequencer ►</h3>
         <div>
+          <button
+            className="retro-button btn-sm me-1"
+            onClick={() => setShowHelp(true)}
+          >
+            HELP
+          </button>
           <button className="retro-button btn-sm me-1" onClick={exportMacros}>
             EXPORT
           </button>
@@ -293,6 +301,7 @@ export default function MacroList() {
         </div>
       )}
       {showImport && <MacroImportModal onClose={() => setShowImport(false)} />}
+      {showHelp && <MacroInstructions onClose={() => setShowHelp(false)} />}
     </div>
   );
 }
