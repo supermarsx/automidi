@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore, type PadConfig } from './store';
 import { useToastStore } from './toastStore';
 import { useMidi } from './useMidi';
@@ -25,6 +25,7 @@ export default function ConfigManager() {
   const setPadActions = useStore((s) => s.setPadActions);
   const clearBeforeLoad = useStore((s) => s.settings.clearBeforeLoad);
   const sysexColorMode = useStore((s) => s.settings.sysexColorMode);
+  const autoLoadFirstConfig = useStore((s) => s.settings.autoLoadFirstConfig);
   const updateConfig = useStore((s) => s.updateConfig);
   const addToast = useToastStore((s) => s.addToast);
   const { send } = useMidi();
@@ -32,6 +33,13 @@ export default function ConfigManager() {
   const [editName, setEditName] = useState('');
   const [name, setName] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<PadConfig | null>(null);
+
+  useEffect(() => {
+    if (autoLoadFirstConfig && configs.length > 0) {
+      loadConfig(configs[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const saveCurrent = () => {
     if (!name.trim()) return;
