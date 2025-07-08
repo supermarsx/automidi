@@ -31,6 +31,7 @@ interface MacrosSlice {
   addMacro: (macro: Macro) => void;
   updateMacro: (macro: Macro) => void;
   removeMacro: (id: string) => void;
+  reorderMacro: (from: number, to: number) => void;
 }
 
 export type PadColourMap = Record<number, string>;
@@ -143,6 +144,20 @@ export const useStore = create<StoreState>()(
         })),
       removeMacro: (id) =>
         set((state) => ({ macros: state.macros.filter((m) => m.id !== id) })),
+      reorderMacro: (from, to) =>
+        set((state) => {
+          const macros = [...state.macros];
+          if (
+            from < 0 ||
+            from >= macros.length ||
+            to < 0 ||
+            to >= macros.length
+          )
+            return { macros };
+          const [m] = macros.splice(from, 1);
+          macros.splice(to, 0, m);
+          return { macros };
+        }),
       padColours: {},
       padLabels: {},
       padChannels: {},

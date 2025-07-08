@@ -9,6 +9,7 @@ export default function MacroList() {
   const macros = useStore((s) => s.macros);
   const removeMacro = useStore((s) => s.removeMacro);
   const updateMacro = useStore((s) => s.updateMacro);
+  const reorderMacro = useStore((s) => s.reorderMacro);
   const addToast = useToastStore((s) => s.addToast);
   const { playMacro } = useKeyMacroPlayer();
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -104,7 +105,7 @@ export default function MacroList() {
         <div className="text-warning text-center p-3">NO MACROS LOADED</div>
       ) : (
         <div>
-          {macros.map((m) => (
+          {macros.map((m, idx) => (
             <div key={m.id} className="macro-list-item">
               <span className="macro-name">
                 {m.name}
@@ -121,6 +122,20 @@ export default function MacroList() {
                 </small>
               </span>
               <div>
+                <button
+                  className="retro-button btn-sm me-1"
+                  disabled={idx === 0}
+                  onClick={() => reorderMacro(idx, idx - 1)}
+                >
+                  ↑
+                </button>
+                <button
+                  className="retro-button btn-sm me-1"
+                  disabled={idx === macros.length - 1}
+                  onClick={() => reorderMacro(idx, idx + 1)}
+                >
+                  ↓
+                </button>
                 <button
                   className="retro-button btn-sm me-1"
                   onClick={() => playMacro(m.id)}
