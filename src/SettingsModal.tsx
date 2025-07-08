@@ -25,6 +25,7 @@ export default function SettingsModal({ onClose }: Props) {
   const autoLoadFirstConfig = useStore((s) => s.settings.autoLoadFirstConfig);
   const theme = useStore((s) => s.settings.theme);
   const clock = useStore((s) => s.settings.clock ?? [0xf8]);
+  const apiKey = useStore((s) => s.settings.apiKey);
   const setHost = useStore((s) => s.setHost);
   const setPort = useStore((s) => s.setPort);
   const setAutoReconnect = useStore((s) => s.setAutoReconnect);
@@ -42,6 +43,7 @@ export default function SettingsModal({ onClose }: Props) {
   const setAutoLoadFirstConfig = useStore((s) => s.setAutoLoadFirstConfig);
   const setTheme = useStore((s) => s.setTheme);
   const setClock = useStore((s) => s.setClock);
+  const setApiKey = useStore((s) => s.setApiKey);
   const addToast = useToastStore((s) => s.addToast);
 
   const [h, setH] = useState(host);
@@ -60,6 +62,7 @@ export default function SettingsModal({ onClose }: Props) {
   const [asleep, setAsleep] = useState(autoSleep);
   const [alfc, setAlfc] = useState(autoLoadFirstConfig);
   const [thm, setThm] = useState(theme);
+  const [ak, setAk] = useState(apiKey);
   const [clk, setClk] = useState(clock.join(' '));
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -80,6 +83,7 @@ export default function SettingsModal({ onClose }: Props) {
     setAutoSleep(asleep);
     setAutoLoadFirstConfig(alfc);
     setTheme(thm);
+    setApiKey(ak);
     setClock(
       clk
         .split(/\s+/)
@@ -126,6 +130,7 @@ export default function SettingsModal({ onClose }: Props) {
         setAutoSleep(cfg.autoSleep ?? asleep);
         setAutoLoadFirstConfig(cfg.autoLoadFirstConfig ?? alfc);
         setTheme(cfg.theme ?? thm);
+        setApiKey(cfg.apiKey ?? ak);
         setClock(Array.isArray(cfg.clock) ? cfg.clock : clock);
         setH(cfg.host ?? h);
         setP(cfg.port ?? p);
@@ -143,6 +148,7 @@ export default function SettingsModal({ onClose }: Props) {
         setAsleep(cfg.autoSleep ?? asleep);
         setAlfc(cfg.autoLoadFirstConfig ?? alfc);
         setThm(cfg.theme ?? thm);
+        setAk(cfg.apiKey ?? ak);
         setClk(
           (Array.isArray(cfg.clock) ? cfg.clock : clock)
             .map((n: number) => n.toString())
@@ -198,6 +204,15 @@ export default function SettingsModal({ onClose }: Props) {
                 max="65535"
               />
               <small className="text-warning">Default: 3000</small>
+            </div>
+            <div className="mb-3">
+              <label className="form-label text-info">API KEY:</label>
+              <input
+                className="form-control retro-input"
+                value={ak}
+                onChange={(e) => setAk(e.target.value)}
+              />
+              <small className="text-warning">Must match server API key</small>
             </div>
             <div className="mb-3">
               <label className="form-label text-info">MAX LOG ENTRIES:</label>

@@ -21,6 +21,7 @@ export interface MidiMessage {
 export function useMidi() {
   const host = useStore((s) => s.settings.host);
   const port = useStore((s) => s.settings.port);
+  const apiKey = useStore((s) => s.settings.apiKey);
   const autoReconnect = useStore((s) => s.settings.autoReconnect);
   const reconnectInterval = useStore((s) => s.settings.reconnectInterval);
   const maxReconnectAttempts = useStore((s) => s.settings.maxReconnectAttempts);
@@ -94,12 +95,12 @@ export function useMidi() {
     }
 
     console.log(
-      `Attempting WebSocket connection to ws://${host}:${port} (attempt ${connectionAttemptsRef.current + 1})`,
+      `Attempting WebSocket connection to ws://${host}:${port}?key=${apiKey} (attempt ${connectionAttemptsRef.current + 1})`,
     );
     setStatus('connecting');
 
     try {
-      const ws = new WebSocket(`ws://${host}:${port}`);
+      const ws = new WebSocket(`ws://${host}:${port}?key=${apiKey}`);
       wsRef.current = ws;
 
       const connectionTimeout = setTimeout(() => {

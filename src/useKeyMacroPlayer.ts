@@ -5,6 +5,7 @@ import { useToastStore } from './toastStore';
 export function useKeyMacroPlayer() {
   const macros = useStore((s) => s.macros);
   const addToast = useToastStore.getState().addToast;
+  const apiKey = useStore.getState().settings.apiKey;
 
   const playMacro = useCallback(
     async (macroId: string) => {
@@ -16,31 +17,46 @@ export function useKeyMacroPlayer() {
         if (macro.type === 'app') {
           await fetch('/run/app', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': apiKey,
+            },
             body: JSON.stringify({ app: macro.command }),
           });
         } else if (macro.type === 'shell') {
           await fetch('/run/shell', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': apiKey,
+            },
             body: JSON.stringify({ cmd: macro.command }),
           });
         } else if (macro.type === 'shell_win') {
           await fetch('/run/shellWin', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': apiKey,
+            },
             body: JSON.stringify({ cmd: macro.command }),
           });
         } else if (macro.type === 'shell_bg') {
           await fetch('/run/shellBg', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': apiKey,
+            },
             body: JSON.stringify({ cmd: macro.command }),
           });
         } else {
           await fetch('/keys/type', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': apiKey,
+            },
             body: JSON.stringify({
               sequence: macro.sequence,
               interval: macro.interval,

@@ -3,11 +3,14 @@ import { useStore } from './store';
 
 export async function notify(message: string) {
   const addToast = useToastStore.getState().addToast;
-  const { host, port } = useStore.getState().settings;
+  const { host, port, apiKey } = useStore.getState().settings;
   try {
     const res = await fetch(`http://${host}:${port}/notify`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+      },
       body: JSON.stringify({ message }),
     });
     if (!res.ok) throw new Error('Request failed');

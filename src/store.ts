@@ -95,6 +95,7 @@ interface SettingsSlice {
     autoSleep: number;
     theme: 'default' | 'dark' | 'light';
     autoLoadFirstConfig: boolean;
+    apiKey: string;
     clock: number[];
   };
   setHost: (h: string) => void;
@@ -113,6 +114,7 @@ interface SettingsSlice {
   setAutoSleep: (s: number) => void;
   setTheme: (t: 'default' | 'dark' | 'light') => void;
   setAutoLoadFirstConfig: (b: boolean) => void;
+  setApiKey: (k: string) => void;
   setClock: (data: number[]) => void;
 }
 
@@ -226,6 +228,7 @@ export const useStore = create<StoreState>()(
         autoSleep: 0,
         theme: 'default',
         autoLoadFirstConfig: false,
+        apiKey: '',
         clock: [0xf8],
       },
       setHost: (h) =>
@@ -312,6 +315,8 @@ export const useStore = create<StoreState>()(
         set((state) => ({
           settings: { ...state.settings, autoLoadFirstConfig: b },
         })),
+      setApiKey: (k) =>
+        set((state) => ({ settings: { ...state.settings, apiKey: k } })),
       setClock: (data) =>
         set((state) => ({
           settings: { ...state.settings, clock: data },
@@ -358,6 +363,7 @@ export const useStore = create<StoreState>()(
             autoLoadFirstConfig:
               p.settings?.autoLoadFirstConfig ??
               current.settings.autoLoadFirstConfig,
+            apiKey: p.settings?.apiKey ?? current.settings.apiKey,
           },
         };
       },
