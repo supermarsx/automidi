@@ -25,6 +25,18 @@ export function useKeyMacroPlayer() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ cmd: macro.command }),
           });
+        } else if (macro.type === 'shell_win') {
+          await fetch('/run/shellWin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cmd: macro.command }),
+          });
+        } else if (macro.type === 'shell_bg') {
+          await fetch('/run/shellBg', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cmd: macro.command }),
+          });
         } else {
           await fetch('/keys/type', {
             method: 'POST',

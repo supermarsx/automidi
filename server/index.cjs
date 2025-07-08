@@ -4,7 +4,7 @@ const { WebMidi } = require('webmidi');
 const keySender = require('node-key-sender');
 const notifier = require('toasted-notifier');
 const cors = require('cors');
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 
 const app = express();
 app.use(express.json());
@@ -122,6 +122,44 @@ WebMidi.enable({ sysex: true })
       exec(cmd, (err) => {
         if (err) {
           console.error('Shell exec error:', err);
+          res.status(500).json({ error: err.message });
+        } else {
+          res.json({ ok: true });
+        }
+      });
+    });
+
+    app.post('/run/shellWin', (req, res) => {
+      const { cmd } = req.body || {};
+      console.log('Run shellWin request:', cmd);
+      if (!cmd) {
+        res.status(400).json({ error: 'cmd required' });
+        return;
+      }
+      try {
+        const child = spawn(cmd, {
+          shell: true,
+          detached: true,
+          windowsHide: false,
+        });
+        child.unref();
+        res.json({ ok: true });
+      } catch (err) {
+        console.error('ShellWin spawn error:', err);
+        res.status(500).json({ error: err.message });
+      }
+    });
+
+    app.post('/run/shellBg', (req, res) => {
+      const { cmd } = req.body || {};
+      console.log('Run shellBg request:', cmd);
+      if (!cmd) {
+        res.status(400).json({ error: 'cmd required' });
+        return;
+      }
+      exec(cmd, { windowsHide: true }, (err) => {
+        if (err) {
+          console.error('ShellBg exec error:', err);
           res.status(500).json({ error: err.message });
         } else {
           res.json({ ok: true });
