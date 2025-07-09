@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "server": "node server/index.cjs",
     "setup": "npm install",
-    "test": "vitest"
+    "test": "jest"
   },
   "dependencies": {
     "@tonejs/midi": "^2.0.28",

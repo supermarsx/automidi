@@ -2,7 +2,10 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  testMatch: ['<rootDir>/server/__tests__/**/*.test.ts'],
+  testMatch: [
+    '<rootDir>/server/__tests__/**/*.test.ts',
+    '<rootDir>/src/__tests__/midiMessages.test.ts',
+  ],
   globals: {
     'ts-jest': {
       tsconfig: 'tsconfig.jest.json',
