@@ -7,6 +7,8 @@ const cors = require('cors');
 const { exec, spawn } = require('child_process');
 const crypto = require('crypto');
 
+const { isValidCmd } = require('./validate.js');
+
 const API_KEY = process.env.API_KEY || crypto.randomBytes(16).toString('hex');
 console.log('API key:', API_KEY);
 
@@ -14,13 +16,6 @@ const allowedCmds = (process.env.ALLOWED_CMDS || '')
   .split(',')
   .map((c) => c.trim())
   .filter(Boolean);
-
-function isValidCmd(cmd) {
-  if (typeof cmd !== 'string' || !cmd.trim()) return false;
-  if (/[;&|<>`$]/.test(cmd)) return false;
-  const base = cmd.trim().split(/\s+/)[0];
-  return allowedCmds.includes(base);
-}
 
 const app = express();
 app.use(express.json());
@@ -129,7 +124,7 @@ WebMidi.enable({ sysex: true })
         res.status(400).json({ error: 'app path required' });
         return;
       }
-      if (!isValidCmd(appPath)) {
+      if (!isValidCmd(appPath, allowedCmds)) {
         res.status(403).json({ error: 'command not allowed' });
         return;
       }
@@ -150,7 +145,7 @@ WebMidi.enable({ sysex: true })
         res.status(400).json({ error: 'cmd required' });
         return;
       }
-      if (!isValidCmd(cmd)) {
+      if (!isValidCmd(cmd, allowedCmds)) {
         res.status(403).json({ error: 'command not allowed' });
         return;
       }
@@ -171,7 +166,7 @@ WebMidi.enable({ sysex: true })
         res.status(400).json({ error: 'cmd required' });
         return;
       }
-      if (!isValidCmd(cmd)) {
+      if (!isValidCmd(cmd, allowedCmds)) {
         res.status(403).json({ error: 'command not allowed' });
         return;
       }
@@ -196,7 +191,7 @@ WebMidi.enable({ sysex: true })
         res.status(400).json({ error: 'cmd required' });
         return;
       }
-      if (!isValidCmd(cmd)) {
+      if (!isValidCmd(cmd, allowedCmds)) {
         res.status(403).json({ error: 'command not allowed' });
         return;
       }
