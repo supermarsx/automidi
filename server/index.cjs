@@ -32,10 +32,104 @@ function checkKey(req, res, next) {
 
 app.use(checkKey);
 
+// Shell command routes are needed in tests and do not rely on WebMidi
+function addShellRoutes() {
+  app.post('/run/app', (req, res) => {
+    const { app: appPath } = req.body || {};
+    console.log('Run app request:', appPath);
+    if (!appPath) {
+      res.status(400).json({ error: 'app path required' });
+      return;
+    }
+    if (!isValidCmd(appPath, allowedCmds)) {
+      res.status(403).json({ error: 'command not allowed' });
+      return;
+    }
+    exec(`"${appPath}"`, (err) => {
+      if (err) {
+        console.error('App exec error:', err);
+        res.status(500).json({ error: err.message });
+      } else {
+        res.json({ ok: true });
+      }
+    });
+  });
+
+  app.post('/run/shell', (req, res) => {
+    const { cmd } = req.body || {};
+    console.log('Run shell request:', cmd);
+    if (!cmd) {
+      res.status(400).json({ error: 'cmd required' });
+      return;
+    }
+    if (!isValidCmd(cmd, allowedCmds)) {
+      res.status(403).json({ error: 'command not allowed' });
+      return;
+    }
+    exec(cmd, (err) => {
+      if (err) {
+        console.error('Shell exec error:', err);
+        res.status(500).json({ error: err.message });
+      } else {
+        res.json({ ok: true });
+      }
+    });
+  });
+
+  app.post('/run/shellWin', (req, res) => {
+    const { cmd } = req.body || {};
+    console.log('Run shellWin request:', cmd);
+    if (!cmd) {
+      res.status(400).json({ error: 'cmd required' });
+      return;
+    }
+    if (!isValidCmd(cmd, allowedCmds)) {
+      res.status(403).json({ error: 'command not allowed' });
+      return;
+    }
+    try {
+      const child = spawn(cmd, {
+        shell: true,
+        detached: true,
+        windowsHide: false,
+      });
+      child.unref();
+      res.json({ ok: true });
+    } catch (err) {
+      console.error('ShellWin spawn error:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post('/run/shellBg', (req, res) => {
+    const { cmd } = req.body || {};
+    console.log('Run shellBg request:', cmd);
+    if (!cmd) {
+      res.status(400).json({ error: 'cmd required' });
+      return;
+    }
+    if (!isValidCmd(cmd, allowedCmds)) {
+      res.status(403).json({ error: 'command not allowed' });
+      return;
+    }
+    exec(cmd, { windowsHide: true }, (err) => {
+      if (err) {
+        console.error('ShellBg exec error:', err);
+        res.status(500).json({ error: err.message });
+      } else {
+        res.json({ ok: true });
+      }
+    });
+  });
+}
+
+addShellRoutes();
+
 let currentDevices = { inputs: [], outputs: [] };
 
-WebMidi.enable({ sysex: true })
-  .then(() => {
+async function startServer() {
+  try {
+    await WebMidi.enable({ sysex: true });
     console.log('WebMidi enabled successfully (with SysEx)');
 
     function listDevices() {
@@ -115,94 +209,6 @@ WebMidi.enable({ sysex: true })
         console.error('Key send error:', err);
         res.status(500).json({ error: err.message });
       }
-    });
-
-    app.post('/run/app', (req, res) => {
-      const { app: appPath } = req.body || {};
-      console.log('Run app request:', appPath);
-      if (!appPath) {
-        res.status(400).json({ error: 'app path required' });
-        return;
-      }
-      if (!isValidCmd(appPath, allowedCmds)) {
-        res.status(403).json({ error: 'command not allowed' });
-        return;
-      }
-      exec(`"${appPath}"`, (err) => {
-        if (err) {
-          console.error('App exec error:', err);
-          res.status(500).json({ error: err.message });
-        } else {
-          res.json({ ok: true });
-        }
-      });
-    });
-
-    app.post('/run/shell', (req, res) => {
-      const { cmd } = req.body || {};
-      console.log('Run shell request:', cmd);
-      if (!cmd) {
-        res.status(400).json({ error: 'cmd required' });
-        return;
-      }
-      if (!isValidCmd(cmd, allowedCmds)) {
-        res.status(403).json({ error: 'command not allowed' });
-        return;
-      }
-      exec(cmd, (err) => {
-        if (err) {
-          console.error('Shell exec error:', err);
-          res.status(500).json({ error: err.message });
-        } else {
-          res.json({ ok: true });
-        }
-      });
-    });
-
-    app.post('/run/shellWin', (req, res) => {
-      const { cmd } = req.body || {};
-      console.log('Run shellWin request:', cmd);
-      if (!cmd) {
-        res.status(400).json({ error: 'cmd required' });
-        return;
-      }
-      if (!isValidCmd(cmd, allowedCmds)) {
-        res.status(403).json({ error: 'command not allowed' });
-        return;
-      }
-      try {
-        const child = spawn(cmd, {
-          shell: true,
-          detached: true,
-          windowsHide: false,
-        });
-        child.unref();
-        res.json({ ok: true });
-      } catch (err) {
-        console.error('ShellWin spawn error:', err);
-        res.status(500).json({ error: err.message });
-      }
-    });
-
-    app.post('/run/shellBg', (req, res) => {
-      const { cmd } = req.body || {};
-      console.log('Run shellBg request:', cmd);
-      if (!cmd) {
-        res.status(400).json({ error: 'cmd required' });
-        return;
-      }
-      if (!isValidCmd(cmd, allowedCmds)) {
-        res.status(403).json({ error: 'command not allowed' });
-        return;
-      }
-      exec(cmd, { windowsHide: true }, (err) => {
-        if (err) {
-          console.error('ShellBg exec error:', err);
-          res.status(500).json({ error: err.message });
-        } else {
-          res.json({ ok: true });
-        }
-      });
     });
 
     const server = app.listen(process.env.PORT || 3000, () => {
@@ -349,7 +355,13 @@ WebMidi.enable({ sysex: true })
       setupMidiListeners(); // Re-setup listeners for new devices
       sendDevices(); // Broadcast to all clients
     });
-  })
-  .catch((err) => {
+  } catch (err) {
     console.error('Failed to enable WebMidi:', err);
-  });
+  }
+}
+
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = app;
