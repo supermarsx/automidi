@@ -7,12 +7,14 @@ import {
   del as idbDel,
 } from 'idb-keyval';
 
+export type MacroType = 'keys' | 'app' | 'shell' | 'shell_win' | 'shell_bg';
+
 export interface Macro {
   id: string;
   name: string;
   sequence?: string[];
   interval?: number;
-  type?: 'keys' | 'app' | 'shell' | 'shell_win' | 'shell_bg';
+  type?: MacroType;
   command?: string;
   nextId?: string;
   tags?: string[];

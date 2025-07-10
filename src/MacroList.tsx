@@ -1,5 +1,5 @@
 import { useKeyMacroPlayer } from './useKeyMacroPlayer';
-import { useStore, type Macro } from './store';
+import { useStore, type Macro, type MacroType } from './store';
 import { useToastStore } from './toastStore';
 import { useState } from 'react';
 import MacroImportModal from './MacroImportModal';
@@ -16,9 +16,7 @@ export default function MacroList() {
   const [name, setName] = useState('');
   const [sequence, setSequence] = useState('');
   const [interval, setInterval] = useState(50);
-  const [type, setType] = useState<
-    'keys' | 'app' | 'shell' | 'shell_win' | 'shell_bg'
-  >('keys');
+  const [type, setType] = useState<MacroType>('keys');
   const [command, setCommand] = useState('');
   const [nextId, setNextId] = useState('');
   const [tags, setTags] = useState('');
@@ -34,7 +32,7 @@ export default function MacroList() {
     setName(m.name);
     setSequence(m.sequence?.join(' ') || '');
     setInterval(m.interval ?? 50);
-    setType(m.type || 'keys');
+    setType((m.type || 'keys') as MacroType);
     setCommand(m.command || '');
     setNextId(m.nextId || '');
     setTags((m.tags || []).join(', '));
@@ -226,16 +224,7 @@ export default function MacroList() {
                   <select
                     className="form-control retro-input me-2 mb-1"
                     value={type}
-                    onChange={(e) =>
-                      setType(
-                        e.target.value as
-                          | 'keys'
-                          | 'app'
-                          | 'shell'
-                          | 'shell_win'
-                          | 'shell_bg',
-                      )
-                    }
+                    onChange={(e) => setType(e.target.value as MacroType)}
                   >
                     <option value="keys">Keys</option>
                     <option value="app">Application</option>
