@@ -1,36 +1,53 @@
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  vi,
+  type Mock,
+} from 'vitest';
 import request from 'supertest';
 import type { Express } from 'express';
-
-jest.mock('child_process', () => ({
-  exec: jest.fn(
-    (_cmd: string, optsOrCb?: unknown, cb?: (err: unknown) => void) => {
-      const callback =
-        typeof optsOrCb === 'function'
-          ? optsOrCb
-          : (cb as (err: unknown) => void);
-      if (callback) callback(null);
-    },
-  ),
-  spawn: jest.fn(() => ({ unref: jest.fn() })),
-}));
 
 describe('shell routes', () => {
   const API_KEY = 'test-key';
   const ALLOW = 'echo,win,app';
   let app: Express;
-  let exec: jest.Mock;
-  let spawn: jest.Mock;
+  let exec: Mock;
+  let spawn: Mock;
+  let originalExec: unknown;
+  let originalSpawn: unknown;
 
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    ({ exec, spawn } = require('child_process'));
-    exec.mockClear();
-    spawn.mockClear();
+    const cp = require('child_process');
+    originalExec = cp.exec;
+    originalSpawn = cp.spawn;
+    exec = vi.fn(
+      (_cmd: string, optsOrCb?: unknown, cb?: (err: unknown) => void) => {
+        const callback =
+          typeof optsOrCb === 'function'
+            ? optsOrCb
+            : (cb as (err: unknown) => void);
+        if (callback) callback(null);
+      },
+    );
+    spawn = vi.fn(() => ({ unref: vi.fn() }));
+    cp.exec = exec;
+    cp.spawn = spawn;
     process.env.API_KEY = API_KEY;
     process.env.ALLOWED_CMDS = ALLOW;
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     app = require('../index.cjs');
+  });
+
+  afterEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const cp = require('child_process');
+    cp.exec = originalExec as typeof cp.exec;
+    cp.spawn = originalSpawn as typeof cp.spawn;
   });
 
   it('executes allowed commands', async () => {

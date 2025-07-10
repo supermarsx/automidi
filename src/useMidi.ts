@@ -37,8 +37,10 @@ export function useMidi() {
   const launchpadRef = useRef<number | null>(null);
   const listeners = useRef(new Set<(msg: MidiMessage) => void>());
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<number | null>(null);
-  const pingIntervalRef = useRef<number | null>(null);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const pingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pingSentAtRef = useRef<number | null>(null);
   const isPageLoadedRef = useRef(false);
   const connectionAttemptsRef = useRef(0);
