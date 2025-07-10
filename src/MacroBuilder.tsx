@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useStore, type Macro } from './store';
+import { useStore, type Macro, type MacroType } from './store';
 import { useToastStore } from './toastStore';
 import MacroInstructions from './MacroInstructions';
 
@@ -11,9 +11,7 @@ export default function MacroBuilder() {
   const [name, setName] = useState('');
   const [sequence, setSequence] = useState('');
   const [interval, setInterval] = useState(50);
-  const [type, setType] = useState<
-    'keys' | 'app' | 'shell' | 'shell_win' | 'shell_bg'
-  >('keys');
+  const [type, setType] = useState<MacroType>('keys');
   const [command, setCommand] = useState('');
   const [nextId, setNextId] = useState('');
   const [tags, setTags] = useState('');
@@ -89,16 +87,7 @@ export default function MacroBuilder() {
         <select
           className="form-control retro-input me-2 mb-1"
           value={type}
-          onChange={(e) =>
-            setType(
-              e.target.value as
-                | 'keys'
-                | 'app'
-                | 'shell'
-                | 'shell_win'
-                | 'shell_bg',
-            )
-          }
+          onChange={(e) => setType(e.target.value as MacroType)}
         >
           <option value="keys">Keys</option>
           <option value="app">Application</option>
