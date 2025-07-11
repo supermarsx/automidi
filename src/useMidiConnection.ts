@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useStore } from './store';
 import { usePing } from './usePing';
+import { registerSend } from './socket';
 
 export type RawMessage = Record<string, unknown>;
 export type RawListener = (msg: RawMessage) => void;
@@ -197,6 +198,10 @@ export function useMidiConnection() {
       listeners.current.delete(fn);
     };
   }, []);
+
+  useEffect(() => {
+    registerSend(send);
+  }, [send]);
 
   return { status, pingDelay, send, listen, reconnect, wsRef };
 }
