@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { useStore } from './store';
 import { usePing } from './usePing';
+import { registerSend } from './socket';
 import { useWebSocket } from './useWebSocket';
 
 export type RawMessage = Record<string, unknown>;
@@ -68,6 +69,10 @@ export function useMidiConnection() {
   }, [listen, handlePong]);
 
   useEffect(() => stopPing, [stopPing]);
+
+  useEffect(() => {
+    registerSend(send);
+  }, [send]);
 
   return { status, pingDelay, send, listen, reconnect, wsRef };
 }

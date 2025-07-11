@@ -1,21 +1,10 @@
 import { useToastStore } from './toastStore';
-import { useStore } from './store';
+import { sendSocketMessage } from './socket';
 
-export async function notify(message: string) {
+export function notify(message: string) {
   const addToast = useToastStore.getState().addToast;
-  const { host, port, apiKey } = useStore.getState().settings;
-  try {
-    const res = await fetch(`http://${host}:${port}/notify`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-      },
-      body: JSON.stringify({ message }),
-    });
-    if (!res.ok) throw new Error('Request failed');
-  } catch (err) {
-    console.error('OS notification failed:', err);
+  const ok = sendSocketMessage({ type: 'notify', message });
+  if (!ok) {
     addToast(message, 'success');
   }
 }
