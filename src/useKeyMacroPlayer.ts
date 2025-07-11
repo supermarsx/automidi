@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useStore } from './store';
 import { useToastStore } from './toastStore';
+import { MACRO_ENDPOINTS } from './macroEndpoints';
 
 export function useKeyMacroPlayer() {
   const macros = useStore((s) => s.macros);
@@ -14,55 +15,15 @@ export function useKeyMacroPlayer() {
       console.log('Playing macro', macro);
       addToast(`Playing: ${macro.name}`, 'success');
       try {
-        if (macro.type === 'app') {
-          await fetch('/run/app', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': apiKey,
-            },
-            body: JSON.stringify({ app: macro.command }),
-          });
-        } else if (macro.type === 'shell') {
-          await fetch('/run/shell', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': apiKey,
-            },
-            body: JSON.stringify({ cmd: macro.command }),
-          });
-        } else if (macro.type === 'shell_win') {
-          await fetch('/run/shellWin', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': apiKey,
-            },
-            body: JSON.stringify({ cmd: macro.command }),
-          });
-        } else if (macro.type === 'shell_bg') {
-          await fetch('/run/shellBg', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': apiKey,
-            },
-            body: JSON.stringify({ cmd: macro.command }),
-          });
-        } else {
-          await fetch('/keys/type', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': apiKey,
-            },
-            body: JSON.stringify({
-              sequence: macro.sequence,
-              interval: macro.interval,
-            }),
-          });
-        }
+        const { url, body } = MACRO_ENDPOINTS[macro.type || 'keys'];
+        await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+          },
+          body: JSON.stringify(body(macro)),
+        });
         if (macro.nextId) {
           await playMacro(macro.nextId);
         }
