@@ -47,18 +47,14 @@ export function useWebSocket({
   const connectWebSocket = useCallback(() => {
     if (typeof WebSocket === 'undefined') return;
     if (!isPageLoadedRef.current) return;
-    if (
-      wsRef.current &&
-      (wsRef.current.readyState === WebSocket.OPEN ||
-        wsRef.current.readyState === WebSocket.CONNECTING)
-    )
-      return;
 
-    if (
-      wsRef.current &&
-      (wsRef.current.readyState === WebSocket.OPEN ||
-        wsRef.current.readyState === WebSocket.CONNECTING)
-    ) {
+    if (wsRef.current) {
+      if (
+        wsRef.current.readyState === WebSocket.OPEN ||
+        wsRef.current.readyState === WebSocket.CONNECTING
+      ) {
+        return;
+      }
       wsRef.current.close();
     }
 
