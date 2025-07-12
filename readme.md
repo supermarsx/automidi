@@ -31,17 +31,18 @@ Start it with:
 npm run server
 ```
 
-It listens on port `3000` and exposes two REST endpoints:
+It listens on port `3000` and still exposes two REST endpoints for
+compatibility:
 
 - `GET /midi/devices` – lists available MIDI inputs and outputs
 - `POST /midi/send` – sends a raw MIDI message to a specified output
 
-There is also a WebSocket on the same port. When a client connects it sends the
-current device list and it pushes `devices` events whenever ports change. Incoming
-MIDI messages are forwarded as `midi` events so the UI can react in real time.
-
-The React code uses `fetch` for the REST calls and opens a WebSocket connection
-to receive device updates and MIDI messages.
+A WebSocket on the same port handles the communication used by the frontend.
+When a client connects it sends the current device list and it pushes `devices`
+events whenever ports change. Incoming MIDI messages are forwarded as `midi`
+events so the UI can react in real time. Device listings, outgoing MIDI messages
+and automation commands are all transmitted over this socket as implemented in
+`useMidiConnection.ts` and `useKeyMacroPlayer.ts`.
 
 ### Shell command security
 
