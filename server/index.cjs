@@ -84,9 +84,10 @@ async function startServer() {
       }
     });
 
+    // Deprecated REST routes retained for backwards compatibility
+    // Prefer using WebSocket messages instead of these endpoints
     app.post('/notify', (req, res) => {
       const { title = 'Automidi', message } = req.body || {};
-      console.log('Notify request:', title, message);
       if (!message) {
         res.status(400).json({ error: 'message is required' });
         return;
@@ -99,7 +100,6 @@ async function startServer() {
 
     app.post('/keys/type', async (req, res) => {
       const { sequence = [], interval = 50 } = req.body || {};
-      console.log('Keys type request:', sequence, interval);
       if (!Array.isArray(sequence)) {
         res.status(400).json({ error: 'sequence must be an array of keys' });
         return;
