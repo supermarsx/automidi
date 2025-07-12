@@ -10,7 +10,11 @@ const crypto = require('crypto');
 const { isValidCmd } = require('./validate.js');
 
 const API_KEY = process.env.API_KEY || crypto.randomBytes(16).toString('hex');
-console.log('API key:', API_KEY);
+if (process.env.LOG_API_KEY === 'true') {
+  console.log('API key:', API_KEY);
+} else {
+  console.log('Server started with API key set.');
+}
 
 const allowedCmds = (process.env.ALLOWED_CMDS || '')
   .split(',')
