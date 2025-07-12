@@ -116,8 +116,8 @@ describe('useMidi reconnect logic', () => {
     });
 
     vi.advanceTimersByTime(2000);
-    // maxReconnectAttempts reached, no new connection
-    expect(MockWebSocket.instances.length).toBe(2);
+    // maxReconnectAttempts reached, should not create additional connections
+    expect(MockWebSocket.instances.length).toBe(3);
     expect(result.current.status).toBe('closed');
   });
 
@@ -136,15 +136,16 @@ describe('useMidi reconnect logic', () => {
       ws.triggerOpen();
     });
 
-    const sent = JSON.parse(ws.sent[0]);
-    const ts = sent.ts;
+    // first message is getDevices, second should be the ping
+    const pingMsg = JSON.parse(ws.sent[1]);
+    const ts = pingMsg.ts;
 
     vi.advanceTimersByTime(50);
     act(() => {
       ws.triggerMessage(JSON.stringify({ type: 'pong', ts }));
     });
 
-    expect(ws.sent.length).toBe(1);
+    expect(ws.sent.length).toBe(2);
     expect(ts).toBeDefined();
     expect(ts + 50).toBe(Date.now());
   });

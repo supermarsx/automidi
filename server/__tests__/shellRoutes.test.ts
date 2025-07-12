@@ -8,6 +8,7 @@ import {
   type Mock,
 } from 'vitest';
 import WebSocket from 'ws';
+import { isValidCmd } from '../validate.js';
 import type { Server } from 'http';
 
 describe('shell routes', () => {
@@ -78,6 +79,10 @@ describe('shell routes', () => {
     ws.send(JSON.stringify({ type: 'runShellWin', cmd: 'win something' }));
     ws.send(JSON.stringify({ type: 'runShellBg', cmd: 'echo hi' }));
 
+    expect(isValidCmd('app', ALLOW.split(','))).toBe(true);
+    expect(isValidCmd('echo hi', ALLOW.split(','))).toBe(true);
+    expect(isValidCmd('win something', ALLOW.split(','))).toBe(true);
+
     await new Promise((r) => setTimeout(r, 10));
 
     expect(exec).toHaveBeenCalledWith('"app"', expect.any(Function));
@@ -102,6 +107,9 @@ describe('shell routes', () => {
 
     ws.send(JSON.stringify({ type: 'runShell', cmd: 'rm -rf /' }));
     ws.send(JSON.stringify({ type: 'runShellWin', cmd: 'malicious' }));
+
+    expect(isValidCmd('rm -rf /', ALLOW.split(','))).toBe(false);
+    expect(isValidCmd('malicious', ALLOW.split(','))).toBe(false);
 
     await new Promise((r) => setTimeout(r, 10));
 
