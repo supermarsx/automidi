@@ -134,4 +134,12 @@ export const LAUNCHPAD_COLORS: LaunchpadColor[] = [
   { name: 'darkolivegreen', value: 0x7e, color: '#544422' },
   { name: 'sienna', value: 0x7f, color: '#925848' },
 ];
+
+export function getLaunchpadColorValue(hex: string): number | undefined {
+  const color = LAUNCHPAD_COLORS.find(
+    (c) => c.color.toLowerCase() === hex.toLowerCase(),
+  );
+  return color?.value;
+}
+
 export default LAUNCHPAD_COLORS;
