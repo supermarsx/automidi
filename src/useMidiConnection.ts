@@ -30,9 +30,6 @@ export function useMidiConnection() {
     autoReconnect,
     reconnectInterval,
     maxReconnectAttempts,
-    onOpen: (ws) => {
-      ws.send(JSON.stringify({ type: 'getDevices' }));
-    },
   });
 
   const {
