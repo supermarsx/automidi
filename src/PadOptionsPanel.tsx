@@ -1,7 +1,7 @@
 import { useStore, type PadColourMap, type PadActions } from './store';
 import { useMidi } from './useMidi';
 import { noteOn, cc, lightingSysEx } from './midiMessages';
-import LAUNCHPAD_COLORS from './launchpadColors';
+import LAUNCHPAD_COLORS, { getLaunchpadColorValue } from './launchpadColors';
 
 interface PadInfo {
   id: string;
@@ -50,20 +50,20 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
 
   const handleChange =
     (ch: number) => (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const selected = LAUNCHPAD_COLORS.find((c) => c.color === e.target.value);
-      if (!selected) return;
-      setPadColour(pad.id, selected.color, ch);
+      const value = getLaunchpadColorValue(e.target.value);
+      if (value === undefined) return;
+      setPadColour(pad.id, e.target.value, ch);
       if (status === 'connected') {
         const id = pad.note ?? pad.cc;
         if (id !== undefined) {
           if (sysexColorMode) {
             const type = ch === 1 ? 0 : ch === 2 ? 1 : 2;
-            const data = ch === 2 ? [0, selected.value] : [selected.value];
+            const data = ch === 2 ? [0, value] : [value];
             send(lightingSysEx([{ type, index: id, data }]));
           } else if (pad.note !== undefined) {
-            send(noteOn(id, selected.value, ch));
+            send(noteOn(id, value, ch));
           } else if (pad.cc !== undefined) {
-            send(cc(id, selected.value, ch));
+            send(cc(id, value, ch));
           }
         }
       }
@@ -82,8 +82,7 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
   const handleModeClick = (ch: number) => {
     setPadChannel(pad.id, ch);
     const colorHex = colours[ch] || '#000000';
-    const colorVal =
-      LAUNCHPAD_COLORS.find((c) => c.color === colorHex)?.value || 0;
+    const colorVal = getLaunchpadColorValue(colorHex) || 0;
     if (status === 'connected') {
       const id = pad.note ?? pad.cc;
       if (id !== undefined) {

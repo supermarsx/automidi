@@ -4,7 +4,7 @@ import { useStore } from './store';
 import { useKeyMacroPlayer } from './useKeyMacroPlayer';
 import { notify } from './notify';
 import { useToastStore } from './toastStore';
-import LAUNCHPAD_COLORS from './launchpadColors';
+import { getLaunchpadColorValue } from './launchpadColors';
 import { noteOn, cc, lightingSysEx } from './midiMessages';
 
 export function usePadActions() {
@@ -22,8 +22,7 @@ export function usePadActions() {
   const sendPadState = (id: string, channel: number) => {
     const colours = padColours[id] || {};
     const colorHex = colours[channel] || colours[1] || '#000000';
-    const colorVal =
-      LAUNCHPAD_COLORS.find((c) => c.color === colorHex)?.value || 0;
+    const colorVal = getLaunchpadColorValue(colorHex) || 0;
     const padId = id.startsWith('n-')
       ? Number(id.slice(2))
       : id.startsWith('cc-')

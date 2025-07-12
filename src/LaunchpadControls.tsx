@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMidi } from './useMidi';
 import { useStore } from './store';
 import { useToastStore } from './toastStore';
-import LAUNCHPAD_COLORS from './launchpadColors';
+import { getLaunchpadColorValue } from './launchpadColors';
 import {
   enterProgrammerMode,
   exitProgrammerMode,
@@ -88,7 +88,7 @@ export default function LaunchpadControls() {
     for (const [id, chMap] of Object.entries(padColours)) {
       for (const [chStr, hex] of Object.entries(chMap)) {
         const channel = Number(chStr);
-        const color = LAUNCHPAD_COLORS.find((c) => c.color === hex)?.value;
+        const color = getLaunchpadColorValue(hex);
         if (color === undefined) continue;
         const padId = id.startsWith('n-')
           ? Number(id.slice(2))
