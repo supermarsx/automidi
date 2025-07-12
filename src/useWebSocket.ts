@@ -7,6 +7,7 @@ export interface UseWebSocketOptions {
   autoReconnect?: boolean;
   reconnectInterval?: number;
   maxReconnectAttempts?: number;
+  connectionTimeout?: number;
   onOpen?: (ws: WebSocket) => void;
 }
 
@@ -15,6 +16,7 @@ export function useWebSocket({
   autoReconnect = true,
   reconnectInterval = 1000,
   maxReconnectAttempts = 5,
+  connectionTimeout = 5000,
   onOpen,
 }: UseWebSocketOptions) {
   const [status, setStatus] = useState<'connected' | 'closed' | 'connecting'>(
@@ -73,7 +75,7 @@ export function useWebSocket({
         if (ws.readyState === WebSocket.CONNECTING) {
           ws.close();
         }
-      }, 5000);
+      }, connectionTimeout);
 
       ws.onopen = () => {
         if (connectionTimeoutRef.current) {
