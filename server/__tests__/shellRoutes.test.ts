@@ -7,19 +7,19 @@ import {
   vi,
   type Mock,
 } from 'vitest';
-import request from 'supertest';
-import type { Express } from 'express';
+import WebSocket from 'ws';
+import type { Server } from 'http';
 
 describe('shell routes', () => {
   const API_KEY = 'test-key';
   const ALLOW = 'echo,win,app';
-  let app: Express;
+  let server: Server;
   let exec: Mock;
   let spawn: Mock;
   let originalExec: unknown;
   let originalSpawn: unknown;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.resetModules();
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const cp = require('child_process');
@@ -39,8 +39,24 @@ describe('shell routes', () => {
     cp.spawn = spawn;
     process.env.API_KEY = API_KEY;
     process.env.ALLOWED_CMDS = ALLOW;
+    process.env.PORT = '0';
+
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    app = require('../index.cjs');
+    const wm = require('webmidi');
+    wm.WebMidi.enable = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(wm.WebMidi, 'inputs', {
+      value: [],
+      configurable: true,
+    });
+    Object.defineProperty(wm.WebMidi, 'outputs', {
+      value: [],
+      configurable: true,
+    });
+    wm.WebMidi.addListener = vi.fn();
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mod = require('../index.cjs');
+    server = await mod.startServer();
   });
 
   afterEach(() => {
@@ -48,59 +64,49 @@ describe('shell routes', () => {
     const cp = require('child_process');
     cp.exec = originalExec as typeof cp.exec;
     cp.spawn = originalSpawn as typeof cp.spawn;
+    server.close();
+    vi.clearAllMocks();
   });
 
   it('executes allowed commands', async () => {
-    await request(app)
-      .post('/run/app')
-      .set('x-api-key', API_KEY)
-      .send({ app: 'app' })
-      .expect(200);
+    const port = (server.address() as { port: number }).port;
+    const ws = new WebSocket(`ws://localhost:${port}?key=${API_KEY}`);
+    await new Promise((r) => ws.on('open', r));
+
+    ws.send(JSON.stringify({ type: 'runApp', app: 'app' }));
+    ws.send(JSON.stringify({ type: 'runShell', cmd: 'echo hi' }));
+    ws.send(JSON.stringify({ type: 'runShellWin', cmd: 'win something' }));
+    ws.send(JSON.stringify({ type: 'runShellBg', cmd: 'echo hi' }));
+
+    await new Promise((r) => setTimeout(r, 10));
+
     expect(exec).toHaveBeenCalledWith('"app"', expect.any(Function));
-
-    await request(app)
-      .post('/run/shell')
-      .set('x-api-key', API_KEY)
-      .send({ cmd: 'echo hi' })
-      .expect(200);
     expect(exec).toHaveBeenCalledWith('echo hi', expect.any(Function));
-
-    await request(app)
-      .post('/run/shellWin')
-      .set('x-api-key', API_KEY)
-      .send({ cmd: 'win something' })
-      .expect(200);
     expect(spawn).toHaveBeenCalledWith('win something', {
       shell: true,
       detached: true,
       windowsHide: false,
     });
-
-    await request(app)
-      .post('/run/shellBg')
-      .set('x-api-key', API_KEY)
-      .send({ cmd: 'echo hi' })
-      .expect(200);
     expect(exec).toHaveBeenCalledWith(
       'echo hi',
       { windowsHide: true },
       expect.any(Function),
     );
+    ws.close();
   });
 
   it('rejects disallowed commands', async () => {
-    await request(app)
-      .post('/run/shell')
-      .set('x-api-key', API_KEY)
-      .send({ cmd: 'rm -rf /' })
-      .expect(403);
-    expect(exec).not.toHaveBeenCalled();
+    const port = (server.address() as { port: number }).port;
+    const ws = new WebSocket(`ws://localhost:${port}?key=${API_KEY}`);
+    await new Promise((r) => ws.on('open', r));
 
-    await request(app)
-      .post('/run/shellWin')
-      .set('x-api-key', API_KEY)
-      .send({ cmd: 'malicious' })
-      .expect(403);
+    ws.send(JSON.stringify({ type: 'runShell', cmd: 'rm -rf /' }));
+    ws.send(JSON.stringify({ type: 'runShellWin', cmd: 'malicious' }));
+
+    await new Promise((r) => setTimeout(r, 10));
+
+    expect(exec).not.toHaveBeenCalled();
     expect(spawn).not.toHaveBeenCalled();
+    ws.close();
   });
 });
