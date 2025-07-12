@@ -9,7 +9,18 @@ export function useKeyMacroPlayer() {
   const addToast = useToastStore.getState().addToast;
 
   const playMacro = useCallback(
-    async (macroId: string) => {
+    async function playMacro(
+      macroId: string,
+      visited: Set<string> = new Set(),
+    ) {
+      if (visited.has(macroId)) {
+        const msg = `Macro cycle detected at ${macroId}`;
+        console.error(msg);
+        addToast(msg, 'error');
+        return;
+      }
+
+      visited.add(macroId);
       const macro = macros.find((m) => m.id === macroId);
       if (!macro) return;
       console.log('Playing macro', macro);
@@ -18,13 +29,13 @@ export function useKeyMacroPlayer() {
         const { type, payload } = MACRO_MESSAGES[macro.type || 'keys'];
         sendSocketMessage({ type, ...payload(macro) });
         if (macro.nextId) {
-          await playMacro(macro.nextId);
+          await playMacro(macro.nextId, visited);
         }
       } catch (err) {
         console.error('Failed to play macro', err);
       }
     },
-    [macros],
+    [macros, addToast],
   );
 
   return { playMacro };

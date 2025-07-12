@@ -94,4 +94,27 @@ describe('useKeyMacroPlayer socket messages', () => {
       expect.objectContaining({ type: 'runShell' }),
     );
   });
+
+  it('stops when macros form a cycle', async () => {
+    storeState.macros = [
+      {
+        id: '1',
+        name: 'first',
+        type: 'keys',
+        sequence: ['a'],
+        interval: 10,
+        nextId: '2',
+      },
+      { id: '2', name: 'second', type: 'shell', command: 'ls', nextId: '1' },
+    ];
+    const { result } = renderHook(() => useKeyMacroPlayer());
+    await act(async () => {
+      await result.current.playMacro('1');
+    });
+    expect(sendMock).toHaveBeenCalledTimes(2);
+    expect(addToastMock).toHaveBeenCalledWith(
+      expect.stringContaining('Macro cycle detected'),
+      'error',
+    );
+  });
 });
