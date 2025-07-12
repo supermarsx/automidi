@@ -143,8 +143,16 @@ async function startServer() {
       }
     }
 
+    // Remove all listeners from every input
+    function cleanupMidiListeners() {
+      WebMidi.inputs.forEach((input) => {
+        input.removeListener();
+      });
+    }
+
     // Set up MIDI input listeners for all devices
     function setupMidiListeners() {
+      cleanupMidiListeners();
       WebMidi.inputs.forEach((input, index) => {
         console.log(`Setting up listener for input: ${input.name}`);
 
@@ -312,6 +320,7 @@ async function startServer() {
     // Listen for device changes
     WebMidi.addListener('portschanged', () => {
       console.log('MIDI ports changed');
+      cleanupMidiListeners();
       listDevices();
       setupMidiListeners(); // Re-setup listeners for new devices
       sendDevices(); // Broadcast to all clients
