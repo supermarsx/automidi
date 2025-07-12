@@ -30,6 +30,7 @@ export function useMidiConnection() {
     autoReconnect,
     reconnectInterval,
     maxReconnectAttempts,
+    connectionTimeout: 5000,
   });
 
   const {
