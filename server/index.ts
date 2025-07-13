@@ -1,13 +1,14 @@
-const express = require('express');
-const { WebSocketServer } = require('ws');
-const { WebMidi } = require('webmidi');
-const keySender = require('node-key-sender');
-const notifier = require('toasted-notifier');
-const cors = require('cors');
-const { exec, spawn } = require('child_process');
-const crypto = require('crypto');
+import express from 'express';
+import { WebSocketServer } from 'ws';
+import type { WebSocket } from 'ws';
+import { WebMidi } from 'webmidi';
+import keySender from 'node-key-sender';
+import notifier from 'toasted-notifier';
+import cors from 'cors';
+import { exec, spawn } from 'child_process';
+import crypto from 'crypto';
 
-const { isValidCmd } = require('./validate.js');
+import { isValidCmd } from './validate.js';
 
 const API_KEY = process.env.API_KEY || crypto.randomBytes(16).toString('hex');
 if (process.env.LOG_API_KEY === 'true') {
@@ -36,6 +37,8 @@ function checkKey(req, res, next) {
 
 app.use(checkKey);
 
+// Updated dynamically in listDevices but never read elsewhere
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let currentDevices = { inputs: [], outputs: [] };
 
 async function startServer() {
@@ -123,7 +126,9 @@ async function startServer() {
     });
 
     const server = app.listen(process.env.PORT || 3000, () => {
-      console.log(`Server listening on port ${server.address().port}`);
+      const addr = server.address();
+      const port = typeof addr === 'string' ? addr : addr?.port;
+      console.log(`Server listening on port ${port}`);
     });
 
     const wss = new WebSocketServer({ server });
@@ -137,7 +142,7 @@ async function startServer() {
       }
     }
 
-    function sendDevices(ws) {
+    function sendDevices(ws?: WebSocket) {
       const devices = listDevices();
       const message = { type: 'devices', ...devices };
       if (ws) {
@@ -163,7 +168,8 @@ async function startServer() {
         // Listen to all MIDI messages
         input.addListener('midimessage', (e) => {
           const bytes = Array.from(e.message.data || e.data || []);
-          const message = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const message: any = {
             type: 'midi',
             direction: 'in',
             message: bytes,
@@ -185,7 +191,8 @@ async function startServer() {
         // Listen to specific message types for better logging
         input.addListener('noteon', (e) => {
           console.log(
-            `Note ON from ${input.name}: ${e.note.name}${e.note.octave} vel:${e.velocity}`,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            `Note ON from ${input.name}: ${e.note.name}${e.note.octave} vel:${(e as any).velocity}`,
           );
         });
 
@@ -234,7 +241,8 @@ async function startServer() {
               console.log(`Sent MIDI via WebSocket to ${out.name}:`, bytes);
 
               // Broadcast the outgoing message to all clients for logging
-              const outMsg = {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const outMsg: any = {
                 type: 'midi',
                 direction: 'out',
                 message: bytes,
@@ -339,4 +347,4 @@ if (require.main === module) {
   startServer();
 }
 
-module.exports = { app, startServer };
+export { app, startServer };

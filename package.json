@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "preview": "vite preview",
-    "server": "node server/index.cjs",
+    "build:server": "tsc -p server/tsconfig.json",
+    "server": "npm run build:server && node server/dist/index.js",
     "setup": "npm install",
     "test": "vitest run"
   },
