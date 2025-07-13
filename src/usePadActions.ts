@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useMidi, type MidiMessage } from './useMidi';
 import { useStore } from './store';
 import { useKeyMacroPlayer } from './useKeyMacroPlayer';
@@ -19,64 +19,70 @@ export function usePadActions() {
     Record<string, { t: ReturnType<typeof setTimeout>; prev: number }>
   >({});
 
-  const sendPadState = (id: string, channel: number) => {
-    const colours = padColours[id] || {};
-    const colorHex = colours[channel] || colours[1] || '#000000';
-    const colorVal = getLaunchpadColorValue(colorHex) || 0;
-    const padId = id.startsWith('n-')
-      ? Number(id.slice(2))
-      : id.startsWith('cc-')
-        ? Number(id.slice(3))
-        : NaN;
-    if (Number.isNaN(padId)) return;
-    if (sysexColorMode) {
-      const type = channel === 1 ? 0 : channel === 2 ? 1 : 2;
-      const data = channel === 2 ? [0, colorVal] : [colorVal];
-      send(lightingSysEx([{ type, index: padId, data }]));
-    } else if (id.startsWith('n-')) {
-      send(noteOn(padId, colorVal, channel));
-    } else {
-      send(cc(padId, colorVal, channel));
-    }
-  };
-
-  const handleMacro = (
-    macroId: string,
-    id: string,
-    confirm?: boolean,
-    toastConfirm?: boolean,
-  ) => {
-    console.log('Pad macro trigger', { macroId, id, confirm, toastConfirm });
-    if (!confirm) {
-      playMacro(macroId);
-      return;
-    }
-    const entry = confirmRef.current[id];
-    if (!entry) {
-      const prev = padChannels[id] || 1;
-      setPadChannel(id, 3);
-      sendPadState(id, 3);
-      if (toastConfirm) {
-        useToastStore
-          .getState()
-          .addToast('Press pad again to confirm', 'success');
+  const sendPadState = useCallback(
+    (id: string, channel: number) => {
+      const colours = padColours[id] || {};
+      const colorHex = colours[channel] || colours[1] || '#000000';
+      const colorVal = getLaunchpadColorValue(colorHex) || 0;
+      const padId = id.startsWith('n-')
+        ? Number(id.slice(2))
+        : id.startsWith('cc-')
+          ? Number(id.slice(3))
+          : NaN;
+      if (Number.isNaN(padId)) return;
+      if (sysexColorMode) {
+        const type = channel === 1 ? 0 : channel === 2 ? 1 : 2;
+        const data = channel === 2 ? [0, colorVal] : [colorVal];
+        send(lightingSysEx([{ type, index: padId, data }]));
+      } else if (id.startsWith('n-')) {
+        send(noteOn(padId, colorVal, channel));
       } else {
-        notify('Press pad again to confirm');
+        send(cc(padId, colorVal, channel));
       }
-      const t = setTimeout(() => {
-        setPadChannel(id, prev);
-        sendPadState(id, prev);
+    },
+    [padColours, sysexColorMode, send],
+  );
+
+  const handleMacro = useCallback(
+    (
+      macroId: string,
+      id: string,
+      confirm?: boolean,
+      toastConfirm?: boolean,
+    ) => {
+      console.log('Pad macro trigger', { macroId, id, confirm, toastConfirm });
+      if (!confirm) {
+        playMacro(macroId);
+        return;
+      }
+      const entry = confirmRef.current[id];
+      if (!entry) {
+        const prev = padChannels[id] || 1;
+        setPadChannel(id, 3);
+        sendPadState(id, 3);
+        if (toastConfirm) {
+          useToastStore
+            .getState()
+            .addToast('Press pad again to confirm', 'success');
+        } else {
+          notify('Press pad again to confirm');
+        }
+        const t = setTimeout(() => {
+          setPadChannel(id, prev);
+          sendPadState(id, prev);
+          delete confirmRef.current[id];
+        }, 2000);
+        confirmRef.current[id] = { t, prev };
+      } else {
+        clearTimeout(entry.t);
+        setPadChannel(id, entry.prev);
+        sendPadState(id, entry.prev);
         delete confirmRef.current[id];
-      }, 2000);
-      confirmRef.current[id] = { t, prev };
-    } else {
-      clearTimeout(entry.t);
-      setPadChannel(id, entry.prev);
-      sendPadState(id, entry.prev);
-      delete confirmRef.current[id];
-      playMacro(macroId);
-    }
-  };
+        playMacro(macroId);
+      }
+    },
+    [padChannels, setPadChannel, playMacro, sendPadState],
+  );
 
   useEffect(() => {
     const handler = (msg: MidiMessage) => {
