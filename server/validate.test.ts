@@ -1,7 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import validate from './validate.js';
-
-const { isValidCmd } = validate;
+import { isValidCmd } from './dist/validate.js';
 
 const allowed = ['echo', 'ls', 'cat'];
 

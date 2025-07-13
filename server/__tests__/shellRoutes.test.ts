@@ -8,7 +8,7 @@ import {
   type Mock,
 } from 'vitest';
 import WebSocket from 'ws';
-import { isValidCmd } from '../validate.js';
+import { isValidCmd } from '../dist/validate.js';
 import type { Server } from 'http';
 
 describe('shell routes', () => {
@@ -56,7 +56,7 @@ describe('shell routes', () => {
     wm.WebMidi.addListener = vi.fn();
 
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const mod = require('../index.cjs');
+    const mod = require('../dist/index.js');
     server = await mod.startServer();
   });
 

@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "outDir": "dist",
+    "rootDir": "./",
+    "strict": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "noEmitOnError": false,
+    "tsBuildInfoFile": "../node_modules/.tmp/tsconfig.server.tsbuildinfo"
+  },
+  "include": ["index.ts", "validate.ts"],
+  "exclude": ["**/*.test.ts", "__tests__", "dist"]
+}
