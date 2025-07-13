@@ -128,7 +128,14 @@ export function useWebSocket({
       console.error('Failed to create WebSocket:', err);
       setStatus('closed');
     }
-  }, [url, autoReconnect, reconnectInterval, maxReconnectAttempts, onOpen]);
+  }, [
+    url,
+    autoReconnect,
+    reconnectInterval,
+    maxReconnectAttempts,
+    onOpen,
+    connectionTimeout,
+  ]);
 
   const reconnect = useCallback(() => {
     connectionAttemptsRef.current = 0;
