@@ -3,7 +3,7 @@ import { useStore } from './store';
 import { useMidiConnection, type RawMessage } from './useMidiConnection';
 
 export interface MidiDevice {
-  id: number;
+  id: string;
   name: string;
   manufacturer?: string;
   state?: string;
@@ -15,7 +15,7 @@ export interface MidiMessage {
   timestamp: number;
   source?: string;
   target?: string;
-  port?: number;
+  port?: string;
   pressure?: number;
 }
 
@@ -31,14 +31,12 @@ export function useMidi() {
 
   const [inputs, setInputs] = useState<MidiDevice[]>([]);
   const [outputs, setOutputs] = useState<MidiDevice[]>([]);
-  const launchpadRef = useRef<number | null>(null);
+  const launchpadRef = useRef<string | null>(null);
   const listeners = useRef(new Set<(msg: MidiMessage) => void>());
 
   const send = useCallback(
     (bytes: number[] | Uint8Array) => {
-      const targetPort = selectedOutput
-        ? Number(selectedOutput)
-        : (launchpadRef.current ?? 0);
+      const targetPort = selectedOutput || launchpadRef.current || '';
       const bytesArray = Array.from(bytes);
       return sendRaw({ type: 'send', port: targetPort, bytes: bytesArray });
     },
@@ -72,7 +70,7 @@ export function useMidi() {
           timestamp?: number;
           source?: string;
           target?: string;
-          port?: number;
+          port?: string;
           pressure?: number;
         };
         const msg: MidiMessage = {

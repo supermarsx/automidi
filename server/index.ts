@@ -47,14 +47,14 @@ async function startServer() {
     console.log('WebMidi enabled successfully (with SysEx)');
 
     function listDevices() {
-      const inputs = WebMidi.inputs.map((input, index) => ({
-        id: index,
+      const inputs = WebMidi.inputs.map((input) => ({
+        id: input.id,
         name: input.name,
         manufacturer: input.manufacturer,
         state: input.state,
       }));
-      const outputs = WebMidi.outputs.map((output, index) => ({
-        id: index,
+      const outputs = WebMidi.outputs.map((output) => ({
+        id: output.id,
         name: output.name,
         manufacturer: output.manufacturer,
         state: output.state,
@@ -71,12 +71,12 @@ async function startServer() {
     });
 
     app.post('/midi/send', (req, res) => {
-      const { port = 0, data } = req.body || {};
+      const { port = '', data } = req.body || {};
       if (!Array.isArray(data)) {
         res.status(400).json({ error: 'data must be an array of numbers' });
         return;
       }
-      const out = WebMidi.outputs[port];
+      const out = WebMidi.getOutputById(String(port));
       if (!out) {
         res.status(404).json({ error: `output port ${port} not found` });
         return;
@@ -162,7 +162,7 @@ async function startServer() {
     // Set up MIDI input listeners for all devices
     function setupMidiListeners() {
       cleanupMidiListeners();
-      WebMidi.inputs.forEach((input, index) => {
+      WebMidi.inputs.forEach((input) => {
         console.log(`Setting up listener for input: ${input.name}`);
 
         // Listen to all MIDI messages
@@ -175,7 +175,7 @@ async function startServer() {
             message: bytes,
             timestamp: e.timestamp || Date.now(),
             source: input.name,
-            port: index,
+            port: input.id,
           };
           // For aftertouch messages (poly or channel), capture the pressure
           if (
@@ -230,8 +230,8 @@ async function startServer() {
           if (data.type === 'getDevices') {
             sendDevices(ws);
           } else if (data.type === 'send') {
-            const { port = 0, bytes } = data;
-            const out = WebMidi.outputs[port];
+            const { port = '', bytes } = data;
+            const out = WebMidi.getOutputById(String(port));
             if (!out || !Array.isArray(bytes)) {
               console.error('Invalid output port or bytes:', { port, bytes });
               return;
