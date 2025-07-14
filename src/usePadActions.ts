@@ -117,4 +117,13 @@ export function usePadActions() {
     const unlisten = listen(handler);
     return () => unlisten();
   }, [listen, padActions, handleMacro]);
+
+  useEffect(() => {
+    return () => {
+      Object.values(confirmRef.current).forEach((entry) => {
+        clearTimeout(entry.t);
+      });
+      confirmRef.current = {} as Record<string, { t: ReturnType<typeof setTimeout>; prev: number }>;
+    };
+  }, []);
 }
