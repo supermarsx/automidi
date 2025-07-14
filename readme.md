@@ -115,3 +115,4 @@ testing device specific commands.
 - `npm run lint` – run ESLint
 - `npm run format` – run Prettier
 - `npm run server` – start only the MIDI backend
+- `npm test` – compile the server then run all tests with Vitest
