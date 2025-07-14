@@ -9,6 +9,12 @@ describe('isValidCmd', () => {
     expect(isValidCmd('ls -la', allowed)).toBe(true);
   });
 
+  it('handles quoted commands', () => {
+    expect(isValidCmd('"echo hello"', allowed)).toBe(true);
+    expect(isValidCmd('"ls -la"', allowed)).toBe(true);
+    expect(isValidCmd('"rm -rf /"', allowed)).toBe(false);
+  });
+
   it('blocks unlisted commands', () => {
     expect(isValidCmd('rm -rf /', allowed)).toBe(false);
   });
