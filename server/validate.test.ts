@@ -23,6 +23,8 @@ describe('isValidCmd', () => {
     expect(isValidCmd('echo hello && rm -rf /', allowed)).toBe(false);
     expect(isValidCmd('ls; rm -rf /', allowed)).toBe(false);
     expect(isValidCmd('cat foo | grep bar', allowed)).toBe(false);
+    expect(isValidCmd('echo hi\nrm -rf /', allowed)).toBe(false);
+    expect(isValidCmd('echo hi\r', allowed)).toBe(false);
   });
 
   it('returns false for non-string or empty input', () => {
