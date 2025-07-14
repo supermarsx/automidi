@@ -136,8 +136,7 @@ describe('useMidi reconnect logic', () => {
       ws.triggerOpen();
     });
 
-    // first message is getDevices, second should be the ping
-    const pingMsg = JSON.parse(ws.sent[1]);
+    const pingMsg = JSON.parse(ws.sent[0]);
     const ts = pingMsg.ts;
 
     vi.advanceTimersByTime(50);
@@ -145,7 +144,7 @@ describe('useMidi reconnect logic', () => {
       ws.triggerMessage(JSON.stringify({ type: 'pong', ts }));
     });
 
-    expect(ws.sent.length).toBe(2);
+    expect(ws.sent.length).toBe(1);
     expect(ts).toBeDefined();
     expect(ts + 50).toBe(Date.now());
   });
