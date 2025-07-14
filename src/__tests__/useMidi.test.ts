@@ -64,12 +64,14 @@ class MockWebSocket {
     this.onmessage?.({ data });
   }
 }
+const originalWebSocket = global.WebSocket;
 
 global.WebSocket = MockWebSocket as unknown as typeof WebSocket;
 
 describe('useMidi reconnect logic', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    global.WebSocket = MockWebSocket as unknown as typeof WebSocket;
     MockWebSocket.instances.length = 0;
     storeState = {
       devices: { outputId: null },
@@ -88,6 +90,7 @@ describe('useMidi reconnect logic', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    global.WebSocket = originalWebSocket as typeof WebSocket;
   });
 
   it('reconnects after failure with expected delay', () => {
