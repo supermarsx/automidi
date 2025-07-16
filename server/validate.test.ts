@@ -10,9 +10,14 @@ describe('isValidCmd', () => {
   });
 
   it('handles quoted commands', () => {
-    expect(isValidCmd('"echo hello"', allowed)).toBe(true);
-    expect(isValidCmd('"ls -la"', allowed)).toBe(true);
-    expect(isValidCmd('"rm -rf /"', allowed)).toBe(false);
+    expect(isValidCmd('"echo" hello', allowed)).toBe(true);
+    expect(isValidCmd('"ls" -la', allowed)).toBe(true);
+    expect(isValidCmd('"rm" -rf /', allowed)).toBe(false);
+  });
+
+  it('handles quoted path with arguments', () => {
+    const allowedPath = ['/path/my app'];
+    expect(isValidCmd('"/path/my app" --option', allowedPath)).toBe(true);
   });
 
   it('blocks unlisted commands', () => {
