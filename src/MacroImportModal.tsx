@@ -30,7 +30,17 @@ export default function MacroImportModal({ onClose }: Props) {
 
   const confirmImport = () => {
     if (!data) return;
-    useStore.setState((s) => ({ ...s, macros: data }));
+    const base = Date.now();
+    const idMap = new Map<string, string>();
+    data.forEach((m, idx) => {
+      idMap.set(m.id, (base + idx).toString());
+    });
+    const imported = data.map((m) => {
+      const newId = idMap.get(m.id) as string;
+      const next = m.nextId ? (idMap.get(m.nextId) ?? m.nextId) : undefined;
+      return { ...m, id: newId, ...(next ? { nextId: next } : {}) };
+    });
+    useStore.setState((s) => ({ ...s, macros: imported }));
     addToast('Macros imported', 'success');
     onClose();
   };
