@@ -12,7 +12,7 @@
     "build:server": "tsc -p server/tsconfig.json",
     "server": "npm run build:server && node server/dist/index.js",
     "setup": "npm install",
-    "test": "vitest run"
+    "test": "npm run build:server && vitest run"
   },
   "dependencies": {
     "@tonejs/midi": "^2.0.28",

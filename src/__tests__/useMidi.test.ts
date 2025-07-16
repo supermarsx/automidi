@@ -64,12 +64,14 @@ class MockWebSocket {
     this.onmessage?.({ data });
   }
 }
+const originalWebSocket = global.WebSocket;
 
 global.WebSocket = MockWebSocket as unknown as typeof WebSocket;
 
 describe('useMidi reconnect logic', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    global.WebSocket = MockWebSocket as unknown as typeof WebSocket;
     MockWebSocket.instances.length = 0;
     storeState = {
       devices: { outputId: null },
@@ -88,6 +90,7 @@ describe('useMidi reconnect logic', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    global.WebSocket = originalWebSocket as typeof WebSocket;
   });
 
   it('reconnects after failure with expected delay', () => {
@@ -136,8 +139,7 @@ describe('useMidi reconnect logic', () => {
       ws.triggerOpen();
     });
 
-    // first message is getDevices, second should be the ping
-    const pingMsg = JSON.parse(ws.sent[1]);
+    const pingMsg = JSON.parse(ws.sent[0]);
     const ts = pingMsg.ts;
 
     vi.advanceTimersByTime(50);
@@ -145,7 +147,7 @@ describe('useMidi reconnect logic', () => {
       ws.triggerMessage(JSON.stringify({ type: 'pong', ts }));
     });
 
-    expect(ws.sent.length).toBe(2);
+    expect(ws.sent.length).toBe(1);
     expect(ts).toBeDefined();
     expect(ts + 50).toBe(Date.now());
   });

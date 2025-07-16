@@ -33,19 +33,6 @@ export function useWebSocket({
   const connectionAttemptsRef = useRef(0);
   const isPageLoadedRef = useRef(false);
 
-  useEffect(() => {
-    const handleLoad = () => {
-      isPageLoadedRef.current = true;
-    };
-
-    if (document.readyState === 'complete') {
-      isPageLoadedRef.current = true;
-    } else {
-      window.addEventListener('load', handleLoad);
-      return () => window.removeEventListener('load', handleLoad);
-    }
-  }, []);
-
   const connectWebSocket = useCallback(() => {
     if (typeof WebSocket === 'undefined') return;
     if (!isPageLoadedRef.current) return;
@@ -99,7 +86,7 @@ export function useWebSocket({
         setStatus('closed');
         if (
           autoReconnect &&
-          connectionAttemptsRef.current < maxReconnectAttempts &&
+          connectionAttemptsRef.current <= maxReconnectAttempts &&
           !reconnectTimeoutRef.current
         ) {
           const delay = Math.min(
@@ -136,6 +123,24 @@ export function useWebSocket({
     onOpen,
     connectionTimeout,
   ]);
+
+  useEffect(() => {
+    const handleLoad = () => {
+      isPageLoadedRef.current = true;
+      connectWebSocket();
+    };
+
+    if (document.readyState === 'complete') {
+      isPageLoadedRef.current = true;
+      connectWebSocket();
+    } else {
+      window.addEventListener('load', handleLoad);
+    }
+
+    return () => {
+      window.removeEventListener('load', handleLoad);
+    };
+  }, [connectWebSocket]);
 
   const reconnect = useCallback(() => {
     connectionAttemptsRef.current = 0;
