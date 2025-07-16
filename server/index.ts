@@ -38,10 +38,6 @@ function checkKey(req: Request, res: Response, next: NextFunction) {
 
 app.use(checkKey);
 
-// Updated dynamically in listDevices but never read elsewhere
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-let currentDevices = { inputs: [], outputs: [] };
-
 async function startServer() {
   try {
     await WebMidi.enable({ sysex: true });
@@ -60,7 +56,6 @@ async function startServer() {
         manufacturer: output.manufacturer,
         state: output.state,
       }));
-      currentDevices = { inputs, outputs };
       return { inputs, outputs };
     }
 
