@@ -3,7 +3,7 @@ import { create } from 'zustand';
 export type ToastType = 'success' | 'error';
 
 export interface Toast {
-  id: number;
+  id: string;
   message: string;
   type: ToastType;
 }
@@ -11,13 +11,13 @@ export interface Toast {
 interface ToastState {
   toasts: Toast[];
   addToast: (message: string, type: ToastType) => void;
-  removeToast: (id: number) => void;
+  removeToast: (id: string) => void;
 }
 
 export const useToastStore = create<ToastState>((set) => ({
   toasts: [],
   addToast: (message, type) => {
-    const id = Date.now() + Math.random();
+    const id = crypto.randomUUID();
     set((state) => {
       if (state.toasts.length >= 5) {
         return { toasts: state.toasts };
