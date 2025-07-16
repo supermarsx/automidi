@@ -241,10 +241,13 @@ export default function MacroList() {
                       />
                       <input
                         type="number"
+                        min="0"
                         className="form-control retro-input me-2 mb-1"
                         style={{ width: '80px' }}
                         value={interval}
-                        onChange={(e) => setInterval(Number(e.target.value))}
+                        onChange={(e) =>
+                          setInterval(Math.max(0, Number(e.target.value)))
+                        }
                       />
                     </>
                   ) : (
