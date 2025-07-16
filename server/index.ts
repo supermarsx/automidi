@@ -1,4 +1,5 @@
 import express from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { WebSocketServer } from 'ws';
 import type { WebSocket } from 'ws';
 import { WebMidi } from 'webmidi';
@@ -26,7 +27,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-function checkKey(req, res, next) {
+function checkKey(req: Request, res: Response, next: NextFunction) {
   const key = req.headers['x-api-key'];
   if (key !== API_KEY) {
     res.status(401).json({ error: 'unauthorized' });
@@ -168,8 +169,8 @@ async function startServer() {
         // Listen to all MIDI messages
         input.addListener('midimessage', (e) => {
           const bytes = Array.from(e.message.data || e.data || []);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const message: any = {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const message: any = {
             type: 'midi',
             direction: 'in',
             message: bytes,
