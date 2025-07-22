@@ -37,12 +37,21 @@ compatibility:
 - `GET /midi/devices` – lists available MIDI inputs and outputs
 - `POST /midi/send` – sends a raw MIDI message to a specified output
 
-A WebSocket on the same port handles the communication used by the frontend.
-When a client connects it sends the current device list and it pushes `devices`
-events whenever ports change. Incoming MIDI messages are forwarded as `midi`
-events so the UI can react in real time. Device listings, outgoing MIDI messages
-and automation commands are all transmitted over this socket as implemented in
-`useMidiConnection.ts` and `useKeyMacroPlayer.ts`.
+  A WebSocket on the same port handles the communication used by the frontend.
+  When a client connects it sends the current device list and it pushes `devices`
+  events whenever ports change. Incoming MIDI messages are forwarded as `midi`
+  events so the UI can react in real time. Device listings, outgoing MIDI messages
+  and automation commands are all transmitted over this socket as implemented in
+  `useMidiConnection.ts` and `useKeyMacroPlayer.ts`.
+
+### API key
+
+Every request to the server, including WebSocket connections, must include the
+server's API key. When the server starts it prints this key to the console. You
+can also set it explicitly via the `API_KEY` environment variable. Configure the
+frontend in the **Settings** panel so the `API key` field matches the value
+logged by the server. A mismatched key will result in the connection being
+rejected with a `401` response.
 
 ### Shell command security
 

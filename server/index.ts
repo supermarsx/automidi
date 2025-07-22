@@ -127,7 +127,17 @@ async function startServer() {
       console.log(`Server listening on port ${port}`);
     });
 
-    const wss = new WebSocketServer({ server });
+    const wss = new WebSocketServer({
+      server,
+      verifyClient: (info, done) => {
+        const url = new URL(info.req.url || '', 'http://localhost');
+        if (url.searchParams.get('key') !== API_KEY) {
+          done(false, 401, 'Unauthorized');
+        } else {
+          done(true);
+        }
+      },
+    });
 
     function broadcastToClients(message) {
       const payload = JSON.stringify(message);
@@ -209,12 +219,7 @@ async function startServer() {
     // Initial setup
     setupMidiListeners();
 
-    wss.on('connection', (ws, req) => {
-      const url = new URL(req.url, 'http://localhost');
-      if (url.searchParams.get('key') !== API_KEY) {
-        ws.close();
-        return;
-      }
+    wss.on('connection', (ws) => {
       console.log('WebSocket client connected');
       sendDevices(ws);
 
