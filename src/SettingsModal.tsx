@@ -188,7 +188,7 @@ export default function SettingsModal({ onClose }: Props) {
           <div className="modal-header">
             <h5 className="modal-title">◄ SYSTEM CONFIGURATION ►</h5>
           </div>
-          <div className="modal-body">
+          <div className="modal-body settings-scroll">
             <div className="mb-3">
               <label className="form-label text-info">HOST ADDRESS:</label>
               <input
