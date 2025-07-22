@@ -11,11 +11,15 @@ import crypto from 'crypto';
 
 import { isValidCmd } from './validate.js';
 
-const API_KEY = process.env.API_KEY || crypto.randomBytes(16).toString('hex');
+const envKey = process.env.API_KEY;
+const API_KEY =
+  envKey === undefined ? crypto.randomBytes(16).toString('hex') : envKey;
 if (process.env.LOG_API_KEY === 'true') {
   console.log('API key:', API_KEY);
-} else {
+} else if (API_KEY) {
   console.log('Server started with API key set.');
+} else {
+  console.log('Server started with no API key required.');
 }
 
 const allowedCmds = (process.env.ALLOWED_CMDS || '')
@@ -29,7 +33,7 @@ app.use(cors());
 
 function checkKey(req: Request, res: Response, next: NextFunction) {
   const key = req.headers['x-api-key'];
-  if (key !== API_KEY) {
+  if (API_KEY && key !== API_KEY) {
     res.status(401).json({ error: 'unauthorized' });
     return;
   }
@@ -131,7 +135,7 @@ async function startServer() {
       server,
       verifyClient: (info, done) => {
         const url = new URL(info.req.url || '', 'http://localhost');
-        if (url.searchParams.get('key') !== API_KEY) {
+        if (API_KEY && url.searchParams.get('key') !== API_KEY) {
           done(false, 401, 'Unauthorized');
         } else {
           done(true);

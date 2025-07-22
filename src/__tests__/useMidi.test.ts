@@ -14,6 +14,7 @@ interface StoreState {
     maxReconnectAttempts: number;
     pingInterval: number;
     pingEnabled: boolean;
+    reconnectOnLost: boolean;
   };
 }
 
@@ -84,6 +85,7 @@ describe('useMidi reconnect logic', () => {
         maxReconnectAttempts: 2,
         pingInterval: 1000,
         pingEnabled: true,
+        reconnectOnLost: true,
       },
     };
   });
@@ -150,5 +152,29 @@ describe('useMidi reconnect logic', () => {
     expect(ws.sent.length).toBe(1);
     expect(ts).toBeDefined();
     expect(ts + 50).toBe(Date.now());
+  });
+
+  it('closes the socket after missed pings when reconnectOnLost is true', () => {
+    storeState.settings.pingInterval = 100;
+    storeState.settings.reconnectOnLost = true;
+
+    renderHook(() => useMidi());
+
+    act(() => {
+      window.dispatchEvent(new Event('load'));
+    });
+
+    vi.advanceTimersByTime(100);
+    const ws = MockWebSocket.instances[0];
+
+    act(() => {
+      ws.triggerOpen();
+    });
+
+    // advance through three ping intervals without responding
+    vi.advanceTimersByTime(300);
+
+    expect(ws.readyState).toBe(MockWebSocket.CLOSED);
+    expect(MockWebSocket.instances.length).toBeGreaterThanOrEqual(1);
   });
 });

@@ -16,6 +16,7 @@ export function useMidiConnection() {
   const maxReconnectAttempts = useStore((s) => s.settings.maxReconnectAttempts);
   const pingInterval = useStore((s) => s.settings.pingInterval);
   const pingEnabled = useStore((s) => s.settings.pingEnabled);
+  const reconnectOnLost = useStore((s) => s.settings.reconnectOnLost);
 
   const url = `ws://${host}:${port}?key=${apiKey}`;
 
@@ -38,7 +39,7 @@ export function useMidiConnection() {
     handlePong,
     start: startPing,
     stop: stopPing,
-  } = usePing(wsRef, pingEnabled, pingInterval);
+  } = usePing(wsRef, pingEnabled, pingInterval, reconnectOnLost);
 
   const listen = useCallback(
     (fn: RawListener) => wsListen((data) => fn(data as RawMessage)),

@@ -19,6 +19,7 @@ export default function SettingsModal({ onClose }: Props) {
   const pingYellow = useStore((s) => s.settings.pingYellow);
   const pingOrange = useStore((s) => s.settings.pingOrange);
   const pingEnabled = useStore((s) => s.settings.pingEnabled);
+  const reconnectOnLost = useStore((s) => s.settings.reconnectOnLost);
   const clearBeforeLoad = useStore((s) => s.settings.clearBeforeLoad);
   const sysexColorMode = useStore((s) => s.settings.sysexColorMode);
   const autoSleep = useStore((s) => s.settings.autoSleep);
@@ -37,6 +38,7 @@ export default function SettingsModal({ onClose }: Props) {
   const setPingYellow = useStore((s) => s.setPingYellow);
   const setPingOrange = useStore((s) => s.setPingOrange);
   const setPingEnabled = useStore((s) => s.setPingEnabled);
+  const setReconnectOnLost = useStore((s) => s.setReconnectOnLost);
   const setClearBeforeLoad = useStore((s) => s.setClearBeforeLoad);
   const setSysexColorMode = useStore((s) => s.setSysexColorMode);
   const setAutoSleep = useStore((s) => s.setAutoSleep);
@@ -57,6 +59,7 @@ export default function SettingsModal({ onClose }: Props) {
   const [py, setPy] = useState(pingYellow);
   const [po, setPo] = useState(pingOrange);
   const [pe, setPe] = useState(pingEnabled);
+  const [rol, setRol] = useState(reconnectOnLost);
   const [cbl, setCbl] = useState(clearBeforeLoad);
   const [scm, setScm] = useState(sysexColorMode);
   const [asleep, setAsleep] = useState(autoSleep);
@@ -75,6 +78,7 @@ export default function SettingsModal({ onClose }: Props) {
     setLogLimit(ll);
     setPingInterval(Math.max(500, pi));
     setPingEnabled(pe);
+    setReconnectOnLost(rol);
     setPingGreen(pg);
     setPingYellow(py);
     setPingOrange(po);
@@ -122,6 +126,7 @@ export default function SettingsModal({ onClose }: Props) {
         setLogLimit(cfg.logLimit ?? ll);
         setPingInterval(cfg.pingInterval ?? pi);
         setPingEnabled(cfg.pingEnabled ?? pe);
+        setReconnectOnLost(cfg.reconnectOnLost ?? rol);
         setPingGreen(cfg.pingGreen ?? pg);
         setPingYellow(cfg.pingYellow ?? py);
         setPingOrange(cfg.pingOrange ?? po);
@@ -143,6 +148,7 @@ export default function SettingsModal({ onClose }: Props) {
         setPy(cfg.pingYellow ?? py);
         setPo(cfg.pingOrange ?? po);
         setPe(cfg.pingEnabled ?? pe);
+        setRol(cfg.reconnectOnLost ?? rol);
         setCbl(cfg.clearBeforeLoad ?? cbl);
         setScm(cfg.sysexColorMode ?? scm);
         setAsleep(cfg.autoSleep ?? asleep);
@@ -308,6 +314,26 @@ export default function SettingsModal({ onClose }: Props) {
               </div>
               <small className="text-warning">
                 Automatically reconnect when connection is lost
+              </small>
+            </div>
+            <div className="mb-3">
+              <div className="form-check">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id="reconnectOnLost"
+                  checked={rol}
+                  onChange={(e) => setRol(e.target.checked)}
+                />
+                <label
+                  className="form-check-label text-info"
+                  htmlFor="reconnectOnLost"
+                >
+                  AUTO-RECONNECT WHEN PING TIMES OUT
+                </label>
+              </div>
+              <small className="text-warning">
+                Close the socket after missed pings to force reconnect
               </small>
             </div>
             <div className="mb-3 form-check">
