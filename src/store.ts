@@ -92,6 +92,7 @@ interface SettingsSlice {
     pingYellow: number;
     pingOrange: number;
     pingEnabled: boolean;
+    reconnectOnLost: boolean;
     clearBeforeLoad: boolean;
     sysexColorMode: boolean;
     autoSleep: number;
@@ -111,6 +112,7 @@ interface SettingsSlice {
   setPingYellow: (ms: number) => void;
   setPingOrange: (ms: number) => void;
   setPingEnabled: (enabled: boolean) => void;
+  setReconnectOnLost: (enabled: boolean) => void;
   setClearBeforeLoad: (enabled: boolean) => void;
   setSysexColorMode: (enabled: boolean) => void;
   setAutoSleep: (s: number) => void;
@@ -225,6 +227,7 @@ export const useStore = create<StoreState>()(
         pingYellow: 50,
         pingOrange: 250,
         pingEnabled: true,
+        reconnectOnLost: true,
         clearBeforeLoad: false,
         sysexColorMode: false,
         autoSleep: 0,
@@ -297,6 +300,10 @@ export const useStore = create<StoreState>()(
             pingEnabled: enabled,
           },
         })),
+      setReconnectOnLost: (enabled) =>
+        set((state) => ({
+          settings: { ...state.settings, reconnectOnLost: enabled },
+        })),
       setClearBeforeLoad: (enabled) =>
         set((state) => ({
           settings: { ...state.settings, clearBeforeLoad: enabled },
@@ -365,6 +372,8 @@ export const useStore = create<StoreState>()(
             autoLoadFirstConfig:
               p.settings?.autoLoadFirstConfig ??
               current.settings.autoLoadFirstConfig,
+            reconnectOnLost:
+              p.settings?.reconnectOnLost ?? current.settings.reconnectOnLost,
             apiKey: p.settings?.apiKey ?? current.settings.apiKey,
           },
         };
