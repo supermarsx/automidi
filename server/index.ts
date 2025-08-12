@@ -7,13 +7,10 @@ import keySender from 'node-key-sender';
 import notifier from 'toasted-notifier';
 import cors from 'cors';
 import { exec, spawn } from 'child_process';
-import crypto from 'crypto';
 
 import { isValidCmd } from './validate.js';
 
-const envKey = process.env.API_KEY;
-const API_KEY =
-  envKey === undefined ? crypto.randomBytes(16).toString('hex') : envKey;
+const API_KEY = process.env.API_KEY || undefined;
 if (process.env.LOG_API_KEY === 'true') {
   console.log('API key:', API_KEY);
 } else if (API_KEY) {
@@ -34,8 +31,12 @@ app.use(express.json());
 app.use(cors());
 
 function checkKey(req: Request, res: Response, next: NextFunction) {
+  if (!API_KEY) {
+    next();
+    return;
+  }
   const key = req.headers['x-api-key'];
-  if (API_KEY && key !== API_KEY) {
+  if (key !== API_KEY) {
     res.status(401).json({ error: 'unauthorized' });
     return;
   }
