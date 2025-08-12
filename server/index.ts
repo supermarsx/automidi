@@ -45,6 +45,15 @@ function checkKey(req: Request, res: Response, next: NextFunction) {
 
 app.use(checkKey);
 
+function isValidByteArray(arr: unknown): arr is number[] {
+  return (
+    Array.isArray(arr) &&
+    arr.every(
+      (n) => typeof n === 'number' && Number.isInteger(n) && n >= 0 && n <= 255,
+    )
+  );
+}
+
 async function startServer() {
   try {
     await WebMidi.enable({ sysex: true });
@@ -75,8 +84,10 @@ async function startServer() {
 
     app.post('/midi/send', (req, res) => {
       const { port = '', data } = req.body || {};
-      if (!Array.isArray(data)) {
-        res.status(400).json({ error: 'data must be an array of numbers' });
+      if (!isValidByteArray(data)) {
+        res.status(400).json({
+          error: 'data must be an array of numbers between 0 and 255',
+        });
         return;
       }
       const out = WebMidi.getOutputById(String(port));
@@ -244,8 +255,12 @@ async function startServer() {
           } else if (data.type === 'send') {
             const { port = '', bytes } = data;
             const out = WebMidi.getOutputById(String(port));
-            if (!out || !Array.isArray(bytes)) {
-              console.error('Invalid output port or bytes:', { port, bytes });
+            if (!out) {
+              console.error('Invalid output port:', { port });
+              return;
+            }
+            if (!isValidByteArray(bytes)) {
+              console.error('Invalid bytes array:', { bytes });
               return;
             }
             try {
