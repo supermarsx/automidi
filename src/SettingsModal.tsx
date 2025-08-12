@@ -446,10 +446,12 @@ export default function SettingsModal({ onClose }: Props) {
                     className="form-control retro-input"
                     value={mra}
                     onChange={(e) => setMra(Number(e.target.value))}
-                    min="1"
+                    min="0"
                     max="99"
                   />
-                  <small className="text-warning">Default: 10</small>
+                  <small className="text-warning">
+                    Default: 10, 0 = unlimited
+                  </small>
                 </div>
               </>
             )}

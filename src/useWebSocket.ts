@@ -86,7 +86,8 @@ export function useWebSocket({
         setStatus('closed');
         if (
           autoReconnect &&
-          connectionAttemptsRef.current <= maxReconnectAttempts &&
+          (maxReconnectAttempts <= 0 ||
+            connectionAttemptsRef.current <= maxReconnectAttempts) &&
           !reconnectTimeoutRef.current
         ) {
           const delay = Math.min(

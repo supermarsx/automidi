@@ -51,7 +51,7 @@ describe('useStore actions', () => {
 
   it('setMaxReconnectAttempts enforces bounds', () => {
     useStore.getState().setMaxReconnectAttempts(0);
-    expect(useStore.getState().settings.maxReconnectAttempts).toBe(1);
+    expect(useStore.getState().settings.maxReconnectAttempts).toBe(0);
 
     useStore.getState().setMaxReconnectAttempts(150);
     expect(useStore.getState().settings.maxReconnectAttempts).toBe(99);
