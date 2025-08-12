@@ -6,10 +6,10 @@ import { WebMidi } from 'webmidi';
 import keySender from 'node-key-sender';
 import notifier from 'toasted-notifier';
 import cors from 'cors';
-import { exec, spawn } from 'child_process';
+import { spawn } from 'child_process';
 import crypto from 'crypto';
 
-import { isValidCmd } from './validate.js';
+import { isValidCmd, parseCmd } from './validate.js';
 
 const envKey = process.env.API_KEY;
 const API_KEY =
@@ -276,26 +276,46 @@ async function startServer() {
             const { app: appPath } = data;
             if (!appPath) return;
             if (!isValidCmd(appPath, allowedCmds)) return;
-            exec(`"${appPath}"`, (err) => {
-              if (err) console.error('App exec error:', err);
-            });
+            const parsed = parseCmd(appPath);
+            if (!parsed) return;
+            try {
+              const child = spawn(parsed.file, parsed.args, {
+                shell: false,
+                detached: true,
+                stdio: 'ignore',
+              });
+              child.on('error', (err) =>
+                console.error('App spawn error:', err),
+              );
+              child.unref();
+            } catch (err) {
+              console.error('App spawn error:', err);
+            }
           } else if (data.type === 'runShell') {
             const { cmd } = data;
             if (!cmd) return;
             if (!isValidCmd(cmd, allowedCmds)) return;
-            exec(cmd, (err) => {
-              if (err) console.error('Shell exec error:', err);
-            });
+            const parsed = parseCmd(cmd);
+            if (!parsed) return;
+            const child = spawn(parsed.file, parsed.args, { shell: false });
+            child.on('error', (err) =>
+              console.error('Shell spawn error:', err),
+            );
           } else if (data.type === 'runShellWin') {
             const { cmd } = data;
             if (!cmd) return;
             if (!isValidCmd(cmd, allowedCmds)) return;
+            const parsed = parseCmd(cmd);
+            if (!parsed) return;
             try {
-              const child = spawn(cmd, {
-                shell: true,
+              const child = spawn(parsed.file, parsed.args, {
+                shell: false,
                 detached: true,
                 windowsHide: false,
               });
+              child.on('error', (err) =>
+                console.error('ShellWin spawn error:', err),
+              );
               child.unref();
             } catch (err) {
               console.error('ShellWin spawn error:', err);
@@ -304,9 +324,18 @@ async function startServer() {
             const { cmd } = data;
             if (!cmd) return;
             if (!isValidCmd(cmd, allowedCmds)) return;
-            exec(cmd, { windowsHide: true }, (err) => {
-              if (err) console.error('ShellBg exec error:', err);
+            const parsed = parseCmd(cmd);
+            if (!parsed) return;
+            const child = spawn(parsed.file, parsed.args, {
+              shell: false,
+              windowsHide: true,
+              detached: true,
+              stdio: 'ignore',
             });
+            child.on('error', (err) =>
+              console.error('ShellBg spawn error:', err),
+            );
+            child.unref();
           } else if (data.type === 'keysType') {
             const { sequence = [], interval = 50 } = data;
             (async () => {

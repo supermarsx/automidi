@@ -15,28 +15,15 @@ describe('shell routes', () => {
   const API_KEY = 'test-key';
   const ALLOW = 'echo,win,app';
   let server: Server;
-  let exec: Mock;
   let spawn: Mock;
-  let originalExec: unknown;
   let originalSpawn: unknown;
 
   beforeEach(async () => {
     vi.resetModules();
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const cp = require('child_process');
-    originalExec = cp.exec;
     originalSpawn = cp.spawn;
-    exec = vi.fn(
-      (_cmd: string, optsOrCb?: unknown, cb?: (err: unknown) => void) => {
-        const callback =
-          typeof optsOrCb === 'function'
-            ? optsOrCb
-            : (cb as (err: unknown) => void);
-        if (callback) callback(null);
-      },
-    );
-    spawn = vi.fn(() => ({ unref: vi.fn() }));
-    cp.exec = exec;
+    spawn = vi.fn(() => ({ on: vi.fn(), unref: vi.fn() }));
     cp.spawn = spawn;
     process.env.API_KEY = API_KEY;
     process.env.ALLOWED_CMDS = ALLOW;
@@ -63,7 +50,6 @@ describe('shell routes', () => {
   afterEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const cp = require('child_process');
-    cp.exec = originalExec as typeof cp.exec;
     cp.spawn = originalSpawn as typeof cp.spawn;
     server.close();
     vi.clearAllMocks();
@@ -85,17 +71,33 @@ describe('shell routes', () => {
 
     await new Promise((r) => setTimeout(r, 10));
 
-    expect(exec).toHaveBeenCalledWith('"app"', expect.any(Function));
-    expect(exec).toHaveBeenCalledWith('echo hi', expect.any(Function));
-    expect(spawn).toHaveBeenCalledWith('win something', {
-      shell: true,
-      detached: true,
-      windowsHide: false,
-    });
-    expect(exec).toHaveBeenCalledWith(
-      'echo hi',
-      { windowsHide: true },
-      expect.any(Function),
+    expect(spawn).toHaveBeenCalledWith(
+      'app',
+      [],
+      expect.objectContaining({ shell: false, detached: true }),
+    );
+    expect(spawn).toHaveBeenCalledWith(
+      'echo',
+      ['hi'],
+      expect.objectContaining({ shell: false }),
+    );
+    expect(spawn).toHaveBeenCalledWith(
+      'win',
+      ['something'],
+      expect.objectContaining({
+        shell: false,
+        detached: true,
+        windowsHide: false,
+      }),
+    );
+    expect(spawn).toHaveBeenCalledWith(
+      'echo',
+      ['hi'],
+      expect.objectContaining({
+        shell: false,
+        windowsHide: true,
+        detached: true,
+      }),
     );
     ws.close();
   });
@@ -113,7 +115,6 @@ describe('shell routes', () => {
 
     await new Promise((r) => setTimeout(r, 10));
 
-    expect(exec).not.toHaveBeenCalled();
     expect(spawn).not.toHaveBeenCalled();
     ws.close();
   });
