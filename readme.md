@@ -50,11 +50,11 @@ compatibility:
 
 ### API key
 
-Every request to the server, including WebSocket connections, must include the
-server's API key. When the server starts it prints this key to the console. You
-can also set it explicitly via the `API_KEY` environment variable. Configure the
-frontend in the **Settings** panel so the `API key` field matches the value
-logged by the server. A mismatched key will result in the connection being
+By default the server accepts requests without authentication. Set the
+`API_KEY` environment variable to require a matching key on all requests,
+including WebSocket connections. When `LOG_API_KEY=true` the server prints the
+active key to the console. Configure the frontend in the **Settings** panel so
+the `API key` field matches this value, otherwise the connection will be
 rejected with a `401` response.
 
 ### Shell command security
