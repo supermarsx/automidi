@@ -18,7 +18,7 @@ export function useMidiConnection() {
   const pingEnabled = useStore((s) => s.settings.pingEnabled);
   const reconnectOnLost = useStore((s) => s.settings.reconnectOnLost);
 
-  const url = `ws://${host}:${port}?key=${apiKey}`;
+  const url = `ws://${host}:${port}?key=${encodeURIComponent(apiKey)}`;
 
   const {
     status,
