@@ -34,7 +34,7 @@ class MockWebSocket {
 
 const originalWebSocket = global.WebSocket;
 
-describe('useWebSocket unlimited reconnects', () => {
+describe('useWebSocket', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     MockWebSocket.instances.length = 0;
@@ -71,5 +71,38 @@ describe('useWebSocket unlimited reconnects', () => {
     }
 
     expect(MockWebSocket.instances.length).toBeGreaterThan(attempts);
+  });
+
+  it('does not exceed maxReconnectAttempts retries', () => {
+    const maxReconnectAttempts = 2;
+
+    renderHook(() =>
+      useWebSocket({
+        url: 'ws://localhost',
+        autoReconnect: true,
+        reconnectInterval: 100,
+        maxReconnectAttempts,
+      }),
+    );
+
+    act(() => {
+      window.dispatchEvent(new Event('load'));
+    });
+
+    for (let i = 0; i < maxReconnectAttempts; i++) {
+      const ws = MockWebSocket.instances[i];
+      act(() => {
+        ws.triggerClose();
+      });
+      vi.advanceTimersByTime(1000);
+    }
+
+    const ws = MockWebSocket.instances[maxReconnectAttempts];
+    act(() => {
+      ws.triggerClose();
+    });
+    vi.advanceTimersByTime(1000);
+
+    expect(MockWebSocket.instances.length).toBe(maxReconnectAttempts + 1);
   });
 });

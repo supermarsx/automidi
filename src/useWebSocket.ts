@@ -52,6 +52,12 @@ export function useWebSocket({
     setStatus('connecting');
 
     try {
+      if (
+        maxReconnectAttempts > 0 &&
+        connectionAttemptsRef.current >= maxReconnectAttempts
+      ) {
+        return;
+      }
       const ws = new WebSocket(url);
       wsRef.current = ws;
       connectionAttemptsRef.current++;
@@ -84,11 +90,14 @@ export function useWebSocket({
           connectionTimeoutRef.current = null;
         }
         setStatus('closed');
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
+          reconnectTimeoutRef.current = null;
+        }
         if (
           autoReconnect &&
           (maxReconnectAttempts <= 0 ||
-            connectionAttemptsRef.current < maxReconnectAttempts) &&
-          !reconnectTimeoutRef.current
+            connectionAttemptsRef.current < maxReconnectAttempts)
         ) {
           const delay = Math.min(
             reconnectInterval * connectionAttemptsRef.current,
