@@ -159,8 +159,14 @@ export function useWebSocket({
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
       }
-      setTimeout(connectWebSocket, 100);
+      reconnectTimeoutRef.current = setTimeout(connectWebSocket, 100);
     }
+    return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+    };
   }, [url, connectWebSocket]);
 
   useEffect(() => {
