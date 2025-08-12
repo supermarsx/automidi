@@ -50,7 +50,14 @@ export function usePadActions() {
       confirm?: boolean,
       toastConfirm?: boolean,
     ) => {
-      console.log('Pad macro trigger', { macroId, id, confirm, toastConfirm });
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Pad macro trigger', {
+          macroId,
+          id,
+          confirm,
+          toastConfirm,
+        });
+      }
       if (!confirm) {
         playMacro(macroId);
         return;
@@ -123,7 +130,10 @@ export function usePadActions() {
       Object.values(confirmRef.current).forEach((entry) => {
         clearTimeout(entry.t);
       });
-      confirmRef.current = {} as Record<string, { t: ReturnType<typeof setTimeout>; prev: number }>;
+      confirmRef.current = {} as Record<
+        string,
+        { t: ReturnType<typeof setTimeout>; prev: number }
+      >;
     };
   }, []);
 }

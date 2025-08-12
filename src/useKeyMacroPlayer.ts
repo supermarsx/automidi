@@ -23,7 +23,9 @@ export function useKeyMacroPlayer() {
       visited.add(macroId);
       const macro = macros.find((m) => m.id === macroId);
       if (!macro) return;
-      console.log('Playing macro', macro);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Playing macro', macro);
+      }
       addToast(`Playing: ${macro.name}`, 'success');
       try {
         const { type, payload } = MACRO_MESSAGES[macro.type || 'keys'];
