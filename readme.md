@@ -44,6 +44,10 @@ compatibility:
   and automation commands are all transmitted over this socket as implemented in
   `useMidiConnection.ts` and `useKeyMacroPlayer.ts`.
 
+  The frontend's **Settings** panel controls reconnection behavior. Setting
+  _Max reconnect attempts_ to `0` or a negative value removes the limit and the
+  client will continue retrying indefinitely.
+
 ### API key
 
 Every request to the server, including WebSocket connections, must include the

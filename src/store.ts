@@ -255,7 +255,7 @@ export const useStore = create<StoreState>()(
         set((state) => ({
           settings: {
             ...state.settings,
-            maxReconnectAttempts: Math.min(99, Math.max(1, max)),
+            maxReconnectAttempts: Math.min(99, Math.max(0, max)),
           },
         })),
       setLogLimit: (limit) =>
