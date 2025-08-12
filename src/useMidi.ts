@@ -33,6 +33,7 @@ export function useMidi() {
   const [outputs, setOutputs] = useState<MidiDevice[]>([]);
   const launchpadRef = useRef<string | null>(null);
   const listeners = useRef(new Set<(msg: MidiMessage) => void>());
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const send = useCallback(
     (bytes: number[] | Uint8Array) => {
@@ -42,6 +43,12 @@ export function useMidi() {
     },
     [selectedOutput, sendRaw],
   );
+
+  const sendRef = useRef(send);
+
+  useEffect(() => {
+    sendRef.current = send;
+  }, [send]);
 
   const listen = useCallback((handler: (msg: MidiMessage) => void) => {
     listeners.current.add(handler);
@@ -90,11 +97,17 @@ export function useMidi() {
 
   useEffect(() => {
     if (launchpadRef.current !== null && status === 'connected') {
-      setTimeout(() => {
-        send([0xf0, 0x00, 0x20, 0x29, 0x02, 0x0c, 0x0e, 0x01, 0xf7]);
+      timeoutRef.current = setTimeout(() => {
+        sendRef.current([0xf0, 0x00, 0x20, 0x29, 0x02, 0x0c, 0x0e, 0x01, 0xf7]);
       }, 1000);
     }
-  }, [status, send]);
+    return () => {
+      if (timeoutRef.current !== null) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
+  }, [status]);
 
   return {
     inputs,
