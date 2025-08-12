@@ -352,11 +352,15 @@ async function startServer() {
     return server;
   } catch (err) {
     console.error('Failed to enable WebMidi:', err);
+    throw err;
   }
 }
 
 if (require.main === module) {
-  startServer();
+  startServer().catch((err) => {
+    console.error('Server failed to start:', err);
+    process.exit(1);
+  });
 }
 
 export { app, startServer };
