@@ -37,7 +37,8 @@ export function useMidi() {
 
   const send = useCallback(
     (bytes: number[] | Uint8Array) => {
-      const targetPort = selectedOutput || launchpadRef.current || '';
+      const targetPort = selectedOutput || launchpadRef.current;
+      if (!targetPort) return false;
       const bytesArray = Array.from(bytes);
       return sendRaw({ type: 'send', port: targetPort, bytes: bytesArray });
     },
@@ -96,6 +97,10 @@ export function useMidi() {
   }, [listenRaw]);
 
   useEffect(() => {
+    if (timeoutRef.current !== null) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     if (launchpadRef.current !== null && status === 'connected') {
       timeoutRef.current = setTimeout(() => {
         sendRef.current([0xf0, 0x00, 0x20, 0x29, 0x02, 0x0c, 0x0e, 0x01, 0xf7]);
