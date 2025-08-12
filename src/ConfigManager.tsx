@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useStore, type PadConfig } from './store';
 import { useToastStore } from './toastStore';
 import { useMidi } from './useMidi';
@@ -41,12 +41,25 @@ export default function ConfigManager() {
     null,
   );
 
+  const loadConfig = useCallback(
+    (cfg: PadConfig) => {
+      setPadColours(cfg.padColours);
+      if (cfg.padLabels) setPadLabels(cfg.padLabels);
+      if (cfg.padChannels) setPadChannels(cfg.padChannels);
+      if (cfg.padActions) setPadActions(cfg.padActions);
+      addToast('Config loaded', 'success');
+    },
+    [setPadColours, setPadLabels, setPadChannels, setPadActions, addToast],
+  );
+
+  const hasAutoLoaded = useRef(false);
   useEffect(() => {
+    if (hasAutoLoaded.current) return;
     if (autoLoadFirstConfig && configs.length > 0) {
       loadConfig(configs[0]);
+      hasAutoLoaded.current = true;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [autoLoadFirstConfig, configs, loadConfig]);
 
   const saveCurrent = () => {
     if (!name.trim()) return;
@@ -71,14 +84,6 @@ export default function ConfigManager() {
     setName('');
     setTags('');
     addToast('Config saved', 'success');
-  };
-
-  const loadConfig = (cfg: PadConfig) => {
-    setPadColours(cfg.padColours);
-    if (cfg.padLabels) setPadLabels(cfg.padLabels);
-    if (cfg.padChannels) setPadChannels(cfg.padChannels);
-    if (cfg.padActions) setPadActions(cfg.padActions);
-    addToast('Config loaded', 'success');
   };
 
   const startEdit = (cfg: PadConfig) => {
