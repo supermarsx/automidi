@@ -75,6 +75,13 @@ Only `ffmpeg` and `ls` will be accepted by `/run/shell*` routes. Review your
 allowed commands carefully as running arbitrary processes can compromise your
 system.
 
+### MIDI logging
+
+By default the server keeps MIDI logging quiet. Run `npm run dev:log-midi` to
+start both servers with detailed logging. This script uses `cross-env` to set
+the `LOG_MIDI` environment variable so incoming and outgoing MIDI messages and
+device events are printed to the console.
+
 ---
 
 ## Development workflow
@@ -122,6 +129,7 @@ testing device specific commands.
 ## Useful scripts
 
 - `npm run dev` – start both the backend and Vite dev server
+- `npm run dev:log-midi` – start the dev servers with MIDI logging enabled
 - `npm run setup` – install all dependencies
 - `npm run build` – build the React application for production
 - `npm run preview` – preview the production build locally

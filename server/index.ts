@@ -27,6 +27,8 @@ const allowedCmds = (process.env.ALLOWED_CMDS || '')
   .map((c) => c.trim())
   .filter(Boolean);
 
+const LOG_MIDI = process.env.LOG_MIDI === 'true';
+
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -45,7 +47,7 @@ app.use(checkKey);
 async function startServer() {
   try {
     await WebMidi.enable({ sysex: true });
-    console.log('WebMidi enabled successfully (with SysEx)');
+    if (LOG_MIDI) console.log('WebMidi enabled successfully (with SysEx)');
 
     function listDevices() {
       const inputs = WebMidi.inputs.map((input) => ({
@@ -83,7 +85,7 @@ async function startServer() {
       }
       try {
         out.send(data);
-        console.log(`Sent MIDI to ${out.name}:`, data);
+        if (LOG_MIDI) console.log(`Sent MIDI to ${out.name}:`, data);
         res.json({ ok: true });
       } catch (err) {
         console.error('MIDI send error:', err);
@@ -173,7 +175,8 @@ async function startServer() {
     function setupMidiListeners() {
       cleanupMidiListeners();
       WebMidi.inputs.forEach((input) => {
-        console.log(`Setting up listener for input: ${input.name}`);
+        if (LOG_MIDI)
+          console.log(`Setting up listener for input: ${input.name}`);
 
         // Listen to all MIDI messages
         input.addListener('midimessage', (e) => {
@@ -194,28 +197,31 @@ async function startServer() {
           ) {
             message.pressure = bytes[2];
           }
-          console.log('MIDI IN:', message);
+          if (LOG_MIDI) console.log('MIDI IN:', message);
           broadcastToClients(message);
         });
 
         // Listen to specific message types for better logging
         input.addListener('noteon', (e) => {
-          console.log(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            `Note ON from ${input.name}: ${e.note.name}${e.note.octave} vel:${(e as any).velocity}`,
-          );
+          if (LOG_MIDI)
+            console.log(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              `Note ON from ${input.name}: ${e.note.name}${e.note.octave} vel:${(e as any).velocity}`,
+            );
         });
 
         input.addListener('noteoff', (e) => {
-          console.log(
-            `Note OFF from ${input.name}: ${e.note.name}${e.note.octave}`,
-          );
+          if (LOG_MIDI)
+            console.log(
+              `Note OFF from ${input.name}: ${e.note.name}${e.note.octave}`,
+            );
         });
 
         input.addListener('controlchange', (e) => {
-          console.log(
-            `CC from ${input.name}: CC${e.controller.number} val:${e.value}`,
-          );
+          if (LOG_MIDI)
+            console.log(
+              `CC from ${input.name}: CC${e.controller.number} val:${e.value}`,
+            );
         });
       });
     }
@@ -243,7 +249,8 @@ async function startServer() {
             }
             try {
               out.send(bytes);
-              console.log(`Sent MIDI via WebSocket to ${out.name}:`, bytes);
+              if (LOG_MIDI)
+                console.log(`Sent MIDI via WebSocket to ${out.name}:`, bytes);
 
               // Broadcast the outgoing message to all clients for logging
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -336,7 +343,7 @@ async function startServer() {
 
     // Listen for device changes
     WebMidi.addListener('portschanged', () => {
-      console.log('MIDI ports changed');
+      if (LOG_MIDI) console.log('MIDI ports changed');
       cleanupMidiListeners();
       listDevices();
       setupMidiListeners(); // Re-setup listeners for new devices
