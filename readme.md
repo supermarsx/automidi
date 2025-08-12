@@ -75,6 +75,12 @@ Only `ffmpeg` and `ls` will be accepted by `/run/shell*` routes. Review your
 allowed commands carefully as running arbitrary processes can compromise your
 system.
 
+### MIDI logging
+
+By default the server keeps MIDI logging quiet. Set the `LOG_MIDI` environment
+variable to `true` to print incoming and outgoing MIDI messages along with
+device events to the console.
+
 ---
 
 ## Development workflow
