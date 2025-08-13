@@ -97,21 +97,16 @@ export function useMidi() {
   }, [listenRaw]);
 
   useEffect(() => {
-    if (timeoutRef.current !== null) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
     if (launchpadRef.current !== null && status === 'connected') {
-      timeoutRef.current = setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         sendRef.current([0xf0, 0x00, 0x20, 0x29, 0x02, 0x0c, 0x0e, 0x01, 0xf7]);
       }, 1000);
-    }
-    return () => {
-      if (timeoutRef.current !== null) {
-        clearTimeout(timeoutRef.current);
+      timeoutRef.current = timeoutId;
+      return () => {
+        clearTimeout(timeoutId);
         timeoutRef.current = null;
-      }
-    };
+      };
+    }
   }, [status]);
 
   return {
