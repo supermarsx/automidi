@@ -140,16 +140,18 @@ export function useWebSocket({
       connectWebSocket();
     };
 
-    if (document.readyState === 'complete') {
-      isPageLoadedRef.current = true;
-      connectWebSocket();
-    } else {
-      window.addEventListener('load', handleLoad);
-    }
+    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+      if (document.readyState === 'complete') {
+        isPageLoadedRef.current = true;
+        connectWebSocket();
+      } else {
+        window.addEventListener('load', handleLoad);
+      }
 
-    return () => {
-      window.removeEventListener('load', handleLoad);
-    };
+      return () => {
+        window.removeEventListener('load', handleLoad);
+      };
+    }
   }, [connectWebSocket]);
 
   const reconnect = useCallback(() => {
