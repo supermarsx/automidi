@@ -1,5 +1,6 @@
 import { useKeyMacroPlayer } from './useKeyMacroPlayer';
-import { useStore, type Macro, type MacroType } from './store';
+import { useStore } from './store';
+import type { Macro, MacroType } from './store/macros';
 import { useToastStore } from './toastStore';
 import { useState } from 'react';
 import MacroImportModal from './MacroImportModal';

@@ -1,5 +1,6 @@
 import React, { memo, useState } from 'react';
-import { useStore, type PadColourMap } from './store';
+import { useStore } from './store';
+import type { PadColourMap } from './store/pads';
 import PadOptionsPanel from './PadOptionsPanel';
 
 // MIDI mappings for Launchpad X according to programmer's reference

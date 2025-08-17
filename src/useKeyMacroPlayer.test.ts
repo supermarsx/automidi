@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import type { Macro } from './store';
+import type { Macro } from './store/macros';
 import { useKeyMacroPlayer } from './useKeyMacroPlayer';
 
 let sendMock: ReturnType<typeof vi.fn>;
