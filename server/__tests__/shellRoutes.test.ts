@@ -15,6 +15,7 @@ describe('shell routes', () => {
   const API_KEY = 'test-key';
   const ALLOW = 'echo,win,app';
   let server: Server;
+  let stopServer: () => Promise<void>;
   let exec: Mock;
   let spawn: Mock;
   let originalExec: unknown;
@@ -58,14 +59,15 @@ describe('shell routes', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const mod = require('../dist/index.js');
     server = await mod.startServer();
+    stopServer = mod.stopServer;
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const cp = require('child_process');
     cp.exec = originalExec as typeof cp.exec;
     cp.spawn = originalSpawn as typeof cp.spawn;
-    server.close();
+    await stopServer();
     vi.clearAllMocks();
   });
 
