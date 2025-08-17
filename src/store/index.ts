@@ -8,14 +8,23 @@ import {
 } from 'idb-keyval';
 
 import { createDevicesSlice, type DevicesSlice } from './devices';
-import { createMacrosSlice, type MacrosSlice, type Macro, type MacroType } from './macros';
+import {
+  createMacrosSlice,
+  type MacrosSlice,
+  type Macro,
+  type MacroType,
+} from './macros';
 import {
   createPadsSlice,
   type PadsSlice,
   type PadColourMap,
   type PadActions,
 } from './pads';
-import { createConfigsSlice, type ConfigsSlice, type PadConfig } from './configs';
+import {
+  createConfigsSlice,
+  type ConfigsSlice,
+  type PadConfig,
+} from './configs';
 import { createSettingsSlice, type SettingsSlice } from './settings';
 
 export type StoreState = DevicesSlice &
@@ -34,12 +43,12 @@ const idbStorage = {
 
 export const useStore = create<StoreState>()(
   persist(
-    (set, get) => ({
-      ...createDevicesSlice(set, get),
-      ...createMacrosSlice(set, get),
-      ...createPadsSlice(set, get),
-      ...createConfigsSlice(set, get),
-      ...createSettingsSlice(set, get),
+    (set, get, api) => ({
+      ...createDevicesSlice(set, get, api),
+      ...createMacrosSlice(set, get, api),
+      ...createPadsSlice(set, get, api),
+      ...createConfigsSlice(set, get, api),
+      ...createSettingsSlice(set, get, api),
     }),
     {
       name: 'store',

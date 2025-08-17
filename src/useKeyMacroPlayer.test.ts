@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import type { Macro } from './store/macros';
 import { useKeyMacroPlayer } from './useKeyMacroPlayer';
+import type { ClientMessage } from '../shared/messages';
 
 let sendMock: ReturnType<typeof vi.fn>;
 let storeState: { macros: Macro[]; settings: { apiKey: string } };
@@ -32,41 +33,36 @@ describe('useKeyMacroPlayer socket messages', () => {
     vi.clearAllMocks();
   });
 
-  const cases: Array<[Macro, string, Record<string, unknown>]> = [
+  const cases: Array<[Macro, ClientMessage]> = [
     [
       { id: '1', name: 'a', type: 'app', command: 'calc' },
-      'runApp',
-      { app: 'calc' },
+      { type: 'runApp', app: 'calc' },
     ],
     [
       { id: '1', name: 's', type: 'shell', command: 'ls' },
-      'runShell',
-      { cmd: 'ls' },
+      { type: 'runShell', cmd: 'ls' },
     ],
     [
       { id: '1', name: 'sw', type: 'shell_win', command: 'dir' },
-      'runShellWin',
-      { cmd: 'dir' },
+      { type: 'runShellWin', cmd: 'dir' },
     ],
     [
       { id: '1', name: 'sb', type: 'shell_bg', command: 'sleep' },
-      'runShellBg',
-      { cmd: 'sleep' },
+      { type: 'runShellBg', cmd: 'sleep' },
     ],
     [
       { id: '1', name: 'k', type: 'keys', sequence: ['a'], interval: 20 },
-      'keysType',
-      { sequence: ['a'], interval: 20 },
+      { type: 'keysType', sequence: ['a'], interval: 20 },
     ],
   ];
 
-  it.each(cases)('plays %s macro', async (macro, type, payload) => {
+  it.each(cases)('plays %s macro', async (macro, expected) => {
     storeState.macros = [macro];
     const { result } = renderHook(() => useKeyMacroPlayer());
     await act(async () => {
       await result.current.playMacro('1');
     });
-    expect(sendMock).toHaveBeenCalledWith({ type, ...payload });
+    expect(sendMock).toHaveBeenCalledWith(expected);
   });
 
   it('recurses when nextId is set', async () => {

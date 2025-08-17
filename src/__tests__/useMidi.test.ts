@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useMidi } from '../useMidi';
+import type { PongMessage } from '../../shared/messages';
 
 // Mock store to supply settings
 interface StoreState {
@@ -146,7 +147,8 @@ describe('useMidi reconnect logic', () => {
 
     vi.advanceTimersByTime(50);
     act(() => {
-      ws.triggerMessage(JSON.stringify({ type: 'pong', ts }));
+      const msg: PongMessage = { type: 'pong', ts };
+      ws.triggerMessage(JSON.stringify(msg));
     });
 
     expect(ws.sent.length).toBe(1);

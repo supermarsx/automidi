@@ -10,6 +10,12 @@ import {
 import WebSocket from 'ws';
 import { isValidCmd } from '../dist/validate.js';
 import type { Server } from 'http';
+import type {
+  RunAppMessage,
+  RunShellMessage,
+  RunShellWinMessage,
+  RunShellBgMessage,
+} from '../../shared/messages';
 
 describe('shell routes', () => {
   const API_KEY = 'test-key';
@@ -74,10 +80,17 @@ describe('shell routes', () => {
     const ws = new WebSocket(`ws://localhost:${port}?key=${API_KEY}`);
     await new Promise((r) => ws.on('open', r));
 
-    ws.send(JSON.stringify({ type: 'runApp', app: 'app' }));
-    ws.send(JSON.stringify({ type: 'runShell', cmd: 'echo hi' }));
-    ws.send(JSON.stringify({ type: 'runShellWin', cmd: 'win something' }));
-    ws.send(JSON.stringify({ type: 'runShellBg', cmd: 'echo hi' }));
+    const m1: RunAppMessage = { type: 'runApp', app: 'app' };
+    const m2: RunShellMessage = { type: 'runShell', cmd: 'echo hi' };
+    const m3: RunShellWinMessage = {
+      type: 'runShellWin',
+      cmd: 'win something',
+    };
+    const m4: RunShellBgMessage = { type: 'runShellBg', cmd: 'echo hi' };
+    ws.send(JSON.stringify(m1));
+    ws.send(JSON.stringify(m2));
+    ws.send(JSON.stringify(m3));
+    ws.send(JSON.stringify(m4));
 
     expect(isValidCmd('app', ALLOW.split(','))).toBe(true);
     expect(isValidCmd('echo hi', ALLOW.split(','))).toBe(true);
@@ -105,8 +118,10 @@ describe('shell routes', () => {
     const ws = new WebSocket(`ws://localhost:${port}?key=${API_KEY}`);
     await new Promise((r) => ws.on('open', r));
 
-    ws.send(JSON.stringify({ type: 'runShell', cmd: 'rm -rf /' }));
-    ws.send(JSON.stringify({ type: 'runShellWin', cmd: 'malicious' }));
+    const m5: RunShellMessage = { type: 'runShell', cmd: 'rm -rf /' };
+    const m6: RunShellWinMessage = { type: 'runShellWin', cmd: 'malicious' };
+    ws.send(JSON.stringify(m5));
+    ws.send(JSON.stringify(m6));
 
     expect(isValidCmd('rm -rf /', ALLOW.split(','))).toBe(false);
     expect(isValidCmd('malicious', ALLOW.split(','))).toBe(false);
