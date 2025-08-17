@@ -3,8 +3,9 @@ import { useStore } from './store';
 import { usePing } from './usePing';
 import { registerSend } from './socket';
 import { useWebSocket } from './useWebSocket';
+import type { ClientMessage, ServerMessage } from '../shared/messages';
 
-export type RawMessage = Record<string, unknown>;
+export type RawMessage = ServerMessage;
 export type RawListener = (msg: RawMessage) => void;
 
 export function useMidiConnection() {
@@ -22,7 +23,7 @@ export function useMidiConnection() {
 
   const {
     status,
-    send,
+    send: wsSend,
     listen: wsListen,
     reconnect,
     wsRef,
@@ -41,8 +42,10 @@ export function useMidiConnection() {
     stop: stopPing,
   } = usePing(wsRef, pingEnabled, pingInterval, reconnectOnLost);
 
+  const send = useCallback((msg: ClientMessage) => wsSend(msg), [wsSend]);
+
   const listen = useCallback(
-    (fn: RawListener) => wsListen((data) => fn(data as RawMessage)),
+    (fn: RawListener) => wsListen((data) => fn(data as ServerMessage)),
     [wsListen],
   );
 
@@ -56,12 +59,9 @@ export function useMidiConnection() {
   }, [status, startPing, stopPing]);
 
   useEffect(() => {
-    const unsub = listen((payload: RawMessage) => {
-      if (
-        payload.type === 'pong' &&
-        typeof (payload as { ts?: unknown }).ts === 'number'
-      ) {
-        handlePong((payload as { ts: number }).ts);
+    const unsub = listen((payload) => {
+      if (payload.type === 'pong') {
+        handlePong(payload.ts);
       }
     });
     return unsub;
@@ -70,7 +70,7 @@ export function useMidiConnection() {
   useEffect(() => stopPing, [stopPing]);
 
   useEffect(() => {
-    registerSend(send);
+    registerSend((data: unknown) => send(data as ClientMessage));
   }, [send]);
 
   return { status, pingDelay, send, listen, reconnect, wsRef };
