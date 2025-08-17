@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useStore } from './store';
 import { useMidiConnection, type RawMessage } from './useMidiConnection';
-
-export interface MidiDevice {
-  id: string;
-  name: string;
-  manufacturer?: string;
-  state?: string;
-}
+import type {
+  MidiDevice,
+  DevicesMessage,
+  MidiEventMessage,
+} from '../shared/messages';
 
 export interface MidiMessage {
   direction: 'in' | 'out';
@@ -61,10 +59,7 @@ export function useMidi() {
   useEffect(() => {
     const unsub = listenRaw((payload: RawMessage) => {
       if (payload.type === 'devices') {
-        const dev = payload as {
-          inputs?: MidiDevice[];
-          outputs?: MidiDevice[];
-        };
+        const dev = payload as DevicesMessage;
         setInputs(dev.inputs || []);
         setOutputs(dev.outputs || []);
         const launchpad = dev.outputs?.find((o: MidiDevice) =>
@@ -72,15 +67,7 @@ export function useMidi() {
         );
         launchpadRef.current = launchpad ? launchpad.id : null;
       } else if (payload.type === 'midi') {
-        const midi = payload as {
-          direction?: 'in' | 'out';
-          message?: number[];
-          timestamp?: number;
-          source?: string;
-          target?: string;
-          port?: string;
-          pressure?: number;
-        };
+        const midi = payload as MidiEventMessage;
         const msg: MidiMessage = {
           direction: midi.direction || 'in',
           message: midi.message || [],

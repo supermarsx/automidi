@@ -1,8 +1,9 @@
 import type { Macro, MacroType } from './store/macros';
+import type { ClientMessage } from '../shared/messages';
 
 export interface MacroMessage {
-  type: string;
-  payload: (macro: Macro) => Record<string, unknown>;
+  type: ClientMessage['type'];
+  payload: (macro: Macro) => Omit<ClientMessage, 'type'>;
 }
 
 export const MACRO_MESSAGES: Record<MacroType, MacroMessage> = {
