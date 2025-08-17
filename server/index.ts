@@ -6,9 +6,8 @@ import { WebMidi } from 'webmidi';
 import keySender from 'node-key-sender';
 import notifier from 'toasted-notifier';
 import cors from 'cors';
-import { exec, spawn } from 'child_process';
-
-import { isValidCmd } from './validate.js';
+import { handlers } from './handlers/index.js';
+import type { HandlerContext } from './handlers/index.js';
 
 const API_KEY = process.env.API_KEY || undefined;
 if (process.env.LOG_API_KEY === 'true') {
@@ -240,6 +239,13 @@ async function startServer() {
 
     // Initial setup
     setupMidiListeners();
+    const context: HandlerContext = {
+      sendDevices,
+      isValidByteArray,
+      broadcastToClients,
+      allowedCmds,
+      LOG_MIDI,
+    };
 
     wss.on('connection', (ws) => {
       console.log('WebSocket client connected');
@@ -249,103 +255,9 @@ async function startServer() {
         try {
           const data = JSON.parse(msg.toString());
           console.log('Received WebSocket message:', data);
-
-          if (data.type === 'getDevices') {
-            sendDevices(ws);
-          } else if (data.type === 'send') {
-            const { port = '', bytes } = data;
-            const out = WebMidi.getOutputById(String(port));
-            if (!out) {
-              console.error('Invalid output port:', { port });
-              return;
-            }
-            if (!isValidByteArray(bytes)) {
-              console.error('Invalid bytes array:', { bytes });
-              return;
-            }
-            try {
-              out.send(bytes);
-              if (LOG_MIDI)
-                console.log(`Sent MIDI via WebSocket to ${out.name}:`, bytes);
-
-              // Broadcast the outgoing message to all clients for logging
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const outMsg: any = {
-                type: 'midi',
-                direction: 'out',
-                message: bytes,
-                timestamp: Date.now(),
-                target: out.name,
-                port: port,
-              };
-              if (
-                bytes.length >= 3 &&
-                ((bytes[0] & 0xf0) === 0xa0 || (bytes[0] & 0xf0) === 0xd0)
-              ) {
-                outMsg.pressure = bytes[2];
-              }
-              broadcastToClients(outMsg);
-            } catch (err) {
-              console.error('WebSocket MIDI send error:', err);
-            }
-          } else if (data.type === 'runApp') {
-            const { app: appPath } = data;
-            if (!appPath) return;
-            if (!isValidCmd(appPath, allowedCmds)) return;
-            exec(`"${appPath}"`, (err) => {
-              if (err) console.error('App exec error:', err);
-            });
-          } else if (data.type === 'runShell') {
-            const { cmd } = data;
-            if (!cmd) return;
-            if (!isValidCmd(cmd, allowedCmds)) return;
-            exec(cmd, (err) => {
-              if (err) console.error('Shell exec error:', err);
-            });
-          } else if (data.type === 'runShellWin') {
-            const { cmd } = data;
-            if (!cmd) return;
-            if (!isValidCmd(cmd, allowedCmds)) return;
-            try {
-              const child = spawn(cmd, {
-                shell: true,
-                detached: true,
-                windowsHide: false,
-              });
-              child.unref();
-            } catch (err) {
-              console.error('ShellWin spawn error:', err);
-            }
-          } else if (data.type === 'runShellBg') {
-            const { cmd } = data;
-            if (!cmd) return;
-            if (!isValidCmd(cmd, allowedCmds)) return;
-            exec(cmd, { windowsHide: true }, (err) => {
-              if (err) console.error('ShellBg exec error:', err);
-            });
-          } else if (data.type === 'keysType') {
-            const { sequence = [], interval = 50 } = data;
-            (async () => {
-              try {
-                for (const key of sequence) {
-                  await keySender.sendKey(key);
-                  if (interval > 0)
-                    await new Promise((r) => setTimeout(r, interval));
-                }
-              } catch (err) {
-                console.error('Key send error:', err);
-              }
-            })();
-          } else if (data.type === 'notify') {
-            const { title = 'Automidi', message } = data;
-            if (!message) return;
-            notifier.notify({ title, message }, (err) => {
-              if (err) console.error('Notification error:', err);
-            });
-          } else if (data.type === 'ping') {
-            ws.send(
-              JSON.stringify({ type: 'pong', ts: data.ts || Date.now() }),
-            );
+          const handler = handlers[data.type as keyof typeof handlers];
+          if (handler) {
+            handler(ws, data, context);
           }
         } catch (err) {
           console.error('WebSocket message parse error:', err);

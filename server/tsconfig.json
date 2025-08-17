@@ -11,6 +11,6 @@
     "noEmitOnError": false,
     "tsBuildInfoFile": "../node_modules/.tmp/tsconfig.server.tsbuildinfo"
   },
-  "include": ["index.ts", "validate.ts"],
+  "include": ["index.ts", "validate.ts", "handlers/**/*.ts"],
   "exclude": ["**/*.test.ts", "__tests__", "dist"]
 }
