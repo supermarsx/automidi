@@ -1,4 +1,5 @@
-import { useStore, type PadColourMap, type PadActions } from './store';
+import { useStore } from './store';
+import type { PadColourMap, PadActions } from './store/pads';
 import { useMidi } from './useMidi';
 import { noteOn, cc, lightingSysEx } from './midiMessages';
 import LAUNCHPAD_COLORS, { getLaunchpadColorValue } from './launchpadColors';

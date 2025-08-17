@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useStore, type Macro } from './store';
+import { useStore } from './store';
+import type { Macro } from './store/macros';
 import { useToastStore } from './toastStore';
 
 interface Props {

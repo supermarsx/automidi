@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useStore, type PadConfig } from './store';
+import { useStore } from './store';
+import type { PadConfig } from './store/configs';
 import { useToastStore } from './toastStore';
 import { useMidi } from './useMidi';
 import { getLaunchpadColorValue } from './launchpadColors';

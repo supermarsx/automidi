@@ -1,4 +1,4 @@
-import type { Macro, MacroType } from './store';
+import type { Macro, MacroType } from './store/macros';
 
 export interface MacroMessage {
   type: string;
