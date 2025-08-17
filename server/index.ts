@@ -9,6 +9,7 @@ import cors from 'cors';
 import { exec, spawn } from 'child_process';
 
 import { isValidCmd } from './validate.js';
+import type { MidiEvent, MidiMessage } from './types.js';
 
 const API_KEY = process.env.API_KEY || undefined;
 if (process.env.LOG_API_KEY === 'true') {
@@ -157,7 +158,7 @@ async function startServer() {
       },
     });
 
-    function broadcastToClients(message) {
+    function broadcastToClients(message: unknown) {
       const payload = JSON.stringify(message);
       for (const ws of wss.clients) {
         if (ws.readyState === ws.OPEN) {
@@ -193,8 +194,7 @@ async function startServer() {
         // Listen to all MIDI messages
         input.addListener('midimessage', (e) => {
           const bytes = Array.from(e.message.data || e.data || []);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const message: any = {
+          const message: MidiEvent = {
             type: 'midi',
             direction: 'in',
             message: bytes,
@@ -215,11 +215,12 @@ async function startServer() {
 
         // Listen to specific message types for better logging
         input.addListener('noteon', (e) => {
-          if (LOG_MIDI)
+          if (LOG_MIDI) {
+            const velocity = (e as unknown as { velocity?: number }).velocity;
             console.log(
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              `Note ON from ${input.name}: ${e.note.name}${e.note.octave} vel:${(e as any).velocity}`,
+              `Note ON from ${input.name}: ${e.note.name}${e.note.octave} vel:${velocity}`,
             );
+          }
         });
 
         input.addListener('noteoff', (e) => {
@@ -247,13 +248,16 @@ async function startServer() {
 
       ws.on('message', (msg) => {
         try {
-          const data = JSON.parse(msg.toString());
+          const data = JSON.parse(msg.toString()) as {
+            type?: string;
+            [key: string]: unknown;
+          };
           console.log('Received WebSocket message:', data);
 
           if (data.type === 'getDevices') {
             sendDevices(ws);
           } else if (data.type === 'send') {
-            const { port = '', bytes } = data;
+            const { port = '', bytes } = data as unknown as MidiMessage;
             const out = WebMidi.getOutputById(String(port));
             if (!out) {
               console.error('Invalid output port:', { port });
@@ -269,14 +273,13 @@ async function startServer() {
                 console.log(`Sent MIDI via WebSocket to ${out.name}:`, bytes);
 
               // Broadcast the outgoing message to all clients for logging
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const outMsg: any = {
+              const outMsg: MidiEvent = {
                 type: 'midi',
                 direction: 'out',
                 message: bytes,
                 timestamp: Date.now(),
                 target: out.name,
-                port: port,
+                port,
               };
               if (
                 bytes.length >= 3 &&
@@ -289,21 +292,21 @@ async function startServer() {
               console.error('WebSocket MIDI send error:', err);
             }
           } else if (data.type === 'runApp') {
-            const { app: appPath } = data;
+            const { app: appPath } = data as { app?: string };
             if (!appPath) return;
             if (!isValidCmd(appPath, allowedCmds)) return;
             exec(`"${appPath}"`, (err) => {
               if (err) console.error('App exec error:', err);
             });
           } else if (data.type === 'runShell') {
-            const { cmd } = data;
+            const { cmd } = data as { cmd?: string };
             if (!cmd) return;
             if (!isValidCmd(cmd, allowedCmds)) return;
             exec(cmd, (err) => {
               if (err) console.error('Shell exec error:', err);
             });
           } else if (data.type === 'runShellWin') {
-            const { cmd } = data;
+            const { cmd } = data as { cmd?: string };
             if (!cmd) return;
             if (!isValidCmd(cmd, allowedCmds)) return;
             try {
@@ -317,14 +320,17 @@ async function startServer() {
               console.error('ShellWin spawn error:', err);
             }
           } else if (data.type === 'runShellBg') {
-            const { cmd } = data;
+            const { cmd } = data as { cmd?: string };
             if (!cmd) return;
             if (!isValidCmd(cmd, allowedCmds)) return;
             exec(cmd, { windowsHide: true }, (err) => {
               if (err) console.error('ShellBg exec error:', err);
             });
           } else if (data.type === 'keysType') {
-            const { sequence = [], interval = 50 } = data;
+            const { sequence = [], interval = 50 } = data as {
+              sequence?: string[];
+              interval?: number;
+            };
             (async () => {
               try {
                 for (const key of sequence) {
@@ -337,14 +343,20 @@ async function startServer() {
               }
             })();
           } else if (data.type === 'notify') {
-            const { title = 'Automidi', message } = data;
+            const { title = 'Automidi', message } = data as {
+              title?: string;
+              message?: string;
+            };
             if (!message) return;
             notifier.notify({ title, message }, (err) => {
               if (err) console.error('Notification error:', err);
             });
           } else if (data.type === 'ping') {
             ws.send(
-              JSON.stringify({ type: 'pong', ts: data.ts || Date.now() }),
+              JSON.stringify({
+                type: 'pong',
+                ts: (data as { ts?: number }).ts || Date.now(),
+              }),
             );
           }
         } catch (err) {
