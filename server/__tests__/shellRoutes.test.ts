@@ -117,4 +117,24 @@ describe('shell routes', () => {
     expect(spawn).not.toHaveBeenCalled();
     ws.close();
   });
+
+  it('rate limits shell commands', async () => {
+    const port = (server.address() as { port: number }).port;
+    const ws = new WebSocket(`ws://localhost:${port}?key=${API_KEY}`);
+    await new Promise((r) => ws.on('open', r));
+
+    for (let i = 0; i < 6; i++) {
+      ws.send(JSON.stringify({ type: 'runShell', cmd: `echo ${i}` }));
+    }
+
+    await new Promise((r) => setTimeout(r, 10));
+
+    expect(exec).toHaveBeenCalledWith('echo 0', expect.any(Function));
+    expect(exec).toHaveBeenCalledWith('echo 1', expect.any(Function));
+    expect(exec).toHaveBeenCalledWith('echo 2', expect.any(Function));
+    expect(exec).toHaveBeenCalledWith('echo 3', expect.any(Function));
+    expect(exec).toHaveBeenCalledWith('echo 4', expect.any(Function));
+    expect(exec).not.toHaveBeenCalledWith('echo 5', expect.anything());
+    ws.close();
+  });
 });
