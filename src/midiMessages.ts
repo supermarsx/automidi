@@ -6,7 +6,7 @@ export interface LedColourSpec {
 }
 
 function clamp7(value: number): number {
-  return value & 0x7f;
+  return Math.max(0, Math.min(127, Math.round(value)));
 }
 
 export const CHANNEL_STATIC = 1; // Channel 1 - static colour
