@@ -24,6 +24,31 @@ import type {
   KeysTypeMessage,
 } from './messages';
 
+const CMD_RATE_LIMIT = Number(process.env.CMD_RATE_LIMIT || 5);
+const CMD_RATE_INTERVAL_MS = Number(process.env.CMD_RATE_INTERVAL_MS || 1000);
+
+type TokenBucket = {
+  count: number;
+  last: number;
+};
+
+function createBucket(): TokenBucket {
+  return { count: 0, last: Date.now() };
+}
+
+function consumeToken(bucket: TokenBucket): boolean {
+  const now = Date.now();
+  if (now - bucket.last > CMD_RATE_INTERVAL_MS) {
+    bucket.count = 0;
+    bucket.last = now;
+  }
+  if (bucket.count >= CMD_RATE_LIMIT) {
+    return false;
+  }
+  bucket.count += 1;
+  return true;
+}
+
 const API_KEY = process.env.API_KEY || undefined;
 if (process.env.LOG_API_KEY === 'true') {
   console.log('API key:', API_KEY);
@@ -261,12 +286,26 @@ async function startServer() {
 
     wssInstance.on('connection', (ws) => {
       console.log('WebSocket client connected');
+      (ws as WebSocket & { bucket: TokenBucket }).bucket = createBucket();
       sendDevices(ws);
 
       ws.on('message', (msg) => {
         try {
           const data = JSON.parse(msg.toString()) as ClientMessage;
           console.log('Received WebSocket message:', data);
+
+          if (
+            data.type === 'runApp' ||
+            data.type === 'runShell' ||
+            data.type === 'runShellWin' ||
+            data.type === 'runShellBg'
+          ) {
+            const bucket = (ws as WebSocket & { bucket: TokenBucket }).bucket;
+            if (!consumeToken(bucket)) {
+              console.warn('Command rate limit exceeded');
+              return;
+            }
+          }
 
           if (data.type === 'getDevices') {
             sendDevices(ws);
