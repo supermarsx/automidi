@@ -26,22 +26,22 @@ describe('midiMessages', () => {
 
   test('noteOn', () => {
     expect(noteOn(60, 127)).toEqual([0x90, 60, 127]);
-    expect(noteOn(200, 300, 16)).toEqual([0x9f, 72, 44]);
+    expect(noteOn(200, 300, 16)).toEqual([0x9f, 127, 127]);
   });
 
   test('noteOff', () => {
     expect(noteOff(60)).toEqual([0x80, 60, 0]);
-    expect(noteOff(200, 300, 18)).toEqual([0x91, 72, 44]);
+    expect(noteOff(200, 300, 18)).toEqual([0x91, 127, 127]);
   });
 
   test('cc', () => {
     expect(cc(1, 127)).toEqual([0xb0, 1, 127]);
-    expect(cc(200, 300, 16)).toEqual([0xbf, 72, 44]);
+    expect(cc(200, 300, 16)).toEqual([0xbf, 127, 127]);
   });
 
   test('sysex', () => {
     expect(sysex(0x0e, 1, 2)).toEqual([...HEADER, 0x0e, 1, 2, 0xf7]);
-    expect(sysex(300, 400, -1)).toEqual([...HEADER, 44, 16, 127, 0xf7]);
+    expect(sysex(300, 400, -1)).toEqual([...HEADER, 127, 127, 0, 0xf7]);
   });
 
   test('enterProgrammerMode / exitProgrammerMode', () => {
@@ -62,17 +62,17 @@ describe('midiMessages', () => {
     expect(ledLighting([{ id: 200, red: 256, green: -1, blue: 700 }])).toEqual([
       ...HEADER,
       0x03,
-      72,
+      127,
+      127,
       0,
       127,
-      60,
       0xf7,
     ]);
   });
 
   test('setBrightness', () => {
     expect(setBrightness(40)).toEqual([...HEADER, 0x08, 40, 0xf7]);
-    expect(setBrightness(200)).toEqual([...HEADER, 0x08, 72, 0xf7]);
+    expect(setBrightness(200)).toEqual([...HEADER, 0x08, 127, 0xf7]);
   });
 
   test('setSleepMode', () => {
@@ -101,7 +101,7 @@ describe('midiMessages', () => {
       0x07,
       0x00,
       0x00,
-      72,
+      127,
       65,
       0x00,
       0xf7,
@@ -110,23 +110,23 @@ describe('midiMessages', () => {
 
   test('setLayout', () => {
     expect(setLayout(5)).toEqual([...HEADER, 0x00, 5, 0xf7]);
-    expect(setLayout(200)).toEqual([...HEADER, 0x00, 72, 0xf7]);
+    expect(setLayout(200)).toEqual([...HEADER, 0x00, 127, 0xf7]);
   });
 
   test('setDAWMode', () => {
     expect(setDAWMode(2)).toEqual([...HEADER, 0x10, 2, 0xf7]);
-    expect(setDAWMode(200)).toEqual([...HEADER, 0x10, 72, 0xf7]);
+    expect(setDAWMode(200)).toEqual([...HEADER, 0x10, 127, 0xf7]);
   });
 
   test('LED commands', () => {
     expect(setLedSolid(1, 5)).toEqual([...HEADER, 0x0a, 1, 5, 0xf7]);
-    expect(setLedSolid(200, 300)).toEqual([...HEADER, 0x0a, 72, 44, 0xf7]);
+    expect(setLedSolid(200, 300)).toEqual([...HEADER, 0x0a, 127, 127, 0xf7]);
 
     expect(setLedFlashing(2, 6)).toEqual([...HEADER, 0x23, 2, 6, 0xf7]);
-    expect(setLedFlashing(200, 300)).toEqual([...HEADER, 0x23, 72, 44, 0xf7]);
+    expect(setLedFlashing(200, 300)).toEqual([...HEADER, 0x23, 127, 127, 0xf7]);
 
     expect(setLedPulsing(3, 7)).toEqual([...HEADER, 0x28, 3, 7, 0xf7]);
-    expect(setLedPulsing(200, 300)).toEqual([...HEADER, 0x28, 72, 44, 0xf7]);
+    expect(setLedPulsing(200, 300)).toEqual([...HEADER, 0x28, 127, 127, 0xf7]);
   });
 
   test('midiClock', () => {
@@ -146,10 +146,10 @@ describe('midiMessages', () => {
     expect(setLedRGB(200, 300, 400, 500)).toEqual([
       ...HEADER,
       0x03,
-      72,
-      44,
-      16,
-      116,
+      127,
+      127,
+      127,
+      127,
       0xf7,
     ]);
   });
@@ -165,9 +165,9 @@ describe('midiMessages', () => {
     expect(lightingSysEx([{ type: 300, index: -1, data: [400] }])).toEqual([
       ...HEADER,
       0x03,
-      44,
       127,
-      16,
+      0,
+      127,
       0xf7,
     ]);
   });
