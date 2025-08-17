@@ -1,11 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useStore } from './store';
 import { useMidiConnection, type RawMessage } from './useMidiConnection';
-import type {
-  MidiDevice,
-  DevicesMessage,
-  MidiEventMessage,
-} from '../shared/messages';
+import type { MidiDevice } from '../shared/messages';
+import { isDevicesMessage, isMidiPayload } from './types';
 
 export interface MidiMessage {
   direction: 'in' | 'out';
@@ -58,24 +55,22 @@ export function useMidi() {
 
   useEffect(() => {
     const unsub = listenRaw((payload: RawMessage) => {
-      if (payload.type === 'devices') {
-        const dev = payload as DevicesMessage;
-        setInputs(dev.inputs || []);
-        setOutputs(dev.outputs || []);
-        const launchpad = dev.outputs?.find((o: MidiDevice) =>
+      if (isDevicesMessage(payload)) {
+        setInputs(payload.inputs || []);
+        setOutputs(payload.outputs || []);
+        const launchpad = payload.outputs?.find((o: MidiDevice) =>
           o.name?.toLowerCase().includes('launchpad x'),
         );
         launchpadRef.current = launchpad ? launchpad.id : null;
-      } else if (payload.type === 'midi') {
-        const midi = payload as MidiEventMessage;
+      } else if (isMidiPayload(payload)) {
         const msg: MidiMessage = {
-          direction: midi.direction || 'in',
-          message: midi.message || [],
-          timestamp: midi.timestamp || Date.now(),
-          source: midi.source,
-          target: midi.target,
-          port: midi.port,
-          pressure: midi.pressure,
+          direction: payload.direction,
+          message: payload.message,
+          timestamp: payload.timestamp,
+          source: payload.source,
+          target: payload.target,
+          port: payload.port,
+          pressure: payload.pressure,
         };
         for (const fn of listeners.current) fn(msg);
       }
