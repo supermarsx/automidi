@@ -31,6 +31,11 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// References to allow graceful shutdown
+let serverInstance: import('http').Server | undefined;
+let wssInstance: WebSocketServer | undefined;
+let portsChangedHandler: (() => void) | undefined;
+
 function checkKey(req: Request, res: Response, next: NextFunction) {
   if (!API_KEY) {
     next();
@@ -53,6 +58,12 @@ function isValidByteArray(arr: unknown): arr is number[] {
       (n) => typeof n === 'number' && Number.isInteger(n) && n >= 0 && n <= 255,
     )
   );
+}
+
+function cleanupMidiListeners() {
+  WebMidi.inputs.forEach((input) => {
+    input.removeListener();
+  });
 }
 
 async function startServer() {
@@ -140,14 +151,14 @@ async function startServer() {
       }
     });
 
-    const server = app.listen(process.env.PORT || 3000, () => {
-      const addr = server.address();
+    serverInstance = app.listen(process.env.PORT || 3000, () => {
+      const addr = serverInstance?.address();
       const port = typeof addr === 'string' ? addr : addr?.port;
       console.log(`Server listening on port ${port}`);
     });
 
-    const wss = new WebSocketServer({
-      server,
+    wssInstance = new WebSocketServer({
+      server: serverInstance,
       verifyClient: (info, done) => {
         const url = new URL(info.req.url || '', 'http://localhost');
         if (API_KEY && url.searchParams.get('key') !== API_KEY) {
@@ -160,7 +171,7 @@ async function startServer() {
 
     function broadcastToClients(message: unknown) {
       const payload = JSON.stringify(message);
-      for (const ws of wss.clients) {
+      for (const ws of wssInstance.clients) {
         if (ws.readyState === ws.OPEN) {
           ws.send(payload);
         }
@@ -175,13 +186,6 @@ async function startServer() {
       } else {
         broadcastToClients(message);
       }
-    }
-
-    // Remove all listeners from every input
-    function cleanupMidiListeners() {
-      WebMidi.inputs.forEach((input) => {
-        input.removeListener();
-      });
     }
 
     // Set up MIDI input listeners for all devices
@@ -242,7 +246,7 @@ async function startServer() {
     // Initial setup
     setupMidiListeners();
 
-    wss.on('connection', (ws) => {
+    wssInstance.on('connection', (ws) => {
       console.log('WebSocket client connected');
       sendDevices(ws);
 
@@ -370,18 +374,45 @@ async function startServer() {
     });
 
     // Listen for device changes
-    WebMidi.addListener('portschanged', () => {
+    portsChangedHandler = () => {
       if (LOG_MIDI) console.log('MIDI ports changed');
       cleanupMidiListeners();
       listDevices();
       setupMidiListeners(); // Re-setup listeners for new devices
       sendDevices(); // Broadcast to all clients
-    });
-    return server;
+    };
+    WebMidi.addListener('portschanged', portsChangedHandler);
+    return serverInstance;
   } catch (err) {
     console.error('Failed to enable WebMidi:', err);
     throw err;
   }
+}
+
+async function stopServer() {
+  cleanupMidiListeners();
+  if (portsChangedHandler) {
+    WebMidi.removeListener('portschanged', portsChangedHandler);
+    portsChangedHandler = undefined;
+  }
+
+  await new Promise<void>((resolve) => {
+    if (wssInstance) {
+      wssInstance.close(() => resolve());
+      wssInstance = undefined;
+    } else {
+      resolve();
+    }
+  });
+
+  await new Promise<void>((resolve) => {
+    if (serverInstance) {
+      serverInstance.close(() => resolve());
+      serverInstance = undefined;
+    } else {
+      resolve();
+    }
+  });
 }
 
 if (require.main === module) {
@@ -391,4 +422,4 @@ if (require.main === module) {
   });
 }
 
-export { app, startServer };
+export { app, startServer, stopServer };
