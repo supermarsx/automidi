@@ -72,7 +72,10 @@ export function usePadActions() {
             .getState()
             .addToast('Press pad again to confirm', 'success');
         } else {
-          notify('Press pad again to confirm');
+          notify({
+            message: 'Press pad again to confirm',
+            title: 'Macro Confirmation',
+          });
         }
         const t = setTimeout(() => {
           setPadChannel(id, prev);
