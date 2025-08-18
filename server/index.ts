@@ -24,8 +24,28 @@ import type {
   KeysTypeMessage,
 } from './messages';
 
-const CMD_RATE_LIMIT = Number(process.env.CMD_RATE_LIMIT || 5);
-const CMD_RATE_INTERVAL_MS = Number(process.env.CMD_RATE_INTERVAL_MS || 1000);
+const DEFAULT_CMD_RATE_LIMIT = 5;
+const DEFAULT_CMD_RATE_INTERVAL_MS = 1000;
+
+const parsedRateLimit = parseInt(process.env.CMD_RATE_LIMIT ?? '', 10);
+if (Number.isNaN(parsedRateLimit) && process.env.CMD_RATE_LIMIT) {
+  console.warn(
+    `Invalid CMD_RATE_LIMIT "${process.env.CMD_RATE_LIMIT}"; using default ${DEFAULT_CMD_RATE_LIMIT}`,
+  );
+}
+const CMD_RATE_LIMIT = Number.isNaN(parsedRateLimit)
+  ? DEFAULT_CMD_RATE_LIMIT
+  : parsedRateLimit;
+
+const parsedRateInterval = parseFloat(process.env.CMD_RATE_INTERVAL_MS ?? '');
+if (Number.isNaN(parsedRateInterval) && process.env.CMD_RATE_INTERVAL_MS) {
+  console.warn(
+    `Invalid CMD_RATE_INTERVAL_MS "${process.env.CMD_RATE_INTERVAL_MS}"; using default ${DEFAULT_CMD_RATE_INTERVAL_MS}`,
+  );
+}
+const CMD_RATE_INTERVAL_MS = Number.isNaN(parsedRateInterval)
+  ? DEFAULT_CMD_RATE_INTERVAL_MS
+  : parsedRateInterval;
 
 type TokenBucket = {
   count: number;
