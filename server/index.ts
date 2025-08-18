@@ -164,9 +164,13 @@ async function startServer() {
         return;
       }
       notifier.notify({ title, message }, (err) => {
-        if (err) console.error('Notification error:', err);
+        if (err) {
+          console.error('Notification error:', err);
+          res.status(500).json({ error: err.message });
+          return;
+        }
+        res.json({ ok: true });
       });
-      res.json({ ok: true });
     });
 
     app.post('/keys/type', async (req, res) => {
