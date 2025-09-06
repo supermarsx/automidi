@@ -5,6 +5,7 @@ import { useToastStore } from './toastStore';
 import { useState } from 'react';
 import MacroImportModal from './MacroImportModal';
 import MacroInstructions from './MacroInstructions';
+import MacroExportButton from './MacroExportButton';
 
 export default function MacroList() {
   const macros = useStore((s) => s.macros);
@@ -80,18 +81,6 @@ export default function MacroList() {
   };
   const closePreview = () => setPreviewId(null);
 
-  const exportMacros = () => {
-    const data = JSON.stringify(macros);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'macros.json';
-    a.click();
-    URL.revokeObjectURL(url);
-    addToast('Macros exported', 'success');
-  };
-
   return (
     <div className="retro-panel">
       <div className="d-flex justify-content-between align-items-center mb-2">
@@ -103,9 +92,7 @@ export default function MacroList() {
           >
             HELP
           </button>
-          <button className="retro-button btn-sm me-1" onClick={exportMacros}>
-            EXPORT
-          </button>
+          <MacroExportButton />
           <button
             className="retro-button btn-sm"
             onClick={() => setShowImport(true)}
