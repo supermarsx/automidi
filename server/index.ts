@@ -109,6 +109,10 @@ function checkKey(req: Request, res: Response, next: NextFunction) {
 
 app.use(checkKey);
 
+app.get('/health', (_req, res) => {
+  res.json({ ok: true });
+});
+
 function isValidByteArray(arr: unknown): arr is number[] {
   return (
     Array.isArray(arr) &&

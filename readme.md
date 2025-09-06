@@ -31,11 +31,12 @@ Start it with:
 npm run server
 ```
 
-It listens on port `3000` and still exposes two REST endpoints for
-compatibility:
+It listens on port `3000` and exposes REST endpoints for compatibility and
+monitoring:
 
 - `GET /midi/devices` – lists available MIDI inputs and outputs
 - `POST /midi/send` – sends a raw MIDI message to a specified output
+- `GET /health` – returns `{ ok: true }` for health checks
 
   A WebSocket on the same port handles the communication used by the frontend.
   When a client connects it sends the current device list and it pushes `devices`
