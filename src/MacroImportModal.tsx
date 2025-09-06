@@ -31,18 +31,35 @@ export default function MacroImportModal({ onClose }: Props) {
 
   const confirmImport = () => {
     if (!data) return;
-    const base = Date.now();
+    const existing = useStore.getState().macros;
+    const usedIds = new Set(existing.map((m) => m.id));
     const idMap = new Map<string, string>();
-    data.forEach((m, idx) => {
-      idMap.set(m.id, (base + idx).toString());
+    const generated = new Set<string>(usedIds);
+    let counter = 0;
+    const base = Date.now();
+    const getId = () => {
+      let id = '';
+      do {
+        id = (base + counter++).toString();
+      } while (generated.has(id));
+      generated.add(id);
+      return id;
+    };
+    data.forEach((m) => {
+      if (generated.has(m.id)) {
+        idMap.set(m.id, getId());
+      } else {
+        idMap.set(m.id, m.id);
+        generated.add(m.id);
+      }
     });
     const imported = data.map((m) => {
       const newId = idMap.get(m.id) as string;
       const next = m.nextId ? (idMap.get(m.nextId) ?? m.nextId) : undefined;
       return { ...m, id: newId, ...(next ? { nextId: next } : {}) };
     });
-    useStore.setState((s) => ({ ...s, macros: imported }));
-    addToast('Macros imported', 'success');
+    useStore.setState((s) => ({ ...s, macros: [...s.macros, ...imported] }));
+    addToast('Macros added', 'success');
     onClose();
   };
 
@@ -63,6 +80,9 @@ export default function MacroImportModal({ onClose }: Props) {
               accept="application/json"
               onChange={handleFile}
             />
+            <p className="mt-2">
+              Imported macros will be added to your current list.
+            </p>
           </div>
           <div className="modal-footer">
             <button
