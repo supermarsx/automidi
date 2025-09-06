@@ -5,6 +5,7 @@ import { screen, waitFor, cleanup } from '@testing-library/react';
 import MacroImportModal from '../MacroImportModal';
 import { renderWithStore, resetStores } from './testUtils';
 import { useStore } from '../store';
+import { useToastStore } from '../toastStore';
 
 vi.mock('idb-keyval', () => ({
   createStore: () => ({}),
@@ -38,43 +39,7 @@ describe('MacroImportModal', () => {
     cleanup();
   });
 
-  it('appends imported macros', async () => {
-    const user = userEvent.setup();
-    useStore.setState(
-      (s) => ({
-        ...s,
-        macros: [
-          { id: '1', name: 'One', sequence: ['a'], interval: 1, tags: [] },
-        ],
-      }),
-      true,
-    );
-
-    const toImport = [
-      { id: '2', name: 'Two', sequence: ['b'], interval: 1, tags: [] },
-    ];
-    const json = JSON.stringify(toImport);
-    mockFileReader(json);
-
-    const { container } = renderWithStore(
-      <MacroImportModal onClose={() => {}} />,
-    );
-    const input = container.querySelector(
-      'input[type="file"]',
-    ) as HTMLInputElement;
-    const file = new File([json], 'macros.json', { type: 'application/json' });
-    await user.upload(input, file);
-    const button = screen.getByText('IMPORT');
-    await waitFor(() => expect(button).not.toBeDisabled());
-    await user.click(button);
-
-    const macros = useStore.getState().macros;
-    expect(macros).toHaveLength(2);
-    expect(macros[0].id).toBe('1');
-    expect(macros[1].id).toBe('2');
-  });
-
-  it('resolves ID collisions and preserves nextId', async () => {
+  it('imports macros, remapping IDs and appending to store', async () => {
     const user = userEvent.setup();
     useStore.setState(
       (s) => ({
@@ -119,5 +84,47 @@ describe('MacroImportModal', () => {
     expect(importedOne.id).not.toBe('1');
     expect(importedTwo.id).toBe('2');
     expect(importedTwo.nextId).toBe(importedOne.id);
+  });
+
+  it('shows an error toast for invalid JSON', async () => {
+    const user = userEvent.setup();
+    mockFileReader('invalid');
+
+    const { container } = renderWithStore(
+      <MacroImportModal onClose={() => {}} />,
+    );
+    const input = container.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
+    const file = new File(['invalid'], 'macros.json', {
+      type: 'application/json',
+    });
+    await user.upload(input, file);
+
+    expect(useToastStore.getState().toasts[0]?.message).toBe(
+      'Failed to parse file',
+    );
+    expect(useStore.getState().macros).toHaveLength(0);
+  });
+
+  it('shows an error toast when required fields are missing', async () => {
+    const user = userEvent.setup();
+    const toImport = [{ id: '1' }];
+    const json = JSON.stringify(toImport);
+    mockFileReader(json);
+
+    const { container } = renderWithStore(
+      <MacroImportModal onClose={() => {}} />,
+    );
+    const input = container.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
+    const file = new File([json], 'macros.json', { type: 'application/json' });
+    await user.upload(input, file);
+
+    expect(useToastStore.getState().toasts[0]?.message).toBe(
+      'Failed to parse file',
+    );
+    expect(useStore.getState().macros).toHaveLength(0);
   });
 });

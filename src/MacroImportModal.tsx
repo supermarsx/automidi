@@ -18,7 +18,17 @@ export default function MacroImportModal({ onClose }: Props) {
     reader.onload = (ev) => {
       try {
         const parsed = JSON.parse(ev.target?.result as string);
-        if (!Array.isArray(parsed)) throw new Error('Invalid format');
+        if (
+          !Array.isArray(parsed) ||
+          parsed.some(
+            (m) =>
+              typeof m !== 'object' ||
+              typeof m.id !== 'string' ||
+              typeof m.name !== 'string',
+          )
+        ) {
+          throw new Error('Invalid format');
+        }
         setData(parsed as Macro[]);
       } catch {
         setData(null);
