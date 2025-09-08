@@ -6,6 +6,7 @@ import { useState } from 'react';
 import MacroImportModal from './MacroImportModal';
 import MacroInstructions from './MacroInstructions';
 import MacroExportButton from './MacroExportButton';
+import MidiMacroEditor from './MidiMacroEditor';
 
 export default function MacroList() {
   const macros = useStore((s) => s.macros);
@@ -20,6 +21,7 @@ export default function MacroList() {
   const [interval, setInterval] = useState(50);
   const [type, setType] = useState<MacroType>('keys');
   const [command, setCommand] = useState('');
+  const [midiData, setMidiData] = useState<number[][]>([]);
   const [nextId, setNextId] = useState('');
   const [tags, setTags] = useState('');
   const [filterTag, setFilterTag] = useState('');
@@ -36,6 +38,7 @@ export default function MacroList() {
     setInterval(m.interval ?? 50);
     setType((m.type || 'keys') as MacroType);
     setCommand(m.command || '');
+    setMidiData(m.midiData || []);
     setNextId(m.nextId || '');
     setTags((m.tags || []).join(', '));
   };
@@ -66,6 +69,9 @@ export default function MacroList() {
       if (keys.length === 0) return;
       m.sequence = keys;
       m.interval = Math.max(0, interval);
+    } else if (type === 'midi') {
+      if (midiData.length === 0) return;
+      m.midiData = midiData;
     } else {
       if (!command.trim()) return;
       m.command = command.trim();
@@ -78,6 +84,7 @@ export default function MacroList() {
   const cancelEdit = () => {
     setEditingId(null);
     setTags('');
+    setMidiData([]);
   };
   const closePreview = () => setPreviewId(null);
 
@@ -127,7 +134,9 @@ export default function MacroList() {
                       const txt =
                         m.type === 'keys'
                           ? `${(m.sequence || []).join(' ')} (${m.interval ?? 0}ms)`
-                          : m.command || '';
+                          : m.type === 'midi'
+                            ? `${m.midiData?.length || 0} msgs`
+                            : m.command || '';
                       return txt.length > 20 ? `${txt.slice(0, 20)}…` : txt;
                     })()}
                     )
@@ -219,6 +228,7 @@ export default function MacroList() {
                     <option value="shell">Shell</option>
                     <option value="shell_win">Shell (Window)</option>
                     <option value="shell_bg">Shell (Hidden)</option>
+                    <option value="midi">MIDI</option>
                   </select>
                   {type === 'keys' ? (
                     <>
@@ -238,6 +248,8 @@ export default function MacroList() {
                         }
                       />
                     </>
+                  ) : type === 'midi' ? (
+                    <MidiMacroEditor value={midiData} onChange={setMidiData} />
                   ) : (
                     <input
                       className="form-control retro-input me-2 mb-1"
@@ -260,7 +272,17 @@ export default function MacroList() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button className="retro-button me-2" onClick={saveEdit}>
+                <button
+                  className="retro-button me-2"
+                  onClick={saveEdit}
+                  disabled={
+                    type === 'keys'
+                      ? !sequence.trim()
+                      : type === 'midi'
+                        ? midiData.length === 0
+                        : !command.trim()
+                  }
+                >
                   SAVE
                 </button>
                 <button className="retro-button" onClick={cancelEdit}>
@@ -304,6 +326,11 @@ export default function MacroList() {
                             <strong>Interval:</strong> {m.interval ?? 0}ms
                           </p>
                         </>
+                      ) : m.type === 'midi' ? (
+                        <p>
+                          <strong>MIDI Messages:</strong>{' '}
+                          {m.midiData?.length || 0}
+                        </p>
                       ) : (
                         <p>
                           <strong>

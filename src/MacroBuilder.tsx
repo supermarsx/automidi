@@ -3,6 +3,7 @@ import { useStore } from './store';
 import type { Macro, MacroType } from './store/macros';
 import { useToastStore } from './toastStore';
 import MacroInstructions from './MacroInstructions';
+import MidiMacroEditor from './MidiMacroEditor';
 
 export default function MacroBuilder() {
   const addMacro = useStore((s) => s.addMacro);
@@ -14,6 +15,7 @@ export default function MacroBuilder() {
   const [interval, setInterval] = useState(50);
   const [type, setType] = useState<MacroType>('keys');
   const [command, setCommand] = useState('');
+  const [midiData, setMidiData] = useState<number[][]>([]);
   const [nextId, setNextId] = useState('');
   const [tags, setTags] = useState('');
   const [showHelp, setShowHelp] = useState(false);
@@ -23,6 +25,7 @@ export default function MacroBuilder() {
     setCommand('');
     setType('keys');
     setInterval(50);
+    setMidiData([]);
     setNextId('');
     setTags('');
   };
@@ -46,6 +49,9 @@ export default function MacroBuilder() {
       if (keys.length === 0) return;
       macro.sequence = keys;
       macro.interval = Math.max(0, interval);
+    } else if (type === 'midi') {
+      if (midiData.length === 0) return;
+      macro.midiData = midiData;
     } else {
       if (!command.trim()) return;
       macro.command = command.trim();
@@ -95,6 +101,7 @@ export default function MacroBuilder() {
           <option value="shell">Shell</option>
           <option value="shell_win">Shell (Window)</option>
           <option value="shell_bg">Shell (Hidden)</option>
+          <option value="midi">MIDI</option>
         </select>
         {type === 'keys' ? (
           <>
@@ -113,6 +120,8 @@ export default function MacroBuilder() {
               onChange={(e) => setInterval(Math.max(0, Number(e.target.value)))}
             />
           </>
+        ) : type === 'midi' ? (
+          <MidiMacroEditor value={midiData} onChange={setMidiData} />
         ) : (
           <input
             className="form-control retro-input me-2 mb-1"
@@ -143,7 +152,11 @@ export default function MacroBuilder() {
           onClick={save}
           disabled={
             !name.trim() ||
-            (type === 'keys' ? !sequence.trim() : !command.trim())
+            (type === 'keys'
+              ? !sequence.trim()
+              : type === 'midi'
+                ? midiData.length === 0
+                : !command.trim())
           }
         >
           SAVE

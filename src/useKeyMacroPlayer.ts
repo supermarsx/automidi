@@ -28,8 +28,17 @@ export function useKeyMacroPlayer() {
       }
       addToast(`Playing: ${macro.name}`, 'success');
       try {
-        const { type, payload } = MACRO_MESSAGES[macro.type || 'keys'];
-        sendSocketMessage({ type, ...payload(macro) });
+        if (macro.type === 'midi') {
+          const port = useStore.getState().devices.outputId;
+          if (port && macro.midiData) {
+            for (const bytes of macro.midiData) {
+              sendSocketMessage({ type: 'send', port, bytes });
+            }
+          }
+        } else {
+          const { type, payload } = MACRO_MESSAGES[macro.type || 'keys'];
+          sendSocketMessage({ type, ...payload(macro) });
+        }
         if (macro.nextId) {
           await playMacro(macro.nextId, visited);
         }
