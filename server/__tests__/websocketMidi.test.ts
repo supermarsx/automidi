@@ -8,6 +8,7 @@ describe('WebSocket MIDI handling', () => {
   let server: Server;
   let stopServer: () => Promise<void>;
   let send: ReturnType<typeof vi.fn>;
+  let exec: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     vi.resetModules();
@@ -33,6 +34,9 @@ describe('WebSocket MIDI handling', () => {
       id === '1' ? output : undefined,
     );
 
+    exec = vi.fn();
+    vi.doMock('child_process', () => ({ exec }));
+
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const mod = require('../dist/index.js');
     server = await mod.startServer();
@@ -55,5 +59,22 @@ describe('WebSocket MIDI handling', () => {
     await new Promise((r) => setTimeout(r, 10));
     expect(send).not.toHaveBeenCalled();
     ws.close();
+  });
+
+  it('rejects malformed messages', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const port = (server.address() as { port: number }).port;
+    const ws = new WebSocket(`ws://localhost:${port}?key=${API_KEY}`);
+    await new Promise((r) => ws.on('open', r));
+
+    ws.send(JSON.stringify({ type: 'runShell' }));
+
+    await new Promise((r) => setTimeout(r, 10));
+    expect(exec).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+
+    ws.close();
+    await new Promise((r) => ws.on('close', r));
+    warn.mockRestore();
   });
 });
