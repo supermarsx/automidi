@@ -10,7 +10,6 @@ import { exec, spawn } from 'child_process';
 
 import { isValidCmd } from './validate.js';
 import type {
-  ClientMessage,
   ServerMessage,
   DevicesMessage,
   MidiEventMessage,
@@ -23,6 +22,7 @@ import type {
   SendMidiMessage,
   KeysTypeMessage,
 } from './messages';
+import { ClientMessageSchema } from './schemas.js';
 
 const DEFAULT_CMD_RATE_LIMIT = 5;
 const DEFAULT_CMD_RATE_INTERVAL_MS = 1000;
@@ -319,7 +319,20 @@ async function startServer() {
 
       ws.on('message', (msg) => {
         try {
-          const data = JSON.parse(msg.toString()) as ClientMessage;
+          const raw = JSON.parse(msg.toString());
+          const parsed = ClientMessageSchema.safeParse(raw);
+          if (!parsed.success) {
+            console.warn('Invalid WebSocket message:', parsed.error.issues);
+            ws.send(
+              JSON.stringify({
+                type: 'error',
+                error: 'Invalid message',
+                issues: parsed.error.issues,
+              }),
+            );
+            return;
+          }
+          const data = parsed.data;
           console.log('Received WebSocket message:', data);
 
           if (
