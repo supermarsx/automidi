@@ -27,4 +27,8 @@ export const MACRO_MESSAGES: Record<MacroType, MacroMessage> = {
     type: 'keysType',
     payload: (m) => ({ sequence: m.sequence, interval: m.interval }),
   },
+  midi: {
+    type: 'send',
+    payload: () => ({ port: '', bytes: [] }),
+  },
 };

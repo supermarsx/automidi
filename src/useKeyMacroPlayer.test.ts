@@ -5,7 +5,11 @@ import { useKeyMacroPlayer } from './useKeyMacroPlayer';
 import type { ClientMessage } from '../shared/messages';
 
 let sendMock: ReturnType<typeof vi.fn>;
-let storeState: { macros: Macro[]; settings: { apiKey: string } };
+let storeState: {
+  macros: Macro[];
+  settings: { apiKey: string };
+  devices: { inputId: string | null; outputId: string | null };
+};
 const addToastMock = vi.fn();
 
 vi.mock('./toastStore', () => ({
@@ -26,7 +30,11 @@ vi.mock('./socket', () => ({
 describe('useKeyMacroPlayer socket messages', () => {
   beforeEach(() => {
     sendMock = vi.fn().mockReturnValue(true);
-    storeState = { macros: [], settings: { apiKey: 'key' } };
+    storeState = {
+      macros: [],
+      settings: { apiKey: 'key' },
+      devices: { inputId: null, outputId: 'out' },
+    };
   });
 
   afterEach(() => {
@@ -112,5 +120,33 @@ describe('useKeyMacroPlayer socket messages', () => {
       expect.stringContaining('Macro cycle detected'),
       'error',
     );
+  });
+
+  it('plays midi macro', async () => {
+    storeState.macros = [
+      {
+        id: '1',
+        name: 'm',
+        type: 'midi',
+        midiData: [
+          [0x90, 60, 127],
+          [0x80, 60, 0],
+        ],
+      },
+    ];
+    const { result } = renderHook(() => useKeyMacroPlayer());
+    await act(async () => {
+      await result.current.playMacro('1');
+    });
+    expect(sendMock).toHaveBeenNthCalledWith(1, {
+      type: 'send',
+      port: 'out',
+      bytes: [0x90, 60, 127],
+    });
+    expect(sendMock).toHaveBeenNthCalledWith(2, {
+      type: 'send',
+      port: 'out',
+      bytes: [0x80, 60, 0],
+    });
   });
 });

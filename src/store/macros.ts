@@ -1,7 +1,13 @@
 import { type StateCreator } from 'zustand';
 import type { StoreState } from './index';
 
-export type MacroType = 'keys' | 'app' | 'shell' | 'shell_win' | 'shell_bg';
+export type MacroType =
+  | 'keys'
+  | 'app'
+  | 'shell'
+  | 'shell_win'
+  | 'shell_bg'
+  | 'midi';
 
 export interface Macro {
   id: string;
@@ -10,6 +16,7 @@ export interface Macro {
   interval?: number;
   type?: MacroType;
   command?: string;
+  midiData?: number[][];
   nextId?: string;
   tags?: string[];
 }
@@ -29,8 +36,7 @@ export const createMacrosSlice: StateCreator<
   MacrosSlice
 > = (set) => ({
   macros: [],
-  addMacro: (macro) =>
-    set((state) => ({ macros: [...state.macros, macro] })),
+  addMacro: (macro) => set((state) => ({ macros: [...state.macros, macro] })),
   updateMacro: (macro) =>
     set((state) => ({
       macros: state.macros.map((m) => (m.id === macro.id ? macro : m)),
@@ -40,12 +46,7 @@ export const createMacrosSlice: StateCreator<
   reorderMacro: (from, to) =>
     set((state) => {
       const macros = [...state.macros];
-      if (
-        from < 0 ||
-        from >= macros.length ||
-        to < 0 ||
-        to >= macros.length
-      )
+      if (from < 0 || from >= macros.length || to < 0 || to >= macros.length)
         return { macros };
       const [m] = macros.splice(from, 1);
       macros.splice(to, 0, m);
