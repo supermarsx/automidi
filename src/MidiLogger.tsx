@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLogStore } from './logStore';
+import { useLogStore, serializeLogs } from './logStore';
 
 interface Props {
   onClose: () => void;
@@ -20,71 +20,71 @@ export default function MidiLogger({ onClose }: Props) {
   }, [logs]);
 
   const formatBytes = (bytes: number[]) => {
-    return bytes.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+    return bytes
+      .map((b) => b.toString(16).padStart(2, '0').toUpperCase())
+      .join(' ');
   };
 
   const getMsgType = (bytes: number[]) => {
     if (bytes.length === 0) return 'EMPTY';
     const status = bytes[0];
-    if (status >= 0x80 && status <= 0x8F) return 'NOTE_OFF';
-    if (status >= 0x90 && status <= 0x9F) {
+    if (status >= 0x80 && status <= 0x8f) return 'NOTE_OFF';
+    if (status >= 0x90 && status <= 0x9f) {
       if (bytes.length >= 3 && bytes[2] === 0) return 'NOTE_OFF';
       return 'NOTE_ON';
     }
-    if (status >= 0xA0 && status <= 0xAF) return 'AFTERTOUCH';
-    if (status >= 0xB0 && status <= 0xBF) return 'CC';
-    if (status >= 0xC0 && status <= 0xCF) return 'PROG_CHG';
-    if (status >= 0xD0 && status <= 0xDF) return 'CH_PRESSURE';
-    if (status >= 0xE0 && status <= 0xEF) return 'PITCH_BEND';
-    if (status === 0xF0) return 'SYSEX';
-    if (status === 0xF1) return 'MTC';
-    if (status === 0xF2) return 'SONG_POS';
-    if (status === 0xF3) return 'SONG_SEL';
-    if (status === 0xF6) return 'TUNE_REQ';
-    if (status === 0xF7) return 'EOX';
-    if (status === 0xF8) return 'CLOCK';
-    if (status === 0xFA) return 'START';
-    if (status === 0xFB) return 'CONTINUE';
-    if (status === 0xFC) return 'STOP';
-    if (status === 0xFE) return 'ACTIVE_SENSE';
-    if (status === 0xFF) return 'RESET';
+    if (status >= 0xa0 && status <= 0xaf) return 'AFTERTOUCH';
+    if (status >= 0xb0 && status <= 0xbf) return 'CC';
+    if (status >= 0xc0 && status <= 0xcf) return 'PROG_CHG';
+    if (status >= 0xd0 && status <= 0xdf) return 'CH_PRESSURE';
+    if (status >= 0xe0 && status <= 0xef) return 'PITCH_BEND';
+    if (status === 0xf0) return 'SYSEX';
+    if (status === 0xf1) return 'MTC';
+    if (status === 0xf2) return 'SONG_POS';
+    if (status === 0xf3) return 'SONG_SEL';
+    if (status === 0xf6) return 'TUNE_REQ';
+    if (status === 0xf7) return 'EOX';
+    if (status === 0xf8) return 'CLOCK';
+    if (status === 0xfa) return 'START';
+    if (status === 0xfb) return 'CONTINUE';
+    if (status === 0xfc) return 'STOP';
+    if (status === 0xfe) return 'ACTIVE_SENSE';
+    if (status === 0xff) return 'RESET';
     return 'OTHER';
   };
 
   const getMessageDetails = (bytes: number[]) => {
     if (bytes.length === 0) return '';
     const status = bytes[0];
-    
-    if (status >= 0x90 && status <= 0x9F && bytes.length >= 3) {
-      return `Ch${(status & 0x0F) + 1} Note:${bytes[1]} Vel:${bytes[2]}`;
+
+    if (status >= 0x90 && status <= 0x9f && bytes.length >= 3) {
+      return `Ch${(status & 0x0f) + 1} Note:${bytes[1]} Vel:${bytes[2]}`;
     }
-    if (status >= 0x80 && status <= 0x8F && bytes.length >= 3) {
-      return `Ch${(status & 0x0F) + 1} Note:${bytes[1]} Vel:${bytes[2]}`;
+    if (status >= 0x80 && status <= 0x8f && bytes.length >= 3) {
+      return `Ch${(status & 0x0f) + 1} Note:${bytes[1]} Vel:${bytes[2]}`;
     }
-    if (status >= 0xA0 && status <= 0xAF && bytes.length >= 3) {
-      return `Ch${(status & 0x0F) + 1} Note:${bytes[1]} Pressure:${bytes[2]}`;
+    if (status >= 0xa0 && status <= 0xaf && bytes.length >= 3) {
+      return `Ch${(status & 0x0f) + 1} Note:${bytes[1]} Pressure:${bytes[2]}`;
     }
-    if (status >= 0xD0 && status <= 0xDF && bytes.length >= 2) {
-      return `Ch${(status & 0x0F) + 1} Pressure:${bytes[1]}`;
+    if (status >= 0xd0 && status <= 0xdf && bytes.length >= 2) {
+      return `Ch${(status & 0x0f) + 1} Pressure:${bytes[1]}`;
     }
-    if (status >= 0xB0 && status <= 0xBF && bytes.length >= 3) {
-      return `Ch${(status & 0x0F) + 1} CC:${bytes[1]} Val:${bytes[2]}`;
+    if (status >= 0xb0 && status <= 0xbf && bytes.length >= 3) {
+      return `Ch${(status & 0x0f) + 1} CC:${bytes[1]} Val:${bytes[2]}`;
     }
-    if (status === 0xF0) {
+    if (status === 0xf0) {
       return `Len:${bytes.length}`;
     }
     return '';
   };
 
-  const msgTypes = Array.from(
-    new Set(logs.map((l) => getMsgType(l.message)))
-  );
+  const msgTypes = Array.from(new Set(logs.map((l) => getMsgType(l.message))));
   const devices = Array.from(
     new Set(
       logs
         .map((l) => (l.direction === 'in' ? l.source : l.target))
-        .filter(Boolean)
-    )
+        .filter(Boolean),
+    ),
   );
 
   const filteredLogs = logs.filter((log) => {
@@ -95,6 +95,17 @@ export default function MidiLogger({ onClose }: Props) {
     if (deviceFilter !== 'all' && device !== deviceFilter) return false;
     return true;
   });
+
+  const exportLogs = () => {
+    const data = serializeLogs(filteredLogs);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'midi-logs.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="midi-logger">
@@ -108,8 +119,12 @@ export default function MidiLogger({ onClose }: Props) {
             onChange={(e) => setFilter(e.target.value as 'all' | 'in' | 'out')}
           >
             <option value="all">ALL ({logs.length})</option>
-            <option value="in">IN ({logs.filter(l => l.direction === 'in').length})</option>
-            <option value="out">OUT ({logs.filter(l => l.direction === 'out').length})</option>
+            <option value="in">
+              IN ({logs.filter((l) => l.direction === 'in').length})
+            </option>
+            <option value="out">
+              OUT ({logs.filter((l) => l.direction === 'out').length})
+            </option>
           </select>
           <select
             className="form-select retro-select me-2"
@@ -137,6 +152,9 @@ export default function MidiLogger({ onClose }: Props) {
               </option>
             ))}
           </select>
+          <button className="retro-button btn-sm me-2" onClick={exportLogs}>
+            EXPORT
+          </button>
           <button className="retro-button btn-sm me-2" onClick={clearLogs}>
             CLEAR
           </button>
@@ -159,7 +177,9 @@ export default function MidiLogger({ onClose }: Props) {
               </span>
               <span className="log-type">{getMsgType(entry.message)}</span>
               <span className="log-data">{formatBytes(entry.message)}</span>
-              <span className="log-details">{getMessageDetails(entry.message)}</span>
+              <span className="log-details">
+                {getMessageDetails(entry.message)}
+              </span>
               {(entry.source || entry.target) && (
                 <span className="log-source">
                   ({entry.direction === 'in' ? entry.source : entry.target})
