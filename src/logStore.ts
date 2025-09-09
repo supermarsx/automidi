@@ -28,3 +28,10 @@ export const useLogStore = create<LogStoreState>((set) => ({
   },
   clearLogs: () => set({ logs: [] }),
 }));
+
+export function serializeLogs(logs: LogEntry[]) {
+  return JSON.stringify(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    logs.map(({ id, formattedTime, ...rest }) => rest),
+  );
+}
