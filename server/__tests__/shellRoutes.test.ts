@@ -8,6 +8,7 @@ import {
   type Mock,
 } from 'vitest';
 import WebSocket from 'ws';
+import { EventEmitter } from 'events';
 import { isValidCmd } from '../dist/validate.js';
 import type { Server } from 'http';
 import type {
@@ -42,7 +43,14 @@ describe('shell routes', () => {
         if (callback) callback(null);
       },
     );
-    spawn = vi.fn(() => ({ unref: vi.fn() }));
+    spawn = vi.fn(() => {
+      const child = new EventEmitter();
+      (child as unknown as { stdout: EventEmitter }).stdout =
+        new EventEmitter();
+      (child as unknown as { stderr: EventEmitter }).stderr =
+        new EventEmitter();
+      return child;
+    });
     cp.exec = exec;
     cp.spawn = spawn;
     process.env.API_KEY = API_KEY;
@@ -101,17 +109,16 @@ describe('shell routes', () => {
     await new Promise((r) => setTimeout(r, 10));
 
     expect(exec).toHaveBeenCalledWith('"app"', expect.any(Function));
-    expect(exec).toHaveBeenCalledWith('echo hi', expect.any(Function));
+    expect(spawn).toHaveBeenCalledWith('echo hi', { shell: true });
     expect(spawn).toHaveBeenCalledWith('win something', {
       shell: true,
       detached: true,
       windowsHide: false,
     });
-    expect(exec).toHaveBeenCalledWith(
-      'echo hi',
-      { windowsHide: true },
-      expect.any(Function),
-    );
+    expect(spawn).toHaveBeenCalledWith('echo hi', {
+      shell: true,
+      windowsHide: true,
+    });
     ws.close();
   });
 
@@ -146,12 +153,12 @@ describe('shell routes', () => {
 
     await new Promise((r) => setTimeout(r, 10));
 
-    expect(exec).toHaveBeenCalledWith('echo 0', expect.any(Function));
-    expect(exec).toHaveBeenCalledWith('echo 1', expect.any(Function));
-    expect(exec).toHaveBeenCalledWith('echo 2', expect.any(Function));
-    expect(exec).toHaveBeenCalledWith('echo 3', expect.any(Function));
-    expect(exec).toHaveBeenCalledWith('echo 4', expect.any(Function));
-    expect(exec).not.toHaveBeenCalledWith('echo 5', expect.anything());
+    expect(spawn).toHaveBeenCalledWith('echo 0', { shell: true });
+    expect(spawn).toHaveBeenCalledWith('echo 1', { shell: true });
+    expect(spawn).toHaveBeenCalledWith('echo 2', { shell: true });
+    expect(spawn).toHaveBeenCalledWith('echo 3', { shell: true });
+    expect(spawn).toHaveBeenCalledWith('echo 4', { shell: true });
+    expect(spawn).not.toHaveBeenCalledWith('echo 5', expect.anything());
     ws.close();
   });
 });
