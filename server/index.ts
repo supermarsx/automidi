@@ -396,9 +396,30 @@ async function startServer() {
             const { cmd } = data as RunShellMessage;
             if (!cmd) return;
             if (!isValidCmd(cmd, allowedCmds)) return;
-            exec(cmd, (err) => {
-              if (err) console.error('Shell exec error:', err);
-            });
+            try {
+              const child = spawn(cmd, { shell: true });
+              child.stdout?.on('data', (chunk) =>
+                broadcastToClients({
+                  type: 'shellOutput',
+                  cmd,
+                  stream: 'stdout',
+                  data: chunk.toString(),
+                }),
+              );
+              child.stderr?.on('data', (chunk) =>
+                broadcastToClients({
+                  type: 'shellOutput',
+                  cmd,
+                  stream: 'stderr',
+                  data: chunk.toString(),
+                }),
+              );
+              child.on('error', (err) =>
+                console.error('Shell spawn error:', err),
+              );
+            } catch (err) {
+              console.error('Shell spawn error:', err);
+            }
           } else if (data.type === 'runShellWin') {
             const { cmd } = data as RunShellWinMessage;
             if (!cmd) return;
@@ -409,7 +430,25 @@ async function startServer() {
                 detached: true,
                 windowsHide: false,
               });
-              child.unref();
+              child.stdout?.on('data', (chunk) =>
+                broadcastToClients({
+                  type: 'shellOutput',
+                  cmd,
+                  stream: 'stdout',
+                  data: chunk.toString(),
+                }),
+              );
+              child.stderr?.on('data', (chunk) =>
+                broadcastToClients({
+                  type: 'shellOutput',
+                  cmd,
+                  stream: 'stderr',
+                  data: chunk.toString(),
+                }),
+              );
+              child.on('error', (err) =>
+                console.error('ShellWin spawn error:', err),
+              );
             } catch (err) {
               console.error('ShellWin spawn error:', err);
             }
@@ -417,9 +456,30 @@ async function startServer() {
             const { cmd } = data as RunShellBgMessage;
             if (!cmd) return;
             if (!isValidCmd(cmd, allowedCmds)) return;
-            exec(cmd, { windowsHide: true }, (err) => {
-              if (err) console.error('ShellBg exec error:', err);
-            });
+            try {
+              const child = spawn(cmd, { shell: true, windowsHide: true });
+              child.stdout?.on('data', (chunk) =>
+                broadcastToClients({
+                  type: 'shellOutput',
+                  cmd,
+                  stream: 'stdout',
+                  data: chunk.toString(),
+                }),
+              );
+              child.stderr?.on('data', (chunk) =>
+                broadcastToClients({
+                  type: 'shellOutput',
+                  cmd,
+                  stream: 'stderr',
+                  data: chunk.toString(),
+                }),
+              );
+              child.on('error', (err) =>
+                console.error('ShellBg spawn error:', err),
+              );
+            } catch (err) {
+              console.error('ShellBg spawn error:', err);
+            }
           } else if (data.type === 'keysType') {
             const { sequence = [], interval = 50 } = data as KeysTypeMessage;
             (async () => {

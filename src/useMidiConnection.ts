@@ -4,6 +4,7 @@ import { usePing } from './usePing';
 import { registerSend } from './socket';
 import { useWebSocket } from './useWebSocket';
 import type { ClientMessage, ServerMessage } from '../shared/messages';
+import { useToastStore } from './toastStore';
 
 export type RawMessage = ServerMessage;
 export type RawListener = (msg: RawMessage) => void;
@@ -18,6 +19,7 @@ export function useMidiConnection() {
   const pingInterval = useStore((s) => s.settings.pingInterval);
   const pingEnabled = useStore((s) => s.settings.pingEnabled);
   const reconnectOnLost = useStore((s) => s.settings.reconnectOnLost);
+  const addToast = useToastStore((s) => s.addToast);
 
   const url = `ws://${host}:${port}?key=${encodeURIComponent(apiKey)}`;
 
@@ -62,10 +64,15 @@ export function useMidiConnection() {
     const unsub = listen((payload) => {
       if (payload.type === 'pong') {
         handlePong(payload.ts);
+      } else if (payload.type === 'shellOutput') {
+        addToast(
+          payload.data,
+          payload.stream === 'stderr' ? 'error' : 'success',
+        );
       }
     });
     return unsub;
-  }, [listen, handlePong]);
+  }, [listen, handlePong, addToast]);
 
   useEffect(() => stopPing, [stopPing]);
 

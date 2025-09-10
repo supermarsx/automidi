@@ -24,6 +24,13 @@ export interface RunShellBgMessage {
   cmd: string;
 }
 
+export interface ShellOutputMessage {
+  type: 'shellOutput';
+  cmd: string;
+  stream: 'stdout' | 'stderr';
+  data: string;
+}
+
 export interface KeysTypeMessage {
   type: 'keysType';
   sequence: string[];
@@ -85,6 +92,10 @@ export type ClientMessage =
   | PingMessage
   | GetDevicesMessage;
 
-export type ServerMessage = PongMessage | DevicesMessage | MidiEventMessage;
+export type ServerMessage =
+  | PongMessage
+  | DevicesMessage
+  | MidiEventMessage
+  | ShellOutputMessage;
 
 export type WsMessage = ClientMessage | ServerMessage;
