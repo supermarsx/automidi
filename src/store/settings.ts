@@ -22,6 +22,7 @@ export interface SettingsSlice {
     autoLoadFirstConfig: boolean;
     apiKey: string;
     clock: number[];
+    macroConfirmTimeout: number;
   };
   setHost: (h: string) => void;
   setPort: (p: number) => void;
@@ -42,6 +43,7 @@ export interface SettingsSlice {
   setAutoLoadFirstConfig: (b: boolean) => void;
   setApiKey: (k: string) => void;
   setClock: (data: number[]) => void;
+  setMacroConfirmTimeout: (ms: number) => void;
 }
 
 export const createSettingsSlice: StateCreator<
@@ -51,7 +53,10 @@ export const createSettingsSlice: StateCreator<
   SettingsSlice
 > = (set) => ({
   settings: {
-    host: typeof location === 'undefined' ? 'localhost' : location.hostname || 'localhost',
+    host:
+      typeof location === 'undefined'
+        ? 'localhost'
+        : location.hostname || 'localhost',
     port: 3000,
     autoReconnect: true,
     reconnectInterval: 2000,
@@ -70,6 +75,7 @@ export const createSettingsSlice: StateCreator<
     autoLoadFirstConfig: false,
     apiKey: '',
     clock: [0xf8],
+    macroConfirmTimeout: 2000,
   },
   setHost: (h) =>
     set((state) => ({ settings: { ...state.settings, host: h } })),
@@ -149,4 +155,8 @@ export const createSettingsSlice: StateCreator<
     set((state) => ({ settings: { ...state.settings, apiKey: k } })),
   setClock: (data) =>
     set((state) => ({ settings: { ...state.settings, clock: data } })),
+  setMacroConfirmTimeout: (ms) =>
+    set((state) => ({
+      settings: { ...state.settings, macroConfirmTimeout: Math.max(0, ms) },
+    })),
 });

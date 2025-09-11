@@ -12,6 +12,7 @@ export function usePadActions() {
   const padChannels = useStore((s) => s.padChannels);
   const padColours = useStore((s) => s.padColours);
   const sysexColorMode = useStore((s) => s.settings.sysexColorMode);
+  const macroConfirmTimeout = useStore((s) => s.settings.macroConfirmTimeout);
   const setPadChannel = useStore((s) => s.setPadChannel);
   const { listen, send } = useMidi();
   const { playMacro } = useKeyMacroPlayer();
@@ -81,7 +82,7 @@ export function usePadActions() {
           setPadChannel(id, prev);
           sendPadState(id, prev);
           delete confirmRef.current[id];
-        }, 2000);
+        }, macroConfirmTimeout);
         confirmRef.current[id] = { t, prev };
       } else {
         clearTimeout(entry.t);
@@ -91,7 +92,7 @@ export function usePadActions() {
         playMacro(macroId);
       }
     },
-    [padChannels, setPadChannel, playMacro, sendPadState],
+    [padChannels, setPadChannel, playMacro, sendPadState, macroConfirmTimeout],
   );
 
   useEffect(() => {
