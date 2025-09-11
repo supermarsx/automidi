@@ -7,7 +7,7 @@ interface MockStore {
   padActions: Record<string, { noteOn?: string; confirm?: boolean }>;
   padChannels: Record<string, number>;
   padColours: Record<string, unknown>;
-  settings: { sysexColorMode: boolean };
+  settings: { sysexColorMode: boolean; macroConfirmTimeout: number };
   setPadChannel: (id: string, ch: number) => void;
 }
 
@@ -56,7 +56,7 @@ describe('usePadActions confirmation', () => {
       padActions: { 'n-60': { noteOn: 'macro1', confirm: true } },
       padChannels: { 'n-60': 1 },
       padColours: {},
-      settings: { sysexColorMode: false },
+      settings: { sysexColorMode: false, macroConfirmTimeout: 2000 },
       setPadChannel: setPadChannelMock,
     };
   });
@@ -89,7 +89,7 @@ describe('usePadActions confirmation', () => {
     expect(setPadChannelMock).toHaveBeenCalledWith('n-60', 1);
     expect(sendMock).toHaveBeenCalledTimes(2);
 
-    vi.advanceTimersByTime(2000);
+    vi.advanceTimersByTime(storeState.settings.macroConfirmTimeout);
     expect(sendMock).toHaveBeenCalledTimes(2);
   });
 
@@ -108,10 +108,30 @@ describe('usePadActions confirmation', () => {
     expect(setPadChannelMock).toHaveBeenCalledWith('n-60', 3);
     expect(sendMock).toHaveBeenCalledTimes(1);
 
-    vi.advanceTimersByTime(2000);
+    vi.advanceTimersByTime(storeState.settings.macroConfirmTimeout);
 
     expect(setPadChannelMock).toHaveBeenCalledWith('n-60', 1);
     expect(sendMock).toHaveBeenCalledTimes(2);
     expect(playMacroMock).not.toHaveBeenCalled();
+  });
+
+  it('resets using configured macroConfirmTimeout', () => {
+    storeState.settings.macroConfirmTimeout = 1000;
+    renderHook(() => usePadActions());
+
+    act(() => {
+      messageHandler!({
+        message: [0x90, 60, 127],
+        direction: 'in',
+        timestamp: Date.now(),
+      });
+    });
+
+    expect(setPadChannelMock).toHaveBeenCalledTimes(1);
+    vi.advanceTimersByTime(999);
+    expect(setPadChannelMock).toHaveBeenCalledTimes(1);
+    vi.advanceTimersByTime(1);
+    expect(setPadChannelMock).toHaveBeenCalledTimes(2);
+    expect(setPadChannelMock).toHaveBeenLastCalledWith('n-60', 1);
   });
 });

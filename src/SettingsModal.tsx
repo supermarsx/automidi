@@ -27,6 +27,7 @@ export default function SettingsModal({ onClose }: Props) {
   const theme = useStore((s) => s.settings.theme);
   const clock = useStore((s) => s.settings.clock ?? [0xf8]);
   const apiKey = useStore((s) => s.settings.apiKey);
+  const macroConfirmTimeout = useStore((s) => s.settings.macroConfirmTimeout);
   const setHost = useStore((s) => s.setHost);
   const setPort = useStore((s) => s.setPort);
   const setAutoReconnect = useStore((s) => s.setAutoReconnect);
@@ -46,6 +47,7 @@ export default function SettingsModal({ onClose }: Props) {
   const setTheme = useStore((s) => s.setTheme);
   const setClock = useStore((s) => s.setClock);
   const setApiKey = useStore((s) => s.setApiKey);
+  const setMacroConfirmTimeout = useStore((s) => s.setMacroConfirmTimeout);
   const addToast = useToastStore((s) => s.addToast);
 
   const [h, setH] = useState(host);
@@ -67,6 +69,7 @@ export default function SettingsModal({ onClose }: Props) {
   const [thm, setThm] = useState(theme);
   const [ak, setAk] = useState(apiKey);
   const [clk, setClk] = useState(clock.join(' '));
+  const [mct, setMct] = useState(macroConfirmTimeout);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const save = () => {
@@ -95,6 +98,7 @@ export default function SettingsModal({ onClose }: Props) {
         .filter((n) => !Number.isNaN(n))
         .map((n) => Math.min(255, Math.max(0, n))),
     );
+    setMacroConfirmTimeout(Math.max(0, mct));
     onClose();
     addToast('Settings saved', 'success');
   };
@@ -137,6 +141,7 @@ export default function SettingsModal({ onClose }: Props) {
         setTheme(cfg.theme ?? thm);
         setApiKey(cfg.apiKey ?? ak);
         setClock(Array.isArray(cfg.clock) ? cfg.clock : clock);
+        setMacroConfirmTimeout(cfg.macroConfirmTimeout ?? macroConfirmTimeout);
         setH(cfg.host ?? h);
         setP(cfg.port ?? p);
         setAr(cfg.autoReconnect ?? ar);
@@ -160,6 +165,7 @@ export default function SettingsModal({ onClose }: Props) {
             .map((n: number) => n.toString())
             .join(' '),
         );
+        setMct(cfg.macroConfirmTimeout ?? macroConfirmTimeout);
         addToast('Config imported', 'success');
       } catch {
         addToast('Failed to import config', 'error');
@@ -417,6 +423,18 @@ export default function SettingsModal({ onClose }: Props) {
               <small className="text-warning">
                 Space-separated decimal bytes
               </small>
+            </div>
+            <div className="mb-3">
+              <label className="form-label text-info">
+                MACRO CONFIRM TIMEOUT (MS):
+              </label>
+              <input
+                type="number"
+                className="form-control retro-input"
+                value={mct}
+                onChange={(e) => setMct(Number(e.target.value))}
+                min="0"
+              />
             </div>
             {ar && (
               <>
