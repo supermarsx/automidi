@@ -44,17 +44,17 @@
 
 /* OLED Dark theme overrides */
 .theme-oled-dark .tab-button:hover {
-  background: #0a0a0a;
-  box-shadow: none;
-  transform: none;
+  background: #0a0a0a !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 .theme-oled-dark .tab-button.active {
-  background: #000000;
-  color: #808080;
-  border-color: #404040;
-  box-shadow: none;
-  transform: none;
+  background: #000000 !important;
+  color: #909090 !important;
+  border-color: #505050 !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 .tab-icon {

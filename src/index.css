@@ -84,8 +84,8 @@
 }
 
 .theme-oled-dark .retro-panel h3 {
-  text-shadow: none;
-  color: #808080;
+  text-shadow: none !important;
+  color: #a0a0a0 !important;
 }
 
 .theme-oled-dark .retro-title {
