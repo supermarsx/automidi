@@ -88,6 +88,14 @@
   color: #a0a0a0 !important;
 }
 
+.theme-oled-dark .text-warning {
+  color: #707070 !important;
+}
+
+.theme-oled-dark .text-info {
+  color: #909090 !important;
+}
+
 .theme-oled-dark .retro-title {
   text-shadow: none;
   animation: none;

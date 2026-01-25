@@ -13,6 +13,6 @@
 }
 
 .active {
-  background: #ffff00 !important;
-  color: #000080 !important;
+  background: var(--highlight) !important;
+  color: var(--bg-start) !important;
 }
