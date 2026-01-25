@@ -29,7 +29,7 @@
 }
 
 .tab-button:hover {
-  background: #000080;
+  background: var(--button-hover);
   box-shadow: 0 0 10px var(--panel-border);
   transform: translateY(-2px);
 }
@@ -40,6 +40,21 @@
   border-color: var(--highlight);
   box-shadow: 0 0 15px var(--highlight);
   transform: translateY(-2px);
+}
+
+/* OLED Dark theme overrides */
+.theme-oled-dark .tab-button:hover {
+  background: #0a0a0a;
+  box-shadow: none;
+  transform: none;
+}
+
+.theme-oled-dark .tab-button.active {
+  background: #000000;
+  color: #808080;
+  border-color: #404040;
+  box-shadow: none;
+  transform: none;
 }
 
 .tab-icon {
