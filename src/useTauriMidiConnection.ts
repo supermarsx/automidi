@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import { useStore } from './store';
 import { useToastStore } from './toastStore';
 import { isTauri, invoke } from './tauri';
-import { getTauriAPI } from './tauri';
 import type {
   ClientMessage,
   ServerMessage,
@@ -13,14 +12,14 @@ import { registerSend } from './socket';
 export type RawMessage = ServerMessage;
 export type RawListener = (msg: RawMessage) => void;
 
-type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
+type ConnectionStatus = 'connected' | 'closed' | 'connecting';
 
 /**
  * Tauri-based MIDI connection hook
  * Replaces WebSocket with Tauri IPC and event system
  */
 export function useTauriMidiConnection() {
-  const [status, setStatus] = useState<ConnectionStatus>('disconnected');
+  const [status, setStatus] = useState<ConnectionStatus>('closed');
   const [pingDelay, setPingDelay] = useState<number | null>(null);
   const listenersRef = useRef<Set<RawListener>>(new Set());
   const unlistenFnsRef = useRef<Array<() => void>>([]);
@@ -31,7 +30,7 @@ export function useTauriMidiConnection() {
   // Setup Tauri event listeners
   useEffect(() => {
     if (!isTauri()) {
-      setStatus('disconnected');
+      setStatus('closed');
       return;
     }
 
@@ -39,13 +38,13 @@ export function useTauriMidiConnection() {
 
     const setupListeners = async () => {
       try {
-        const tauri = getTauriAPI();
-        if (!tauri || !tauri.event) {
-          throw new Error('Tauri event API not available');
+        const tauri = window.__TAURI__;
+        if (!tauri) {
+          throw new Error('Tauri API not available');
         }
 
         // Listen for MIDI events
-        const unlistenMidi = await tauri.event.listen('midi:event', (e: { payload: unknown }) => {
+        const unlistenMidi = await tauri.event.listen('midi:event', (e: any) => {
           const payload = e.payload as {
             direction: 'in' | 'out';
             message: number[];
@@ -69,7 +68,7 @@ export function useTauriMidiConnection() {
         });
 
         // Listen for device changes
-        const unlistenDevices = await tauri.event.listen('midi:devices', (e: { payload: unknown }) => {
+        const unlistenDevices = await tauri.event.listen('midi:devices', (e: any) => {
           const payload = e.payload as {
             inputs: Array<{ id: string; name: string }>;
             outputs: Array<{ id: string; name: string }>;
@@ -83,7 +82,7 @@ export function useTauriMidiConnection() {
         });
 
         // Listen for shell output
-        const unlistenShell = await tauri.event.listen('shell:output', (e: { payload: unknown }) => {
+        const unlistenShell = await tauri.event.listen('shell:output', (e: any) => {
           const payload = e.payload as {
             cmd: string;
             stream: 'stdout' | 'stderr';
@@ -106,7 +105,8 @@ export function useTauriMidiConnection() {
         setStatus('connected');
       } catch (error) {
         console.error('Failed to setup Tauri listeners:', error);
-        setStatus('error');
+        setStatus('closed');
+        addToast('Failed to connect to Tauri backend', 'error');
       }
     };
 
@@ -151,7 +151,7 @@ export function useTauriMidiConnection() {
         switch (msg.type) {
           case 'listDevices':
           case 'getDevices':
-            const devices = await invoke('midi_list_devices');
+            const devices = await invoke('listDevices');
             const devicesMsg: ServerMessage = {
               type: 'devices',
               ...devices,
@@ -161,45 +161,45 @@ export function useTauriMidiConnection() {
 
           case 'send':
           case 'sendMidi':
-            await invoke('midi_send', {
-              portId: (msg as any).port || (msg as any).portId,
+            await invoke('sendMidi', {
+              port: (msg as any).port || (msg as any).portId,
               bytes: (msg as any).bytes,
             });
             break;
 
           case 'setListening':
-            await invoke('midi_set_listening', {
+            await invoke('setListening', {
               enabled: (msg as SetListeningMessage).enabled,
             });
             break;
 
           case 'runApp':
-            await invoke('run_app', {
+            await invoke('runApp', {
               appPath: (msg as any).app || (msg as any).appPath,
             });
             break;
 
           case 'runShell':
             if ((msg as any).background) {
-              await invoke('run_shell_bg', { cmd: (msg as any).cmd });
+              await invoke('runShellBg', { cmd: (msg as any).cmd });
             } else if ((msg as any).windowed) {
-              await invoke('run_shell_win', { cmd: (msg as any).cmd });
+              await invoke('runShellWin', { cmd: (msg as any).cmd });
             } else {
-              await invoke('run_shell', { cmd: (msg as any).cmd });
+              await invoke('runShell', { cmd: (msg as any).cmd });
             }
             break;
 
           case 'runShellBg':
-            await invoke('run_shell_bg', { cmd: (msg as any).cmd });
+            await invoke('runShellBg', { cmd: (msg as any).cmd });
             break;
 
           case 'runShellWin':
-            await invoke('run_shell_win', { cmd: (msg as any).cmd });
+            await invoke('runShellWin', { cmd: (msg as any).cmd });
             break;
 
           case 'keysType':
-            await invoke('keys_type', {
-              sequence: (msg as any).sequence,
+            await invoke('runKeys', {
+              keys: (msg as any).sequence || (msg as any).keys,
               interval: (msg as any).interval,
             });
             break;

@@ -36,13 +36,13 @@ export async function invoke<T = any>(
 /**
  * Listen to Tauri events
  */
-export function listen<T = any>(
+export async function listen<T = any>(
   event: string,
   handler: (payload: T) => void
 ): Promise<() => void> {
   const tauri = getTauriAPI();
   if (!tauri) {
-    return Promise.resolve(() => {});
+    return () => {};
   }
   return tauri.event.listen(event, (e: any) => handler(e.payload));
 }

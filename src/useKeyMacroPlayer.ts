@@ -50,7 +50,7 @@ export function useKeyMacroPlayer() {
                              macro.type === 'shell_win' ? 'runShellWin' : 'runShellBg';
               await invoke(cmdType, { cmd: macro.command || '' });
             } else if (macro.type === 'app') {
-              await invoke('runApp', { cmd: macro.command || '' });
+              await invoke('runApp', { appPath: macro.command || '' });
             } else if (macro.type === 'keys' && macro.sequence) {
               await invoke('runKeys', { 
                 keys: macro.sequence, 
