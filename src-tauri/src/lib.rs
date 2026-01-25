@@ -393,18 +393,18 @@ fn start_device_watcher(app: AppHandle) {
     // Emit initial device list immediately
     let initial_devices = list_devices_internal();
     let initial_signature = signature_for_devices(&initial_devices);
-    
+
     if let Ok(mut midi) = app.state::<AppState>().midi.lock() {
         midi.last_signature = initial_signature;
     }
-    
+
     let message = DevicesMessage {
         r#type: "devices",
         inputs: initial_devices.inputs.clone(),
         outputs: initial_devices.outputs.clone(),
     };
     let _ = app.emit("midi:devices", message);
-    
+
     // Start watching for changes
     std::thread::spawn(move || loop {
         let devices = list_devices_internal();

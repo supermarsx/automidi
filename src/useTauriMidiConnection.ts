@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useStore } from './store';
 import { useToastStore } from './toastStore';
-import { isTauri, invoke } from './tauri';
+import { isTauri, invoke, getTauriAPI } from './tauri';
 import type {
   ClientMessage,
   ServerMessage,
@@ -38,8 +38,8 @@ export function useTauriMidiConnection() {
 
     const setupListeners = async () => {
       try {
-        const tauri = (window as any).__TAURI__;
-        if (!tauri) {
+        const tauri = getTauriAPI();
+        if (!tauri || !tauri.event) {
           throw new Error('Tauri API not available');
         }
 
