@@ -1,5 +1,6 @@
 import { useMidi } from './useMidi';
 import { useStore } from './store';
+import { isTauriRuntime } from './tauriFiles';
 
 export default function ActionBar() {
   const { status, reconnect, launchpadDetected, pingDelay } = useMidi();
@@ -7,8 +8,7 @@ export default function ActionBar() {
   const yellow = useStore((s) => s.settings.pingYellow);
   const orange = useStore((s) => s.settings.pingOrange);
   const pingEnabled = useStore((s) => s.settings.pingEnabled);
-  const isTauri =
-    typeof window !== 'undefined' && '__TAURI__' in window;
+  const isTauri = isTauriRuntime();
 
   const pingClass =
     pingDelay === null

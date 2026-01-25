@@ -6,6 +6,7 @@ import type {
 } from '@shared/messages';
 
 import { registerSend } from './socket';
+import { isTauriRuntime } from './tauriFiles';
 import { usePing } from './usePing';
 import { useStore } from './store';
 import { useToastStore } from './toastStore';
@@ -24,8 +25,7 @@ export function useMidiConnection() {
     'closed',
   );
 
-  const isTauriRuntime =
-    typeof window !== 'undefined' && '__TAURI__' in window;
+  const isTauri = isTauriRuntime();
 
   const {
     pingDelay,
@@ -47,7 +47,7 @@ export function useMidiConnection() {
 
   const send = useCallback(
     (msg: ClientMessage) => {
-      if (!isTauriRuntime) return false;
+      if (!isTauri) return false;
       const run = async () => {
         const { invoke } = await import('@tauri-apps/api/core');
         switch (msg.type) {
@@ -100,13 +100,13 @@ export function useMidiConnection() {
       run().catch((err) => console.error('Tauri send failed', err));
       return true;
     },
-    [emitMessage, isTauriRuntime],
+    [emitMessage, isTauri],
   );
 
   const reconnect = useCallback(() => {
-    if (!isTauriRuntime) return;
+    if (!isTauri) return;
     setStatus('connected');
-  }, [isTauriRuntime]);
+  }, [isTauri]);
 
   useEffect(() => {
     if (!pingEnabled) stopPing();
@@ -134,7 +134,7 @@ export function useMidiConnection() {
   useEffect(() => stopPing, [stopPing]);
 
   useEffect(() => {
-    if (!isTauriRuntime) {
+    if (!isTauri) {
       setStatus('closed');
       return;
     }
@@ -192,7 +192,7 @@ export function useMidiConnection() {
       cancelled = true;
       unsubs.forEach((unsub) => unsub());
     };
-  }, [emitMessage, isTauriRuntime]);
+  }, [emitMessage, isTauri]);
 
   useEffect(() => {
     registerSend((data: unknown) => send(data as ClientMessage));
