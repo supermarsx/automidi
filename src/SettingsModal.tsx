@@ -522,29 +522,33 @@ export default function SettingsModal({ onClose }: Props) {
   // If onClose is not provided, render without modal wrapper (embedded mode)
   if (!onClose) {
     return (
-      <div className="settings-scroll">
-        {renderSettingsContent()}
-        <div className="modal-footer">
-          <input
-            type="file"
-            accept="application/json"
-            ref={fileRef}
-            onChange={importSettings}
-            style={{ display: 'none' }}
-          />
-          <button className="retro-button me-2" onClick={exportSettings}>
-            EXPORT
-          </button>
-          <button
-            className="retro-button me-2"
-            onClick={() => (isTauri() ? importSettingsTauri() : fileRef.current?.click())}
-          >
-            IMPORT
-          </button>
-          <button className="retro-button me-2" onClick={save}>
-            SAVE CONFIG
-          </button>
+      <div>
+        <div className="d-flex justify-content-between align-items-center mb-3 pb-2" style={{ borderBottom: '2px solid var(--panel-border)' }}>
+          <h5 style={{ margin: 0, color: 'var(--highlight)' }}>◄ CONFIGURATION ►</h5>
+          <div>
+            <input
+              type="file"
+              accept="application/json"
+              ref={fileRef}
+              onChange={importSettings}
+              style={{ display: 'none' }}
+            />
+            <button className="retro-button me-2" onClick={exportSettings} style={{ padding: '6px 12px', fontSize: '0.9rem' }}>
+              EXPORT
+            </button>
+            <button
+              className="retro-button me-2"
+              onClick={() => (isTauri() ? importSettingsTauri() : fileRef.current?.click())}
+              style={{ padding: '6px 12px', fontSize: '0.9rem' }}
+            >
+              IMPORT
+            </button>
+            <button className="retro-button" onClick={save} style={{ padding: '6px 12px', fontSize: '0.9rem' }}>
+              SAVE
+            </button>
+          </div>
         </div>
+        {renderSettingsContent()}
       </div>
     );
   }
@@ -557,34 +561,35 @@ export default function SettingsModal({ onClose }: Props) {
     >
       <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
         <div className="modal-content modal-retro">
-          <div className="modal-header">
-            <h5 className="modal-title">◄ SYSTEM CONFIGURATION ►</h5>
+          <div className="modal-header d-flex justify-content-between align-items-center">
+            <h5 className="modal-title" style={{ margin: 0 }}>◄ CONFIGURATION ►</h5>
+            <div>
+              <input
+                type="file"
+                accept="application/json"
+                ref={fileRef}
+                onChange={importSettings}
+                style={{ display: 'none' }}
+              />
+              <button className="retro-button me-2" onClick={exportSettings} style={{ padding: '6px 12px', fontSize: '0.9rem' }}>
+                EXPORT
+              </button>
+              <button
+                className="retro-button me-2"
+                onClick={() => (isTauri() ? importSettingsTauri() : fileRef.current?.click())}
+                style={{ padding: '6px 12px', fontSize: '0.9rem' }}
+              >
+                IMPORT
+              </button>
+              <button className="retro-button me-2" onClick={save} style={{ padding: '6px 12px', fontSize: '0.9rem' }}>
+                SAVE
+              </button>
+              <button className="retro-button" onClick={onClose} style={{ padding: '6px 12px', fontSize: '0.9rem' }}>
+                CLOSE
+              </button>
+            </div>
           </div>
-          <div className="modal-body settings-scroll">{renderSettingsContent()}</div>
-          <div className="modal-footer">
-            <input
-              type="file"
-              accept="application/json"
-              ref={fileRef}
-              onChange={importSettings}
-              style={{ display: 'none' }}
-            />
-            <button className="retro-button me-2" onClick={exportSettings}>
-              EXPORT
-            </button>
-            <button
-              className="retro-button me-2"
-              onClick={() => (isTauri() ? importSettingsTauri() : fileRef.current?.click())}
-            >
-              IMPORT
-            </button>
-            <button className="retro-button me-2" onClick={save}>
-              SAVE CONFIG
-            </button>
-            <button className="retro-button" onClick={onClose}>
-              ABORT
-            </button>
-          </div>
+          <div className="modal-body">{renderSettingsContent()}</div>
         </div>
       </div>
     </div>

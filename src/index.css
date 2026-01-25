@@ -859,11 +859,17 @@ body {
 
 .text-info {
   color: var(--fg) !important;
+  opacity: 0.9;
 }
 
 .text-warning {
+  color: var(--fg-secondary) !important;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.text-success {
   color: var(--highlight) !important;
-  font-size: 0.9rem;
 }
 
 .mb-3 {

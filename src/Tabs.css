@@ -5,27 +5,27 @@
 .tabs-header {
   display: flex;
   gap: 2px;
-  border-bottom: 3px solid var(--panel-border);
-  background: #000040;
-  padding: 4px;
-  margin-bottom: 20px;
+  border-bottom: 2px solid var(--panel-border);
+  background: var(--input-bg);
+  padding: 2px;
+  margin-bottom: 16px;
 }
 
 .tab-button {
   flex: 1;
-  padding: 12px 20px;
-  background: #000060;
+  padding: 6px 16px;
+  background: var(--button-bg);
   color: var(--fg);
   border: 2px solid var(--panel-border);
   font-family: 'VT323', monospace;
-  font-size: 1.2rem;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s;
   text-transform: uppercase;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .tab-button:hover {
@@ -43,7 +43,7 @@
 }
 
 .tab-icon {
-  font-size: 1.3rem;
+  font-size: 1rem;
 }
 
 .tabs-content {
