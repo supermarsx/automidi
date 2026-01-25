@@ -16,24 +16,13 @@ import { useStore } from './store';
 import { useEffect } from 'react';
 import { useMidi } from './useMidi';
 import { setSleepMode } from './midiMessages';
-import { useTauriPersistence } from './useTauriPersistence';
-import { performMigrationWorkflow } from './tauriMigration';
-import { isTauri } from './tauri';
 import './App.css';
 
 function App() {
   usePadActions();
-  useTauriPersistence(); // Enable Tauri Store persistence
   const autoSleep = useStore((s) => s.settings.autoSleep);
   const theme = useStore((s) => s.settings.theme);
   const { send } = useMidi();
-
-  // Check for migration on first load (Tauri mode only)
-  useEffect(() => {
-    if (isTauri()) {
-      performMigrationWorkflow().catch(console.error);
-    }
-  }, []);
 
   useEffect(() => {
     document.body.className = `theme-${theme}`;
@@ -59,10 +48,11 @@ function App() {
   }, [autoSleep, send]);
   return (
     <div className="App">
-      {isTauri() && <TitleBar />}
-      <div className="scan-lines"></div>
-      <div className="container-fluid">
-        <div className="retro-container">
+      <TitleBar />
+      <div className="app-content">
+        <div className="scan-lines"></div>
+        <div className="container-fluid">
+          <div className="retro-container">
           <ActionBar />
           <Tabs
             tabs={[
@@ -136,6 +126,7 @@ function App() {
             </div>
           </Tabs>
         </div>
+      </div>
       </div>
       <ToastContainer />
     </div>

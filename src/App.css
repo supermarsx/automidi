@@ -1,8 +1,15 @@
 .App {
-  min-height: 100vh;
-  position: relative;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-content {
+  flex: 1;
+  overflow-y: auto;
   overflow-x: hidden;
-  padding-top: 32px;
+  position: relative;
 }
 
 .active {

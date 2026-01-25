@@ -232,45 +232,19 @@ export default function SettingsModal({ onClose }: Props) {
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
 
-  // If onClose is not provided, render without modal wrapper (embedded mode)
-  if (!onClose) {
-    return (
-      <div className="settings-scroll">
-        <div className="mb-3">{renderSettingsContent()}</div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="modal d-block"
-      style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
-      onClick={onClose}
-    >
-      <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-content modal-retro">
-          <div className="modal-header">
-            <h5 className="modal-title">◄ SYSTEM CONFIGURATION ►</h5>
-          </div>
-          <div className="modal-body settings-scroll">{renderSettingsContent()}</div>
-        </div>
-      </div>
-    </div>
-  );
-
-  function renderSettingsContent() {
+  const renderSettingsContent = () => {
     return (
       <>
-            <div className="mb-3">
-              <label className="form-label text-info">HOST ADDRESS:</label>
-              <input
-                className="form-control retro-input"
-                value={h}
-                onChange={(e) => setH(e.target.value)}
-                placeholder="localhost"
-              />
-              <small className="text-warning">Default: localhost</small>
-            </div>
+        <div className="mb-3">
+          <label className="form-label text-info">HOST ADDRESS:</label>
+          <input
+            className="form-control retro-input"
+            value={h}
+            onChange={(e) => setH(e.target.value)}
+            placeholder="localhost"
+          />
+          <small className="text-warning">Default: localhost</small>
+        </div>
             <div className="mb-3">
               <label className="form-label text-info">PORT NUMBER:</label>
               <input
@@ -539,7 +513,52 @@ export default function SettingsModal({ onClose }: Props) {
                 </div>
               </>
             )}
+      </>
+    );
+  };
+
+  // If onClose is not provided, render without modal wrapper (embedded mode)
+  if (!onClose) {
+    return (
+      <div className="settings-scroll">
+        {renderSettingsContent()}
+        <div className="modal-footer">
+          <input
+            type="file"
+            accept="application/json"
+            ref={fileRef}
+            onChange={importSettings}
+            style={{ display: 'none' }}
+          />
+          <button className="retro-button me-2" onClick={exportSettings}>
+            EXPORT
+          </button>
+          <button
+            className="retro-button me-2"
+            onClick={() => (isTauri() ? importSettingsTauri() : fileRef.current?.click())}
+          >
+            IMPORT
+          </button>
+          <button className="retro-button me-2" onClick={save}>
+            SAVE CONFIG
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="modal d-block"
+      style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
+      onClick={onClose}
+    >
+      <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-content modal-retro">
+          <div className="modal-header">
+            <h5 className="modal-title">◄ SYSTEM CONFIGURATION ►</h5>
           </div>
+          <div className="modal-body settings-scroll">{renderSettingsContent()}</div>
           <div className="modal-footer">
             <input
               type="file"
@@ -560,13 +579,12 @@ export default function SettingsModal({ onClose }: Props) {
             <button className="retro-button me-2" onClick={save}>
               SAVE CONFIG
             </button>
-            {onClose && (
-              <button className="retro-button" onClick={onClose}>
-                ABORT
-              </button>
-            )}
+            <button className="retro-button" onClick={onClose}>
+              ABORT
+            </button>
           </div>
-        </>
-    );
-  }
+        </div>
+      </div>
+    </div>
+  );
 }

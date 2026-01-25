@@ -1,40 +1,61 @@
-import { minimizeWindow, toggleMaximize, closeWindow } from './tauriWindow';
 import './TitleBar.css';
 
 export default function TitleBar() {
   const handleMinimize = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('[TitleBar] Minimize clicked');
+    console.log('[TitleBar] Minimize button clicked');
+    
     try {
-      await minimizeWindow();
-      console.log('[TitleBar] Minimize successful');
-    } catch (error) {
-      console.error('[TitleBar] Failed to minimize window:', error);
+      // Dynamic import for Tauri v2 API
+      const { getCurrentWindow } = await import('@tauri-apps/api/window');
+      console.log('[TitleBar] Tauri API imported');
+      
+      const appWindow = getCurrentWindow();
+      console.log('[TitleBar] Window object obtained');
+      
+      await appWindow.minimize();
+      console.log('[TitleBar] Window minimized successfully');
+    } catch (err) {
+      console.error('[TitleBar] Minimize failed:', err);
     }
   };
 
   const handleMaximize = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('[TitleBar] Maximize clicked');
+    console.log('[TitleBar] Maximize button clicked');
+    
     try {
-      await toggleMaximize();
-      console.log('[TitleBar] Maximize successful');
-    } catch (error) {
-      console.error('[TitleBar] Failed to maximize window:', error);
+      const { getCurrentWindow } = await import('@tauri-apps/api/window');
+      console.log('[TitleBar] Tauri API imported');
+      
+      const appWindow = getCurrentWindow();
+      console.log('[TitleBar] Window object obtained');
+      
+      await appWindow.toggleMaximize();
+      console.log('[TitleBar] Window toggle maximize successfully');
+    } catch (err) {
+      console.error('[TitleBar] Maximize failed:', err);
     }
   };
 
   const handleClose = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('[TitleBar] Close clicked');
+    console.log('[TitleBar] Close button clicked');
+    
     try {
-      await closeWindow();
-      console.log('[TitleBar] Close successful');
-    } catch (error) {
-      console.error('[TitleBar] Failed to close window:', error);
+      const { getCurrentWindow } = await import('@tauri-apps/api/window');
+      console.log('[TitleBar] Tauri API imported');
+      
+      const appWindow = getCurrentWindow();
+      console.log('[TitleBar] Window object obtained');
+      
+      await appWindow.close();
+      console.log('[TitleBar] Window closed successfully');
+    } catch (err) {
+      console.error('[TitleBar] Close failed:', err);
     }
   };
 

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLogStore, serializeLogs } from './logStore';
 
 interface Props {
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 export default function MidiLogger({ onClose }: Props) {
@@ -158,9 +158,11 @@ export default function MidiLogger({ onClose }: Props) {
           <button className="retro-button btn-sm me-2" onClick={clearLogs}>
             CLEAR
           </button>
-          <button className="retro-button btn-sm" onClick={onClose}>
-            HIDE
-          </button>
+          {onClose && (
+            <button className="retro-button btn-sm" onClick={onClose}>
+              HIDE
+            </button>
+          )}
         </div>
       </div>
       <div className="logger-content" ref={logRef}>
