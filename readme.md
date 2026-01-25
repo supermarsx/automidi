@@ -21,6 +21,9 @@ The Next.js + Tauri desktop app lives in `apps/desktop`.
 - Run the Next dev server: `npm run dev:desktop`
 - Run the Tauri dev shell: `npm run tauri:dev`
 
+The legacy Vite + Node workflow is still present while the desktop migration
+is underway.
+
 ## Setup
 
 Install dependencies before running any lint or build steps:

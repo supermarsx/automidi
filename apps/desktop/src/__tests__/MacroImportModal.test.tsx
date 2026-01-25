@@ -6,12 +6,24 @@ import MacroImportModal from '../MacroImportModal';
 import { renderWithStore, resetStores } from './testUtils';
 import { useStore } from '../store';
 import { useToastStore } from '../toastStore';
+import * as tauriFiles from '../tauriFiles';
 
 vi.mock('idb-keyval', () => ({
   createStore: () => ({}),
   get: vi.fn(),
   set: vi.fn(),
   del: vi.fn(),
+}));
+
+const tauriState = {
+  enabled: false,
+  openJsonFile: vi.fn<[], Promise<string | null>>(),
+};
+
+vi.mock('../tauriFiles', async () => ({
+  ...(await vi.importActual<typeof tauriFiles>('../tauriFiles')),
+  isTauriRuntime: () => tauriState.enabled,
+  openJsonFile: (...args: []) => tauriState.openJsonFile(...args),
 }));
 
 function mockFileReader(json: string) {
@@ -31,6 +43,8 @@ function mockFileReader(json: string) {
 describe('MacroImportModal', () => {
   beforeEach(() => {
     resetStores();
+    tauriState.enabled = false;
+    tauriState.openJsonFile.mockReset();
   });
 
   afterEach(() => {
@@ -84,6 +98,23 @@ describe('MacroImportModal', () => {
     expect(importedOne.id).not.toBe('1');
     expect(importedTwo.id).toBe('2');
     expect(importedTwo.nextId).toBe(importedOne.id);
+  });
+
+  it('imports macros via Tauri dialog', async () => {
+    const user = userEvent.setup();
+    tauriState.enabled = true;
+    const toImport = [
+      { id: '1', name: 'ImportOne', sequence: ['a'], interval: 1, tags: [] },
+    ];
+    tauriState.openJsonFile.mockResolvedValue(JSON.stringify(toImport));
+
+    renderWithStore(<MacroImportModal onClose={() => {}} />);
+
+    await user.click(screen.getByText('CHOOSE FILE'));
+    await waitFor(() =>
+      expect(useStore.getState().macros).toHaveLength(1),
+    );
+    expect(useStore.getState().macros[0]?.name).toBe('ImportOne');
   });
 
   it('shows an error toast for invalid JSON', async () => {
