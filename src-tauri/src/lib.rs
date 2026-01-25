@@ -46,16 +46,76 @@ struct MidiDevices {
 
 #[tauri::command]
 fn midi_list_devices() -> MidiDevices {
-  MidiDevices {
-    inputs: Vec::new(),
-    outputs: Vec::new(),
-  }
+  let input = match midir::MidiInput::new("automidi") {
+    Ok(input) => input,
+    Err(err) => {
+      eprintln!("Failed to init MIDI input: {err}");
+      return MidiDevices {
+        inputs: Vec::new(),
+        outputs: Vec::new(),
+      };
+    }
+  };
+  let output = match midir::MidiOutput::new("automidi") {
+    Ok(output) => output,
+    Err(err) => {
+      eprintln!("Failed to init MIDI output: {err}");
+      return MidiDevices {
+        inputs: Vec::new(),
+        outputs: Vec::new(),
+      };
+    }
+  };
+
+  let inputs = input
+    .ports()
+    .iter()
+    .enumerate()
+    .map(|(idx, port)| MidiDevice {
+      id: idx.to_string(),
+      name: input.port_name(port).unwrap_or_else(|_| "Unknown".to_string()),
+      manufacturer: None,
+      state: None,
+    })
+    .collect();
+
+  let outputs = output
+    .ports()
+    .iter()
+    .enumerate()
+    .map(|(idx, port)| MidiDevice {
+      id: idx.to_string(),
+      name: output.port_name(port).unwrap_or_else(|_| "Unknown".to_string()),
+      manufacturer: None,
+      state: None,
+    })
+    .collect();
+
+  MidiDevices { inputs, outputs }
 }
 
 #[tauri::command(rename_all = "camelCase")]
-fn midi_send(port_id: String, _bytes: Vec<u8>) -> Result<(), String> {
+fn midi_send(port_id: String, bytes: Vec<u8>) -> Result<(), String> {
   if port_id.trim().is_empty() {
     return Err("port_id is required".to_string());
   }
+  let port_index = port_id
+    .parse::<usize>()
+    .map_err(|_| "port_id must be a numeric index".to_string())?;
+
+  let output = midir::MidiOutput::new("automidi")
+    .map_err(|err| format!("Failed to init MIDI output: {err}"))?;
+  let ports = output.ports();
+  let port = ports
+    .get(port_index)
+    .ok_or_else(|| format!("output port index {port_index} not found"))?;
+
+  let mut conn = output
+    .connect(port, "automidi-send")
+    .map_err(|err| format!("Failed to connect MIDI output: {err}"))?;
+
+  conn
+    .send(&bytes)
+    .map_err(|err| format!("Failed to send MIDI: {err}"))?;
   Ok(())
 }
