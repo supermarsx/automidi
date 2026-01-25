@@ -38,7 +38,7 @@ export function useTauriMidiConnection() {
 
     const setupListeners = async () => {
       try {
-        const tauri = window.__TAURI__;
+        const tauri = (window as any).__TAURI__;
         if (!tauri) {
           throw new Error('Tauri API not available');
         }
@@ -103,6 +103,18 @@ export function useTauriMidiConnection() {
 
         unlistenFnsRef.current = [unlistenMidi, unlistenDevices, unlistenShell];
         setStatus('connected');
+        
+        // Request initial device list
+        try {
+          const devices = await invoke('listDevices');
+          const devicesMsg: ServerMessage = {
+            type: 'devices',
+            ...devices,
+          };
+          listenersRef.current.forEach((fn) => fn(devicesMsg));
+        } catch (error) {
+          console.error('Failed to get initial device list:', error);
+        }
       } catch (error) {
         console.error('Failed to setup Tauri listeners:', error);
         setStatus('closed');
