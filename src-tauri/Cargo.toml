@@ -24,3 +24,5 @@ log = "0.4"
 midir = "0.10"
 tauri = { version = "2.9.5" }
 tauri-plugin-log = "2"
+tauri-plugin-notification = "2"
+enigo = "0.1.3"
