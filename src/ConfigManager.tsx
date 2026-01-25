@@ -291,72 +291,105 @@ export default function ConfigManager() {
           onChange={(e) => setFilterTag(e.target.value)}
         />
       </div>
-      {configs
-        .filter((c) => !filterTag.trim() || c.tags?.includes(filterTag.trim()))
-        .map((cfg, idx) => (
-          <div key={cfg.id} className="macro-list-item">
-            <span className="macro-name">
-              {cfg.name}
-              {cfg.tags && cfg.tags.length > 0 && (
-                <small className="ms-1 text-warning">
-                  [{cfg.tags.join(', ')}]
-                </small>
-              )}
-            </span>
-            <div>
-              <button
-                className="retro-button btn-sm me-1"
-                disabled={idx === 0}
-                onClick={() => reorderConfig(idx, idx - 1)}
-              >
-                ↑
-              </button>
-              <button
-                className="retro-button btn-sm me-1"
-                disabled={idx === configs.length - 1}
-                onClick={() => reorderConfig(idx, idx + 1)}
-              >
-                ↓
-              </button>
-              <button
-                className="retro-button btn-sm me-1"
-                onClick={() => loadConfig(cfg)}
-              >
-                LOAD
-              </button>
-              <button
-                className="retro-button btn-sm me-1"
-                onClick={() => saveToConfig(cfg)}
-              >
-                SAVE
-              </button>
-              <button
-                className="retro-button btn-sm me-1"
-                onClick={() => exportConfig(cfg)}
-              >
-                EXPORT
-              </button>
-              <button
-                className="retro-button btn-sm me-1"
-                onClick={() => loadToLaunchpad(cfg)}
-              >
-                LOAD LP
-              </button>
-              <button
-                className="retro-button btn-sm me-1"
-                onClick={() => startEdit(cfg)}
-              >
-                EDIT
-              </button>
-              <button
-                className="retro-button btn-sm"
-                onClick={() => setConfirmDelete(cfg)}
-              >
-                DEL
-              </button>
-            </div>
-          </div>
-        ))}
+      <div className="table-responsive">
+        <table className="retro-table w-100">
+          <thead>
+            <tr>
+              <th style={{ width: '30%' }}>NAME</th>
+              <th style={{ width: '20%' }}>TAGS</th>
+              <th style={{ width: '50%', textAlign: 'right' }}>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {configs
+              .filter((c) => !filterTag.trim() || c.tags?.includes(filterTag.trim()))
+              .map((cfg, idx) => (
+                <tr key={cfg.id}>
+                  <td className="align-middle">
+                    <span className="macro-name" style={{ fontSize: '1rem' }}>{cfg.name}</span>
+                  </td>
+                  <td className="align-middle">
+                    {cfg.tags && cfg.tags.length > 0 && (
+                      <span className="text-warning small">
+                        {cfg.tags.join(', ')}
+                      </span>
+                    )}
+                  </td>
+                  <td className="align-middle text-end">
+                    <div className="btn-group btn-group-sm">
+                      <button
+                        className="retro-button btn-sm me-1"
+                        style={{ padding: '2px 6px' }}
+                        disabled={idx === 0}
+                        onClick={() => reorderConfig(idx, idx - 1)}
+                        title="Move Up"
+                      >
+                        ↑
+                      </button>
+                      <button
+                        className="retro-button btn-sm me-1"
+                        style={{ padding: '2px 6px' }}
+                        disabled={idx === configs.length - 1}
+                        onClick={() => reorderConfig(idx, idx + 1)}
+                        title="Move Down"
+                      >
+                        ↓
+                      </button>
+                      <button
+                        className="retro-button btn-sm me-1"
+                        style={{ padding: '2px 6px' }}
+                        onClick={() => loadConfig(cfg)}
+                        title="Load to Application"
+                      >
+                        LOAD
+                      </button>
+                      <button
+                        className="retro-button btn-sm me-1"
+                        style={{ padding: '2px 6px' }}
+                        onClick={() => saveToConfig(cfg)}
+                        title="Save Current State to Config"
+                      >
+                        SAVE
+                      </button>
+                      <button
+                        className="retro-button btn-sm me-1"
+                        style={{ padding: '2px 6px' }}
+                        onClick={() => exportConfig(cfg)}
+                        title="Export to JSON"
+                      >
+                        EXP
+                      </button>
+                      <button
+                        className="retro-button btn-sm me-1"
+                        style={{ padding: '2px 6px' }}
+                        onClick={() => loadToLaunchpad(cfg)}
+                        title="Load directly to Launchpad memory"
+                      >
+                        LP
+                      </button>
+                      <button
+                        className="retro-button btn-sm me-1"
+                        style={{ padding: '2px 6px' }}
+                        onClick={() => startEdit(cfg)}
+                        title="Edit Name/Tags"
+                      >
+                        EDIT
+                      </button>
+                      <button
+                        className="retro-button btn-sm"
+                        style={{ padding: '2px 6px' }}
+                        onClick={() => setConfirmDelete(cfg)}
+                        title="Delete Config"
+                      >
+                        DEL
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
       {editing && (
         <div
           className="modal d-block"

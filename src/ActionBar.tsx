@@ -27,8 +27,9 @@ export default function ActionBar() {
   const outputName = outputs.find(o => o.id === selectedOutput)?.name || 'NONE';
 
   return (
-    <div className="status-bar d-flex justify-content-between align-items-center" style={{ padding: '10px 20px', marginBottom: '12px' }}>
-      <div className="d-flex align-items-center" style={{ gap: '16px', flexWrap: 'wrap', fontSize: '0.95rem' }}>
+    <div className="status-bar d-flex justify-content-between align-items-center" style={{ padding: '0 10px', marginBottom: '6px', height: '28px' }}>
+      <div className="d-flex align-items-center" style={{ gap: '12px', flexWrap: 'nowrap', fontSize: '0.85rem', width: '100%' }}>
+        <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>SYSTEM STATUS:</span>
         <span className={`connection-status ${status}`}>
           {status.toUpperCase()}
         </span>
@@ -45,7 +46,7 @@ export default function ActionBar() {
         <span>IN: <strong>{inputName}</strong></span>
         <span>OUT: <strong>{outputName}</strong></span>
         {status === 'closed' && !isTauriMode && (
-          <button className="retro-button btn-sm" onClick={reconnect} style={{ padding: '3px 10px', fontSize: '0.85rem', marginLeft: '8px' }}>
+          <button className="retro-button btn-sm" onClick={reconnect} style={{ padding: '0px 8px', fontSize: '0.8rem', marginLeft: '8px', lineHeight: '1.2' }}>
             RECONNECT
           </button>
         )}

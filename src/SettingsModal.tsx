@@ -235,115 +235,128 @@ export default function SettingsModal({ onClose }: Props) {
   const renderSettingsContent = () => {
     return (
       <>
-        <div className="mb-3">
-          <label className="form-label text-info">HOST ADDRESS:</label>
-          <input
-            className="form-control retro-input"
-            value={h}
-            onChange={(e) => setH(e.target.value)}
-            placeholder="localhost"
-          />
-          <small className="text-warning">Default: localhost</small>
-        </div>
-            <div className="mb-3">
-              <label className="form-label text-info">PORT NUMBER:</label>
-              <input
-                type="number"
-                className="form-control retro-input"
-                value={p}
-                onChange={(e) => setP(Number(e.target.value))}
-                min="1"
-                max="65535"
-              />
-              <small className="text-warning">Default: 3000</small>
-            </div>
-            <div className="mb-3">
-              <label className="form-label text-info">API KEY:</label>
-              <input
-                className="form-control retro-input"
-                value={ak}
-                onChange={(e) => setAk(e.target.value)}
-              />
-              <small className="text-warning">Must match server API key</small>
-            </div>
-            <div className="mb-3">
-              <label className="form-label text-info">MAX LOG ENTRIES:</label>
-              <input
-                type="number"
-                className="form-control retro-input"
-                style={{ width: '8rem' }}
-                value={ll}
-                onChange={(e) => setLl(Number(e.target.value))}
-                min="1"
-                max="9999"
-              />
-              <small className="text-warning">Default: 9999</small>
-            </div>
-            <div className="mb-3">
-              <label className="form-label text-info">
-                PING INTERVAL (MS):
-              </label>
-              <input
-                type="number"
-                className="form-control retro-input"
-                value={pi}
-                onChange={(e) => setPi(Number(e.target.value))}
-                min="500"
-                step="500"
-              />
-              <small className="text-warning">Default: 15000 (Min 500)</small>
-            </div>
-            <div className="mb-3">
-              <label className="form-label text-info">
-                PING THRESHOLDS (MS):
-              </label>
-              <div className="d-flex gap-2">
+        <table className="retro-table w-100">
+          <tbody>
+            <tr>
+              <td style={{ width: '30%' }}><strong>HOST ADDRESS</strong></td>
+              <td>
+                <input
+                  className="form-control retro-input"
+                  value={h}
+                  onChange={(e) => setH(e.target.value)}
+                  placeholder="localhost"
+                  style={{ width: '100%' }}
+                />
+              </td>
+              <td style={{ width: '25%' }}><small className="text-warning">Default: localhost</small></td>
+            </tr>
+            <tr>
+              <td><strong>PORT NUMBER</strong></td>
+              <td>
                 <input
                   type="number"
                   className="form-control retro-input"
-                  value={pg}
-                  onChange={(e) => setPg(Number(e.target.value))}
-                  min="0"
-                  style={{ width: '5rem' }}
+                  value={p}
+                  onChange={(e) => setP(Number(e.target.value))}
+                  min="1"
+                  max="65535"
+                  style={{ width: '100%' }}
                 />
+              </td>
+              <td><small className="text-warning">Default: 3000</small></td>
+            </tr>
+            <tr>
+              <td><strong>API KEY</strong></td>
+              <td>
+                <input
+                  className="form-control retro-input"
+                  value={ak}
+                  onChange={(e) => setAk(e.target.value)}
+                  style={{ width: '100%' }}
+                />
+              </td>
+              <td><small className="text-warning">Must match server</small></td>
+            </tr>
+            <tr>
+              <td><strong>MAX LOG ENTRIES</strong></td>
+              <td>
                 <input
                   type="number"
                   className="form-control retro-input"
-                  value={py}
-                  onChange={(e) => setPy(Number(e.target.value))}
-                  min="0"
-                  style={{ width: '5rem' }}
+                  value={ll}
+                  onChange={(e) => setLl(Number(e.target.value))}
+                  min="1"
+                  max="9999"
+                  style={{ width: '100%' }}
                 />
+              </td>
+              <td><small className="text-warning">Default: 9999</small></td>
+            </tr>
+            <tr>
+              <td><strong>PING INTERVAL (MS)</strong></td>
+              <td>
                 <input
                   type="number"
                   className="form-control retro-input"
-                  value={po}
-                  onChange={(e) => setPo(Number(e.target.value))}
-                  min="0"
-                  style={{ width: '5rem' }}
+                  value={pi}
+                  onChange={(e) => setPi(Number(e.target.value))}
+                  min="500"
+                  step="500"
+                  style={{ width: '100%' }}
                 />
-              </div>
-              <small className="text-warning">
-                Green, Yellow, Orange defaults: 10/50/250
-              </small>
-            </div>
-            <div className="mb-3 form-check">
-              <input
-                type="checkbox"
-                className="form-check-input"
-                id="pingEnabled"
-                checked={pe}
-                onChange={(e) => setPe(e.target.checked)}
-              />
-              <label
-                className="form-check-label text-info"
-                htmlFor="pingEnabled"
-              >
-                ENABLE PING
-              </label>
-            </div>
-            <div className="mb-3">
-              <div className="form-check">
+              </td>
+              <td><small className="text-warning">Default: 15000</small></td>
+            </tr>
+            <tr>
+              <td><strong>PING THRESHOLDS (MS)</strong></td>
+              <td>
+                <div className="d-flex gap-1">
+                  <input
+                    type="number"
+                    className="form-control retro-input"
+                    value={pg}
+                    onChange={(e) => setPg(Number(e.target.value))}
+                    min="0"
+                    style={{ width: '33%' }}
+                    placeholder="Green"
+                  />
+                  <input
+                    type="number"
+                    className="form-control retro-input"
+                    value={py}
+                    onChange={(e) => setPy(Number(e.target.value))}
+                    min="0"
+                    style={{ width: '33%' }}
+                    placeholder="Yellow"
+                  />
+                  <input
+                    type="number"
+                    className="form-control retro-input"
+                    value={po}
+                    onChange={(e) => setPo(Number(e.target.value))}
+                    min="0"
+                    style={{ width: '33%' }}
+                    placeholder="Orange"
+                  />
+                </div>
+              </td>
+              <td><small className="text-warning">10/50/250</small></td>
+            </tr>
+            <tr>
+              <td><strong>ENABLE PING</strong></td>
+              <td colSpan={2}>
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id="pingEnabled"
+                  checked={pe}
+                  onChange={(e) => setPe(e.target.checked)}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td><strong>AUTO-RECONNECT</strong></td>
+              <td colSpan={2}>
                 <input
                   type="checkbox"
                   className="form-check-input"
@@ -351,19 +364,11 @@ export default function SettingsModal({ onClose }: Props) {
                   checked={ar}
                   onChange={(e) => setAr(e.target.checked)}
                 />
-                <label
-                  className="form-check-label text-info"
-                  htmlFor="autoReconnect"
-                >
-                  AUTO-RECONNECT ON FAILURE
-                </label>
-              </div>
-              <small className="text-warning">
-                Automatically reconnect when connection is lost
-              </small>
-            </div>
-            <div className="mb-3">
-              <div className="form-check">
+              </td>
+            </tr>
+            <tr>
+              <td><strong>RECONNECT ON TIMEOUT</strong></td>
+              <td colSpan={2}>
                 <input
                   type="checkbox"
                   className="form-check-input"
@@ -371,150 +376,141 @@ export default function SettingsModal({ onClose }: Props) {
                   checked={rol}
                   onChange={(e) => setRol(e.target.checked)}
                 />
-                <label
-                  className="form-check-label text-info"
-                  htmlFor="reconnectOnLost"
+              </td>
+            </tr>
+            <tr>
+              <td><strong>CLEAR BEFORE LOAD</strong></td>
+              <td colSpan={2}>
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id="clearBeforeLoad"
+                  checked={cbl}
+                  onChange={(e) => setCbl(e.target.checked)}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td><strong>SYSEX COLOR MODE</strong></td>
+              <td colSpan={2}>
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id="sysexColorMode"
+                  checked={scm}
+                  onChange={(e) => setScm(e.target.checked)}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td><strong>AUTO-LOAD FIRST CONFIG</strong></td>
+              <td colSpan={2}>
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id="autoLoadFirstConfig"
+                  checked={alfc}
+                  onChange={(e) => setAlfc(e.target.checked)}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td><strong>AUTO SLEEP (SEC)</strong></td>
+              <td>
+                <input
+                  type="number"
+                  className="form-control retro-input"
+                  value={asleep}
+                  onChange={(e) => setAsleep(Number(e.target.value))}
+                  min="0"
+                  style={{ width: '100%' }}
+                />
+              </td>
+              <td><small className="text-warning">0 = disabled</small></td>
+            </tr>
+            <tr>
+              <td><strong>THEME</strong></td>
+              <td colSpan={2}>
+                <select
+                  className="form-select retro-select"
+                  value={thm}
+                  onChange={(e) =>
+                    setThm(e.target.value as 'original' | 'oled-dark' | 'outrun' | 'matrix' | 'lightsaber')
+                  }
+                  style={{ width: '100%' }}
                 >
-                  AUTO-RECONNECT WHEN PING TIMES OUT
-                </label>
-              </div>
-              <small className="text-warning">
-                Close the socket after missed pings to force reconnect
-              </small>
-            </div>
-            <div className="mb-3 form-check">
-              <input
-                type="checkbox"
-                className="form-check-input"
-                id="clearBeforeLoad"
-                checked={cbl}
-                onChange={(e) => setCbl(e.target.checked)}
-              />
-              <label
-                className="form-check-label text-info"
-                htmlFor="clearBeforeLoad"
-              >
-                CLEAR BEFORE LOAD
-              </label>
-            </div>
-            <div className="mb-3 form-check">
-              <input
-                type="checkbox"
-                className="form-check-input"
-                id="sysexColorMode"
-                checked={scm}
-                onChange={(e) => setScm(e.target.checked)}
-              />
-              <label
-                className="form-check-label text-info"
-                htmlFor="sysexColorMode"
-              >
-                SYSEX COLOR MODE
-              </label>
-            </div>
-            <div className="mb-3 form-check">
-              <input
-                type="checkbox"
-                className="form-check-input"
-                id="autoLoadFirstConfig"
-                checked={alfc}
-                onChange={(e) => setAlfc(e.target.checked)}
-              />
-              <label
-                className="form-check-label text-info"
-                htmlFor="autoLoadFirstConfig"
-              >
-                AUTO-LOAD FIRST CONFIG
-              </label>
-            </div>
-            <div className="mb-3">
-              <label className="form-label text-info">AUTO SLEEP (SEC):</label>
-              <input
-                type="number"
-                className="form-control retro-input"
-                value={asleep}
-                onChange={(e) => setAsleep(Number(e.target.value))}
-                min="0"
-              />
-              <small className="text-warning">0 disables auto sleep</small>
-            </div>
-            <div className="mb-3">
-              <label className="form-label text-info">THEME:</label>
-              <select
-                className="form-select retro-select"
-                value={thm}
-                onChange={(e) =>
-                  setThm(e.target.value as 'original' | 'oled-dark' | 'outrun' | 'matrix' | 'lightsaber')
-                }
-              >
-                <option value="original">Original (Retro)</option>
+                  <option value="original">Original (Retro)</option>
                 <option value="oled-dark">OLED Dark</option>
                 <option value="outrun">Outrun</option>
                 <option value="matrix">Matrix</option>
                 <option value="lightsaber">Lightsaber</option>
               </select>
-            </div>
-            <div className="mb-3">
-              <label className="form-label text-info">CLOCK MESSAGE:</label>
-              <input
-                className="form-control retro-input"
-                value={clk}
-                onChange={(e) => setClk(e.target.value)}
-                placeholder="248"
-              />
-              <small className="text-warning">
-                Space-separated decimal bytes
-              </small>
-            </div>
-            <div className="mb-3">
-              <label className="form-label text-info">
-                MACRO CONFIRM TIMEOUT (MS):
-              </label>
-              <input
-                type="number"
-                className="form-control retro-input"
-                value={mct}
-                onChange={(e) => setMct(Number(e.target.value))}
-                min="0"
-              />
-            </div>
+            </td>
+            </tr>
+            <tr>
+              <td><strong>CLOCK MESSAGE</strong></td>
+              <td>
+                <input
+                  className="form-control retro-input"
+                  value={clk}
+                  onChange={(e) => setClk(e.target.value)}
+                  placeholder="248"
+                  style={{ width: '100%' }}
+                />
+              </td>
+              <td><small className="text-warning">Decimal bytes</small></td>
+            </tr>
+            <tr>
+              <td><strong>MACRO CONFIRM (MS)</strong></td>
+              <td>
+                <input
+                  type="number"
+                  className="form-control retro-input"
+                  value={mct}
+                  onChange={(e) => setMct(Number(e.target.value))}
+                  min="0"
+                  style={{ width: '100%' }}
+                />
+              </td>
+              <td><small className="text-warning">Timeout</small></td>
+            </tr>
             {ar && (
               <>
-                <div className="mb-3">
-                  <label className="form-label text-info">
-                    RECONNECT INTERVAL (SECONDS):
-                  </label>
-                  <input
-                    type="number"
-                    className="form-control retro-input"
-                    value={ri}
-                    onChange={(e) => setRi(Number(e.target.value))}
-                    min="1"
-                    max="60"
-                    step="0.5"
-                  />
-                  <small className="text-warning">
-                    Minimum: 1 second, Maximum: 60 seconds
-                  </small>
-                </div>
-                <div className="mb-3">
-                  <label className="form-label text-info">
-                    MAX RECONNECT ATTEMPTS:
-                  </label>
-                  <input
-                    type="number"
-                    className="form-control retro-input"
-                    value={mra}
-                    onChange={(e) => setMra(Number(e.target.value))}
-                    min="0"
-                    max="99"
-                  />
-                  <small className="text-warning">
-                    Default: 10, 0 = unlimited
-                  </small>
-                </div>
+                <tr>
+                  <td><strong>RECONNECT INTERVAL (S)</strong></td>
+                  <td>
+                    <input
+                      type="number"
+                      className="form-control retro-input"
+                      value={ri}
+                      onChange={(e) => setRi(Number(e.target.value))}
+                      min="1"
+                      max="60"
+                      step="0.5"
+                      style={{ width: '100%' }}
+                    />
+                  </td>
+                  <td><small className="text-warning">1-60 sec</small></td>
+                </tr>
+                <tr>
+                  <td><strong>MAX RECONNECT ATTEMPTS</strong></td>
+                  <td>
+                    <input
+                      type="number"
+                      className="form-control retro-input"
+                      value={mra}
+                      onChange={(e) => setMra(Number(e.target.value))}
+                      min="0"
+                      max="99"
+                      style={{ width: '100%' }}
+                    />
+                  </td>
+                  <td><small className="text-warning">0 = unlimited</small></td>
+                </tr>
               </>
             )}
+          </tbody>
+        </table>
       </>
     );
   };

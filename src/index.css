@@ -557,45 +557,47 @@ body {
 
 .connection-status {
   display: inline-block;
-  padding: 3px 10px;
-  border-radius: 3px;
+  padding: 0px 6px;
+  border-radius: 2px;
   font-family: 'VT323', monospace;
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: bold;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  line-height: 1.2;
 }
 
 .connection-status.connected {
   background: #00ff00;
   color: #000000;
-  border: 2px solid #00ff00;
-  box-shadow: 0 0 8px #00ff00;
+  border: 1px solid #00ff00;
+  box-shadow: 0 0 5px #00ff00;
 }
 
 .connection-status.connecting {
   background: #ffff00;
   color: #000000;
-  border: 2px solid #ffff00;
+  border: 1px solid #ffff00;
   animation: blink 1s infinite;
 }
 
 .connection-status.closed {
   background: #ff0000;
   color: #000000;
-  border: 2px solid #ff0000;
+  border: 1px solid #ff0000;
 }
 
 /* Ping timing display */
 .ping-value {
   display: inline-block;
-  padding: 3px 8px;
+  padding: 0px 6px;
   font-family: 'VT323', monospace;
   background: var(--input-bg);
   color: var(--fg);
   border: 1px solid var(--panel-border);
-  border-radius: 3px;
-  font-size: 0.9rem;
+  border-radius: 2px;
+  font-size: 0.85rem;
+  line-height: 1.2;
 }
 
 .ping-none {
@@ -694,6 +696,97 @@ body {
   font-weight: bold;
   text-transform: uppercase;
   font-size: 1.1rem;
+}
+
+/* Retro Table Styles */
+.retro-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  color: var(--fg);
+  font-family: 'VT323', monospace;
+}
+
+.retro-table th {
+  border-bottom: 2px solid var(--panel-border);
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: var(--highlight);
+  font-size: 1.1rem;
+}
+
+.retro-table td {
+  border-bottom: 1px solid var(--panel-border);
+  padding: 8px 12px;
+  vertical-align: middle;
+}
+
+.retro-table tr:hover td {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.retro-table .btn-group {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+/* Retro Checkbox Styles */
+.form-check-input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--fg);
+  background: var(--input-bg);
+  cursor: pointer;
+  position: relative;
+  margin-right: 8px;
+  transition: all 0.2s;
+  opacity: 0.5;
+}
+
+.form-check-input:hover {
+  border-color: var(--fg);
+  box-shadow: 0 0 5px var(--fg);
+  opacity: 0.7;
+}
+
+.form-check-input:checked {
+  background: var(--fg);
+  border-color: var(--fg);
+  box-shadow: 0 0 12px var(--fg);
+  opacity: 1;
+}
+
+.form-check-input:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--bg-start);
+  font-size: 16px;
+  font-weight: bold;
+  font-family: 'VT323', monospace;
+  text-shadow: 0 0 3px var(--bg-start);
+}
+
+.form-check-input:focus {
+  outline: none;
+  border-color: var(--fg);
+  box-shadow: 0 0 10px var(--fg);
+  opacity: 0.8;
+}
+
+.form-check-label {
+  cursor: pointer;
+  user-select: none;
+  font-family: 'VT323', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .scan-lines {
@@ -841,18 +934,8 @@ body {
 }
 
 .form-range::-webkit-slider-thumb {
-  background: #00ff00;
-  border: 1px solid #ffff00;
-}
-
-.form-check-input {
-  background: #000020 !important;
-  border: 1px solid #00ff00 !important;
-}
-
-.form-check-input:checked {
-  background: #00ff00 !important;
-  border-color: #ffff00 !important;
+  background: var(--fg);
+  border: 1px solid var(--highlight);
 }
 
 /* Scrollbar styling */
