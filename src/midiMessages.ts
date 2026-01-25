@@ -95,6 +95,14 @@ export function setLedPulsing(id: number, color: number): number[] {
   return sysex(0x28, clamp7(id), clamp7(color));
 }
 
+/**
+ * Create a custom slow flash by alternating between color and off
+ * Call this repeatedly with isOn toggling to create flash effect
+ */
+export function setLedSlowFlash(id: number, color: number, isOn: boolean): number[] {
+  return sysex(0x0a, clamp7(id), isOn ? clamp7(color) : 0);
+}
+
 export function midiClock(): number[] {
   return [0xf8];
 }

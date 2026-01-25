@@ -6,7 +6,14 @@
  * Check if running in Tauri environment
  */
 export function isTauri(): boolean {
-  return typeof window !== 'undefined' && '__TAURI__' in window;
+  const result = typeof window !== 'undefined' && '__TAURI__' in window;
+  console.log('[Tauri Detection]', {
+    windowExists: typeof window !== 'undefined',
+    hasTauriGlobal: typeof window !== 'undefined' && '__TAURI__' in window,
+    result,
+    tauriAPI: typeof window !== 'undefined' ? (window as any).__TAURI__ : undefined
+  });
+  return result;
 }
 
 /**

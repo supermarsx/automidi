@@ -25,7 +25,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background: linear-gradient(45deg, var(--bg-start), var(--bg-end));
-  overflow-x: auto;
+  overflow-x: hidden;
 }
 
 .retro-container {
@@ -167,7 +167,7 @@ body {
 }
 
 .midi-pad-container.flash {
-  animation: pad-flash 1s steps(2, start) infinite;
+  animation: pad-flash 2s steps(2, start) infinite;
 }
 
 .midi-pad-container.pulse {

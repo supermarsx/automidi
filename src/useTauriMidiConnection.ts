@@ -29,11 +29,14 @@ export function useTauriMidiConnection() {
 
   // Setup Tauri event listeners
   useEffect(() => {
+    console.log('[useTauriMidiConnection] Starting setup, isTauri:', isTauri());
     if (!isTauri()) {
+      console.log('[useTauriMidiConnection] Not in Tauri mode, setting status to closed');
       setStatus('closed');
       return;
     }
 
+    console.log('[useTauriMidiConnection] Setting status to connecting');
     setStatus('connecting');
 
     const setupListeners = async () => {
@@ -102,18 +105,21 @@ export function useTauriMidiConnection() {
         });
 
         unlistenFnsRef.current = [unlistenMidi, unlistenDevices, unlistenShell];
+        console.log('[useTauriMidiConnection] All listeners setup, setting status to connected');
         setStatus('connected');
         
         // Request initial device list
+        console.log('[useTauriMidiConnection] Requesting initial device list');
         try {
-          const devices = await invoke('listDevices');
+          const devices = await invoke('list_devices');
+          console.log('[useTauriMidiConnection] Received devices:', devices);
           const devicesMsg: ServerMessage = {
             type: 'devices',
             ...devices,
           };
           listenersRef.current.forEach((fn) => fn(devicesMsg));
         } catch (error) {
-          console.error('Failed to get initial device list:', error);
+          console.error('[useTauriMidiConnection] Failed to get initial device list:', error);
         }
       } catch (error) {
         console.error('Failed to setup Tauri listeners:', error);
@@ -159,11 +165,15 @@ export function useTauriMidiConnection() {
     async (msg: ClientMessage) => {
       if (!isTauri()) return false;
 
+      console.log('[useTauriMidiConnection] Sending command:', msg.type, msg);
+
       try {
         switch (msg.type) {
           case 'listDevices':
           case 'getDevices':
-            const devices = await invoke('listDevices');
+            console.log('[useTauriMidiConnection] Calling list_devices command');
+            const devices = await invoke('list_devices');
+            console.log('[useTauriMidiConnection] Got devices:', devices);
             const devicesMsg: ServerMessage = {
               type: 'devices',
               ...devices,
@@ -173,44 +183,44 @@ export function useTauriMidiConnection() {
 
           case 'send':
           case 'sendMidi':
-            await invoke('sendMidi', {
+            await invoke('send_midi', {
               port: (msg as any).port || (msg as any).portId,
               bytes: (msg as any).bytes,
             });
             break;
 
           case 'setListening':
-            await invoke('setListening', {
+            await invoke('set_listening', {
               enabled: (msg as SetListeningMessage).enabled,
             });
             break;
 
           case 'runApp':
-            await invoke('runApp', {
+            await invoke('run_app', {
               appPath: (msg as any).app || (msg as any).appPath,
             });
             break;
 
           case 'runShell':
             if ((msg as any).background) {
-              await invoke('runShellBg', { cmd: (msg as any).cmd });
+              await invoke('run_shell_bg', { cmd: (msg as any).cmd });
             } else if ((msg as any).windowed) {
-              await invoke('runShellWin', { cmd: (msg as any).cmd });
+              await invoke('run_shell_win', { cmd: (msg as any).cmd });
             } else {
-              await invoke('runShell', { cmd: (msg as any).cmd });
+              await invoke('run_shell', { cmd: (msg as any).cmd });
             }
             break;
 
           case 'runShellBg':
-            await invoke('runShellBg', { cmd: (msg as any).cmd });
+            await invoke('run_shell_bg', { cmd: (msg as any).cmd });
             break;
 
           case 'runShellWin':
-            await invoke('runShellWin', { cmd: (msg as any).cmd });
+            await invoke('run_shell_win', { cmd: (msg as any).cmd });
             break;
 
           case 'keysType':
-            await invoke('runKeys', {
+            await invoke('run_keys', {
               keys: (msg as any).sequence || (msg as any).keys,
               interval: (msg as any).interval,
             });
@@ -238,8 +248,8 @@ export function useTauriMidiConnection() {
         }
         return true;
       } catch (error) {
-        console.error('Tauri command failed:', error);
-        addToast(String(error), 'error');
+        console.error('[useTauriMidiConnection] Tauri command failed:', msg.type, error);
+        addToast(`Command ${msg.type} failed: ${String(error)}`, 'error');
         return false;
       }
     },

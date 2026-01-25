@@ -24,9 +24,15 @@ export function getCurrentWindow() {
  * Minimize the window
  */
 export async function minimizeWindow(): Promise<void> {
+  console.log('[tauriWindow] minimizeWindow called');
   const window = getCurrentWindow();
+  console.log('[tauriWindow] window object:', window);
   if (window) {
+    console.log('[tauriWindow] Calling window.minimize()');
     await window.minimize();
+    console.log('[tauriWindow] minimize() completed');
+  } else {
+    console.error('[tauriWindow] No window available');
   }
 }
 
@@ -34,9 +40,15 @@ export async function minimizeWindow(): Promise<void> {
  * Maximize the window
  */
 export async function maximizeWindow(): Promise<void> {
+  console.log('[tauriWindow] maximizeWindow called');
   const window = getCurrentWindow();
+  console.log('[tauriWindow] window object:', window);
   if (window) {
+    console.log('[tauriWindow] Calling window.maximize()');
     await window.maximize();
+    console.log('[tauriWindow] maximize() completed');
+  } else {
+    console.error('[tauriWindow] No window available');
   }
 }
 
@@ -44,9 +56,15 @@ export async function maximizeWindow(): Promise<void> {
  * Toggle maximize/unmaximize
  */
 export async function toggleMaximize(): Promise<void> {
+  console.log('[tauriWindow] toggleMaximize called');
   const window = getCurrentWindow();
+  console.log('[tauriWindow] window object:', window);
   if (window) {
+    console.log('[tauriWindow] Calling window.toggleMaximize()');
     await window.toggleMaximize();
+    console.log('[tauriWindow] toggleMaximize() completed');
+  } else {
+    console.error('[tauriWindow] No window available');
   }
 }
 
@@ -54,9 +72,15 @@ export async function toggleMaximize(): Promise<void> {
  * Close the window
  */
 export async function closeWindow(): Promise<void> {
+  console.log('[tauriWindow] closeWindow called');
   const window = getCurrentWindow();
+  console.log('[tauriWindow] window object:', window);
   if (window) {
+    console.log('[tauriWindow] Calling window.close()');
     await window.close();
+    console.log('[tauriWindow] close() completed');
+  } else {
+    console.error('[tauriWindow] No window available');
   }
 }
 

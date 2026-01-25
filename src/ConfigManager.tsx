@@ -120,12 +120,12 @@ export default function ConfigManager() {
     addToast('Config updated', 'success');
   };
 
-  const loadToLaunchpad = (cfg: PadConfig) => {
+  const loadToLaunchpad = async (cfg: PadConfig) => {
     let ok = true;
     if (clearBeforeLoad) {
-      ok = send(clearAllLeds());
+      ok = Boolean(await send(clearAllLeds()));
     }
-    ok = send(enterProgrammerMode()) && ok;
+    ok = Boolean(await send(enterProgrammerMode())) && ok;
     for (const [id, chMap] of Object.entries(cfg.padColours)) {
       for (const [chStr, hex] of Object.entries(chMap)) {
         const channel = Number(chStr);
@@ -140,11 +140,11 @@ export default function ConfigManager() {
         if (sysexColorMode) {
           const type = channel === 1 ? 0 : channel === 2 ? 1 : 2;
           const data = channel === 2 ? [0, color] : [color];
-          ok = send(lightingSysEx([{ type, index: padId, data }])) && ok;
+          ok = Boolean(await send(lightingSysEx([{ type, index: padId, data }]))) && ok;
         } else if (id.startsWith('n-')) {
-          ok = send(noteOn(padId, color, channel)) && ok;
+          ok = Boolean(await send(noteOn(padId, color, channel))) && ok;
         } else if (id.startsWith('cc-')) {
-          ok = send(cc(padId, color, channel)) && ok;
+          ok = Boolean(await send(cc(padId, color, channel))) && ok;
         }
       }
     }

@@ -13,7 +13,9 @@ export type RawListener = (msg: RawMessage) => void;
 
 export function useMidiConnection() {
   // Use Tauri connection if available, otherwise fallback to WebSocket
-  if (isTauri()) {
+  const useTauri = isTauri();
+  console.log('[useMidiConnection] Connection mode:', useTauri ? 'TAURI IPC' : 'WEBSOCKET');
+  if (useTauri) {
     return useTauriMidiConnection();
   }
   const host = useStore((s) => s.settings.host);

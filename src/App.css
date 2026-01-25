@@ -1,6 +1,8 @@
 .App {
   min-height: 100vh;
   position: relative;
+  overflow-x: hidden;
+  padding-top: 32px;
 }
 
 .active {

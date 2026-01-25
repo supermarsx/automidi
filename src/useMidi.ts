@@ -31,11 +31,17 @@ export function useMidi() {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const send = useCallback(
-    (bytes: number[] | Uint8Array) => {
+    async (bytes: number[] | Uint8Array) => {
       const targetPort = selectedOutput || launchpadRef.current;
-      if (!targetPort) return false;
+      if (!targetPort) {
+        console.warn('[useMidi] No target port available');
+        return false;
+      }
       const bytesArray = Array.from(bytes);
-      return sendRaw({ type: 'send', port: targetPort, bytes: bytesArray });
+      console.log('[useMidi] Sending MIDI:', { port: targetPort, bytes: bytesArray });
+      const result = await sendRaw({ type: 'send', port: targetPort, bytes: bytesArray });
+      console.log('[useMidi] Send result:', result);
+      return result;
     },
     [selectedOutput, sendRaw],
   );

@@ -8,12 +8,12 @@ use tauri::{AppHandle, Emitter, Manager, State};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    eprintln!("[automidi] Starting Tauri app...");
+    eprintln!("[automidi] Registering commands: ping, run_app, run_shell, run_shell_bg, run_shell_win, keys_type, notify, list_devices, send_midi, set_listening, run_keys");
+    
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             ping,
-            midi_list_devices,
-            midi_send,
-            midi_set_listening,
             run_app,
             run_shell,
             run_shell_bg,
@@ -26,27 +26,58 @@ pub fn run() {
             run_keys
         ])
         .setup(|app| {
+            eprintln!("[automidi] Running setup...");
+            
             if cfg!(debug_assertions) {
+                eprintln!("[automidi] Debug mode: enabling logging");
                 app.handle().plugin(
                     tauri_plugin_log::Builder::default()
                         .level(log::LevelFilter::Info)
                         .build(),
                 )?;
             }
+            
+            eprintln!("[automidi] Initializing plugins...");
             app.handle().plugin(tauri_plugin_notification::init())?;
             app.handle().plugin(tauri_plugin_dialog::init())?;
             app.handle().plugin(tauri_plugin_fs::init())?;
             app.handle()
                 .plugin(tauri_plugin_store::Builder::new().build())?;
 
+            eprintln!("[automidi] Setting up application state...");
             let state = AppState::from_env();
             app.manage(state);
+            
+            eprintln!("[automidi] Starting device watcher...");
             start_device_watcher(app.handle().clone());
 
+            // Prevent window from closing immediately on load errors
+            let windows = app.webview_windows();
+            eprintln!("[automidi] Found {} window(s)", windows.len());
+            for (label, win) in windows {
+                eprintln!("[automidi] Window '{}' found, showing it", label);
+                let _ = win.show();
+            }
+
+            eprintln!("[automidi] Setup complete!");
             Ok(())
+        })
+        .on_window_event(|_window, event| {
+            match event {
+                tauri::WindowEvent::CloseRequested { api, .. } => {
+                    eprintln!("[automidi] Window close requested");
+                    api.prevent_close();
+                }
+                tauri::WindowEvent::Destroyed => {
+                    eprintln!("[automidi] Window destroyed");
+                }
+                _ => {}
+            }
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+    
+    eprintln!("[automidi] App exited normally");
 }
 
 #[tauri::command]
@@ -258,29 +289,32 @@ fn midi_list_devices() -> MidiDevices {
 }
 
 // Alias for frontend
-#[tauri::command(rename_all = "camelCase")]
+#[tauri::command]
 fn list_devices() -> MidiDevices {
-    list_devices_internal()
+    eprintln!("[automidi] list_devices command called");
+    let devices = list_devices_internal();
+    eprintln!("[automidi] Found {} inputs, {} outputs", devices.inputs.len(), devices.outputs.len());
+    devices
 }
 
 #[tauri::command(rename_all = "camelCase")]
-fn midi_send(app: AppHandle, port_id: String, bytes: Vec<u8>) -> Result<(), String> {
-    if port_id.trim().is_empty() {
-        return Err("port_id is required".to_string());
+fn midi_send(app: AppHandle, port: String, bytes: Vec<u8>) -> Result<(), String> {
+    if port.trim().is_empty() {
+        return Err("port is required".to_string());
     }
-    let port_index = port_id
+    let port_index = port
         .parse::<usize>()
-        .map_err(|_| "port_id must be a numeric index".to_string())?;
+        .map_err(|_| "port must be a numeric index".to_string())?;
 
     let output = midir::MidiOutput::new("automidi")
         .map_err(|err| format!("Failed to init MIDI output: {err}"))?;
     let ports = output.ports();
-    let port = ports
+    let midi_port = ports
         .get(port_index)
         .ok_or_else(|| format!("output port index {port_index} not found"))?;
 
     let mut conn = output
-        .connect(port, "automidi-send")
+        .connect(midi_port, "automidi-send")
         .map_err(|err| format!("Failed to connect MIDI output: {err}"))?;
 
     conn.send(&bytes)
@@ -293,7 +327,7 @@ fn midi_send(app: AppHandle, port_id: String, bytes: Vec<u8>) -> Result<(), Stri
         timestamp: now_ms(),
         source: None,
         target: None,
-        port: Some(port_id),
+        port: Some(port),
         pressure: None,
     };
     let _ = app.emit("midi:event", message);
@@ -302,8 +336,10 @@ fn midi_send(app: AppHandle, port_id: String, bytes: Vec<u8>) -> Result<(), Stri
 }
 
 // Alias for frontend
-#[tauri::command(rename_all = "camelCase")]
+#[tauri::command]
 fn send_midi(app: AppHandle, port: String, bytes: Vec<u8>) -> Result<(), String> {
+    eprintln!("[automidi] send_midi command called with port: {}, bytes: {:?}", port, bytes);
+    // Call midi_send with port_id parameter
     midi_send(app, port, bytes)
 }
 
@@ -327,8 +363,9 @@ fn midi_set_listening(app: AppHandle, state: State<AppState>, enabled: bool) -> 
 }
 
 // Alias for frontend
-#[tauri::command(rename_all = "camelCase")]
+#[tauri::command]
 fn set_listening(app: AppHandle, state: State<AppState>, enabled: bool) -> Result<(), String> {
+    eprintln!("[automidi] set_listening command called with enabled: {}", enabled);
     midi_set_listening(app, state, enabled)
 }
 
@@ -556,8 +593,9 @@ fn keys_type(sequence: Vec<String>, interval: Option<u64>) -> Result<(), String>
 }
 
 // Alias for frontend
-#[tauri::command(rename_all = "camelCase")]
+#[tauri::command]
 fn run_keys(keys: Vec<String>, interval: Option<u64>) -> Result<(), String> {
+    eprintln!("[automidi] run_keys command called");
     keys_type(keys, interval)
 }
 

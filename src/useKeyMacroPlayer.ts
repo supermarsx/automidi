@@ -34,7 +34,7 @@ export function useKeyMacroPlayer() {
           if (port && macro.midiData) {
             if (isTauri()) {
               for (const bytes of macro.midiData) {
-                await invoke('sendMidi', { port, bytes });
+                await invoke('send_midi', { port, bytes });
               }
             } else {
               for (const bytes of macro.midiData) {
@@ -46,13 +46,13 @@ export function useKeyMacroPlayer() {
           // Handle shell/app/keys macros
           if (isTauri()) {
             if (macro.type === 'shell' || macro.type === 'shell_win' || macro.type === 'shell_bg') {
-              const cmdType = macro.type === 'shell' ? 'runShell' : 
-                             macro.type === 'shell_win' ? 'runShellWin' : 'runShellBg';
+              const cmdType = macro.type === 'shell' ? 'run_shell' : 
+                             macro.type === 'shell_win' ? 'run_shell_win' : 'run_shell_bg';
               await invoke(cmdType, { cmd: macro.command || '' });
             } else if (macro.type === 'app') {
-              await invoke('runApp', { appPath: macro.command || '' });
+              await invoke('run_app', { appPath: macro.command || '' });
             } else if (macro.type === 'keys' && macro.sequence) {
-              await invoke('runKeys', { 
+              await invoke('run_keys', { 
                 keys: macro.sequence, 
                 interval: macro.interval || 50 
               });

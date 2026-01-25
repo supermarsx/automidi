@@ -173,10 +173,10 @@ export default function SettingsModal({ onClose }: Props) {
     setPingYellow(settings.pingYellow as number ?? py);
     setPingOrange(settings.pingOrange as number ?? po);
     setClearBeforeLoad(settings.clearBeforeLoad as boolean ?? cbl);
-    setSysexColorMode(settings.sysexColorMode as string ?? scm);
-    setAutoSleep(settings.autoSleep as boolean ?? asleep);
+    setSysexColorMode((settings.sysexColorMode as boolean) ?? scm);
+    setAutoSleep((settings.autoSleep as number) ?? asleep);
     setAutoLoadFirstConfig(settings.autoLoadFirstConfig as boolean ?? alfc);
-    setTheme(settings.theme as string ?? thm);
+    setTheme((settings.theme as 'default' | 'dark' | 'light') ?? thm);
     setApiKey(settings.apiKey as string ?? ak);
     setClock(Array.isArray(settings.clock) ? settings.clock as number[] : clock);
     setMacroConfirmTimeout(settings.macroConfirmTimeout as number ?? macroConfirmTimeout);
@@ -193,10 +193,10 @@ export default function SettingsModal({ onClose }: Props) {
     setPe(settings.pingEnabled as boolean ?? pe);
     setRol(settings.reconnectOnLost as boolean ?? rol);
     setCbl(settings.clearBeforeLoad as boolean ?? cbl);
-    setScm(settings.sysexColorMode as string ?? scm);
-    setAsleep(settings.autoSleep as boolean ?? asleep);
+    setScm((settings.sysexColorMode as boolean) ?? scm);
+    setAsleep((settings.autoSleep as number) ?? asleep);
     setAlfc(settings.autoLoadFirstConfig as boolean ?? alfc);
-    setThm(settings.theme as string ?? thm);
+    setThm((settings.theme as 'default' | 'dark' | 'light') ?? thm);
     setAk(settings.apiKey as string ?? ak);
     setClk(
       (Array.isArray(settings.clock) ? settings.clock as number[] : clock)

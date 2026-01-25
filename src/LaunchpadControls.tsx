@@ -42,36 +42,36 @@ export default function LaunchpadControls() {
   const [dawBank, setDawBank] = useState(0);
   const clearBeforeLoad = useStore((s) => s.settings.clearBeforeLoad);
 
-  const handleEnterProgrammer = () => {
-    notify(send(enterProgrammerMode()), 'Programmer mode');
+  const handleEnterProgrammer = async () => {
+    notify(Boolean(await send(enterProgrammerMode())), 'Programmer mode');
   };
 
-  const handleExitProgrammer = () => {
-    notify(send(exitProgrammerMode()), 'Live mode');
+  const handleExitProgrammer = async () => {
+    notify(Boolean(await send(exitProgrammerMode())), 'Live mode');
   };
 
-  const handleSetBrightness = () => {
-    notify(send(setBrightness(brightness)), 'Brightness');
+  const handleSetBrightness = async () => {
+    notify(Boolean(await send(setBrightness(brightness))), 'Brightness');
   };
 
-  const handleSetSleep = () => {
-    notify(send(setSleepMode(sleepEnabled)), 'Sleep mode');
+  const handleSetSleep = async () => {
+    notify(Boolean(await send(setSleepMode(sleepEnabled))), 'Sleep mode');
   };
 
-  const handleClearAll = () => {
-    notify(send(clearAllLeds()), 'Clear all');
+  const handleClearAll = async () => {
+    notify(Boolean(await send(clearAllLeds())), 'Clear all');
   };
 
-  const handleScrollText = () => {
-    notify(send(scrollText(scrollTextValue, false, 7)), 'Scroll text');
+  const handleScrollText = async () => {
+    notify(Boolean(await send(scrollText(scrollTextValue, false, 7))), 'Scroll text');
   };
 
-  const handleSetLayout = () => {
-    notify(send(setLayout(layout)), 'Layout');
+  const handleSetLayout = async () => {
+    notify(Boolean(await send(setLayout(layout))), 'Layout');
   };
 
-  const handleSetDAW = () => {
-    notify(send(setDAWMode(dawBank)), 'DAW mode');
+  const handleSetDAW = async () => {
+    notify(Boolean(await send(setDAWMode(dawBank))), 'DAW mode');
   };
 
   const handleClearConfig = () => {
@@ -79,12 +79,12 @@ export default function LaunchpadControls() {
     setPadChannels({});
   };
 
-  const handleLoadToLaunchpad = () => {
+  const handleLoadToLaunchpad = async () => {
     let ok = true;
     if (clearBeforeLoad) {
-      ok = send(clearAllLeds());
+      ok = Boolean(await send(clearAllLeds()));
     }
-    ok = send(enterProgrammerMode()) && ok;
+    ok = Boolean(await send(enterProgrammerMode())) && ok;
     for (const [id, chMap] of Object.entries(padColours)) {
       for (const [chStr, hex] of Object.entries(chMap)) {
         const channel = Number(chStr);
@@ -99,11 +99,11 @@ export default function LaunchpadControls() {
         if (sysexColorMode) {
           const type = channel === 1 ? 0 : channel === 2 ? 1 : 2;
           const data = channel === 2 ? [0, color] : [color];
-          ok = send(lightingSysEx([{ type, index: padId, data }])) && ok;
+          ok = Boolean(await send(lightingSysEx([{ type, index: padId, data }]))) && ok;
         } else if (id.startsWith('n-')) {
-          ok = send(noteOn(padId, color, channel)) && ok;
+          ok = Boolean(await send(noteOn(padId, color, channel))) && ok;
         } else if (id.startsWith('cc-')) {
-          ok = send(cc(padId, color, channel)) && ok;
+          ok = Boolean(await send(cc(padId, color, channel))) && ok;
         }
       }
     }
@@ -138,9 +138,9 @@ export default function LaunchpadControls() {
     }
   };
 
-  const handleSendClock = () => {
+  const handleSendClock = async () => {
     const bytes = clockBytes.length ? clockBytes : midiClock();
-    notify(send(bytes), 'Clock');
+    notify(Boolean(await send(bytes)), 'Clock');
   };
 
   const [showMore, setShowMore] = useState(false);

@@ -4,10 +4,13 @@ import MacroList from './MacroList';
 import MacroBuilder from './MacroBuilder';
 import SysexWorkbench from './SysexWorkbench';
 import MidiDevices from './MidiDevices';
+import MidiLogger from './MidiLogger';
 import ActionBar from './ActionBar';
 import FloatingActionBar from './FloatingActionBar';
 import ConfigManager from './ConfigManager';
 import ToastContainer from './ToastContainer';
+import TitleBar from './TitleBar';
+import Tabs from './Tabs';
 import { usePadActions } from './usePadActions';
 import { useStore } from './store';
 import { useEffect } from 'react';
@@ -56,41 +59,74 @@ function App() {
   }, [autoSleep, send]);
   return (
     <div className="App">
+      {isTauri() && <TitleBar />}
       <div className="scan-lines"></div>
       <div className="container-fluid">
         <div className="retro-container">
-          <h1 className="retro-title">◄ AutoMIDI v2.0 ►</h1>
           <ActionBar />
-          <div className="row">
-            <div className="col-md-6">
-              <MidiDevices />
-            </div>
-            <div className="col-md-6">
-              <div className="retro-panel">
-                <h3>◄ Launchpad Mission Control ►</h3>
-                <LaunchpadCanvas />
+          <Tabs
+            tabs={[
+              { id: 'mission', label: 'Mission Control', icon: '◄►' },
+              { id: 'diagnostics', label: 'Diagnostics', icon: '⚡' },
+              { id: 'macros', label: 'Macros', icon: '⚙' },
+              { id: 'config', label: 'Config', icon: '⚙' },
+            ]}
+          >
+            {/* Mission Control Tab */}
+            <div>
+              <div className="row">
+                <div className="col-md-6">
+                  <MidiDevices />
+                </div>
+                <div className="col-md-6">
+                  <div className="retro-panel">
+                    <h3>◄ Launchpad Control ►</h3>
+                    <LaunchpadCanvas />
+                  </div>
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-12">
+                  <LaunchpadControls />
+                </div>
               </div>
             </div>
-          </div>
-          <div className="row">
-            <div className="col-12">
-              <ConfigManager />
+
+            {/* Diagnostics Tab */}
+            <div>
+              <div className="row">
+                <div className="col-12">
+                  <MidiLogger />
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-12">
+                  <SysexWorkbench />
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="row">
-            <div className="col-12">
-              <LaunchpadControls />
+
+            {/* Macros Tab */}
+            <div>
+              <div className="row">
+                <div className="col-md-6">
+                  <MacroList />
+                </div>
+                <div className="col-md-6">
+                  <MacroBuilder />
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="row">
-            <div className="col-md-6">
-              <MacroList />
-              <MacroBuilder />
+
+            {/* Config Tab */}
+            <div>
+              <div className="row">
+                <div className="col-12">
+                  <ConfigManager />
+                </div>
+              </div>
             </div>
-            <div className="col-md-6">
-              <SysexWorkbench />
-            </div>
-          </div>
+          </Tabs>
         </div>
       </div>
       <FloatingActionBar />

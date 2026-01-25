@@ -1,0 +1,100 @@
+.titlebar {
+  height: 32px;
+  background: linear-gradient(180deg, #000080 0%, #000060 100%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 8px;
+  user-select: none;
+  border-bottom: 2px solid #00ffff;
+  box-shadow: 0 2px 8px rgba(0, 255, 255, 0.3);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+}
+
+.titlebar-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #ffff00;
+  font-weight: bold;
+  font-size: 16px;
+  font-family: 'VT323', monospace;
+  flex: 1;
+  cursor: default;
+  -webkit-app-region: drag;
+  app-region: drag;
+}
+
+.titlebar-logo {
+  animation: titlebar-glow 2s ease-in-out infinite alternate;
+  text-shadow: 2px 2px 0px #ff00ff, 0 0 5px #ffff00;
+}
+
+@keyframes titlebar-glow {
+  from {
+    text-shadow: 2px 2px 0px #ff00ff, 0 0 5px #ffff00;
+  }
+  to {
+    text-shadow: 2px 2px 0px #ff00ff, 0 0 15px #ffff00, 0 0 25px #00ffff;
+  }
+}
+
+.titlebar-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.titlebar-button {
+  width: 32px;
+  height: 24px;
+  border: 2px solid #00ffff;
+  background: #000040;
+  color: #00ffff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Courier New', monospace;
+  padding: 0;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+.titlebar-button:hover {
+  background: #000080;
+  box-shadow: 0 0 10px #00ffff;
+  transform: scale(1.05);
+}
+
+.titlebar-button:active {
+  background: #0000a0;
+  transform: scale(0.95);
+}
+
+.titlebar-button.close:hover {
+  background: #800000;
+  border-color: #ff0000;
+  color: #ff0000;
+  box-shadow: 0 0 10px #ff0000;
+}
+
+.titlebar-button.minimize {
+  padding-bottom: 4px;
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 5px #00ffff;
+  }
+  to {
+    text-shadow: 0 0 15px #00ffff, 0 0 25px #00ffff;
+  }
+}
