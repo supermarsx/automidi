@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { listMidiDevices } from "./lib/midi";
+import { listMidiDevices, onDeviceChange, onMidiEvent, setMidiListening } from "./lib/midi";
 import { isTauriRuntime } from "./lib/tauri";
 import type { MidiDevice } from "@shared/messages";
 
@@ -10,10 +10,40 @@ export default function Home() {
   const [inputs, setInputs] = useState<MidiDevice[]>([]);
   const [outputs, setOutputs] = useState<MidiDevice[]>([]);
   const [loading, setLoading] = useState(false);
+  const [lastMidi, setLastMidi] = useState<string>("-");
 
   useEffect(() => {
     setTauriReady(isTauriRuntime());
   }, []);
+
+  useEffect(() => {
+    if (!tauriReady) return;
+
+    let disposeEvents: Array<() => void> = [];
+    let cancelled = false;
+
+    (async () => {
+      try {
+        await setMidiListening(true);
+        const disposeMidi = await onMidiEvent((event) => {
+          setLastMidi(`${event.direction} ${event.message.join(",")}`);
+        });
+        const disposeDevices = await onDeviceChange((event) => {
+          if (cancelled) return;
+          setInputs(event.inputs ?? []);
+          setOutputs(event.outputs ?? []);
+        });
+        disposeEvents = [disposeMidi, disposeDevices];
+      } catch {
+        // Silent until we wire real error reporting.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      disposeEvents.forEach((dispose) => dispose());
+    };
+  }, [tauriReady]);
 
   async function handleLoadDevices() {
     setLoading(true);
@@ -52,6 +82,8 @@ export default function Home() {
             <li key={output.id}>{output.name ?? output.id}</li>
           ))}
         </ul>
+        <h2>Last MIDI</h2>
+        <p>{lastMidi}</p>
       </section>
     </main>
   );
