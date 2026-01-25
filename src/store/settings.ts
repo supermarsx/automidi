@@ -18,7 +18,7 @@ export interface SettingsSlice {
     clearBeforeLoad: boolean;
     sysexColorMode: boolean;
     autoSleep: number;
-    theme: 'default' | 'dark' | 'light';
+    theme: 'original' | 'oled-dark' | 'outrun' | 'matrix' | 'lightsaber';
     autoLoadFirstConfig: boolean;
     apiKey: string;
     clock: number[];
@@ -39,7 +39,7 @@ export interface SettingsSlice {
   setClearBeforeLoad: (enabled: boolean) => void;
   setSysexColorMode: (enabled: boolean) => void;
   setAutoSleep: (s: number) => void;
-  setTheme: (t: 'default' | 'dark' | 'light') => void;
+  setTheme: (t: 'original' | 'oled-dark' | 'outrun' | 'matrix' | 'lightsaber') => void;
   setAutoLoadFirstConfig: (b: boolean) => void;
   setApiKey: (k: string) => void;
   setClock: (data: number[]) => void;
@@ -71,7 +71,7 @@ export const createSettingsSlice: StateCreator<
     clearBeforeLoad: false,
     sysexColorMode: false,
     autoSleep: 0,
-    theme: 'default',
+    theme: 'original',
     autoLoadFirstConfig: false,
     apiKey: '',
     clock: [0xf8],

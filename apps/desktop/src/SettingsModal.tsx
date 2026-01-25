@@ -129,7 +129,7 @@ export default function SettingsModal({ onClose }: Props) {
     setSysexColorMode((cfg.sysexColorMode as boolean) ?? scm);
     setAutoSleep((cfg.autoSleep as number) ?? asleep);
     setAutoLoadFirstConfig((cfg.autoLoadFirstConfig as boolean) ?? alfc);
-    setTheme((cfg.theme as 'default' | 'dark' | 'light') ?? thm);
+    setTheme((cfg.theme as 'original' | 'oled-dark' | 'outrun' | 'matrix' | 'lightsaber') ?? thm);
     setApiKey((cfg.apiKey as string) ?? ak);
     setClock(Array.isArray(cfg.clock) ? (cfg.clock as number[]) : clock);
     setMacroConfirmTimeout(
@@ -151,7 +151,7 @@ export default function SettingsModal({ onClose }: Props) {
     setScm((cfg.sysexColorMode as boolean) ?? scm);
     setAsleep((cfg.autoSleep as number) ?? asleep);
     setAlfc((cfg.autoLoadFirstConfig as boolean) ?? alfc);
-    setThm((cfg.theme as 'default' | 'dark' | 'light') ?? thm);
+    setThm((cfg.theme as 'original' | 'oled-dark' | 'outrun' | 'matrix' | 'lightsaber') ?? thm);
     setAk((cfg.apiKey as string) ?? ak);
     setClk(
       (Array.isArray(cfg.clock) ? (cfg.clock as number[]) : clock)
@@ -436,12 +436,14 @@ export default function SettingsModal({ onClose }: Props) {
                 className="form-select retro-select"
                 value={thm}
                 onChange={(e) =>
-                  setThm(e.target.value as 'default' | 'dark' | 'light')
+                  setThm(e.target.value as 'original' | 'oled-dark' | 'outrun' | 'matrix' | 'lightsaber')
                 }
               >
-                <option value="default">Default</option>
-                <option value="dark">Dark</option>
-                <option value="light">Light</option>
+                <option value="original">Original (Retro)</option>
+                <option value="oled-dark">OLED Dark</option>
+                <option value="outrun">Outrun</option>
+                <option value="matrix">Matrix</option>
+                <option value="lightsaber">Lightsaber</option>
               </select>
             </div>
             <div className="mb-3">

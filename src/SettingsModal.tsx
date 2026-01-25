@@ -176,7 +176,7 @@ export default function SettingsModal({ onClose }: Props) {
     setSysexColorMode((settings.sysexColorMode as boolean) ?? scm);
     setAutoSleep((settings.autoSleep as number) ?? asleep);
     setAutoLoadFirstConfig(settings.autoLoadFirstConfig as boolean ?? alfc);
-    setTheme((settings.theme as 'default' | 'dark' | 'light') ?? thm);
+    setTheme((settings.theme as 'original' | 'oled-dark' | 'outrun' | 'matrix' | 'lightsaber') ?? thm);
     setApiKey(settings.apiKey as string ?? ak);
     setClock(Array.isArray(settings.clock) ? settings.clock as number[] : clock);
     setMacroConfirmTimeout(settings.macroConfirmTimeout as number ?? macroConfirmTimeout);
@@ -196,7 +196,7 @@ export default function SettingsModal({ onClose }: Props) {
     setScm((settings.sysexColorMode as boolean) ?? scm);
     setAsleep((settings.autoSleep as number) ?? asleep);
     setAlfc(settings.autoLoadFirstConfig as boolean ?? alfc);
-    setThm((settings.theme as 'default' | 'dark' | 'light') ?? thm);
+    setThm((settings.theme as 'original' | 'oled-dark' | 'outrun' | 'matrix' | 'lightsaber') ?? thm);
     setAk(settings.apiKey as string ?? ak);
     setClk(
       (Array.isArray(settings.clock) ? settings.clock as number[] : clock)
@@ -444,12 +444,14 @@ export default function SettingsModal({ onClose }: Props) {
                 className="form-select retro-select"
                 value={thm}
                 onChange={(e) =>
-                  setThm(e.target.value as 'default' | 'dark' | 'light')
+                  setThm(e.target.value as 'original' | 'oled-dark' | 'outrun' | 'matrix' | 'lightsaber')
                 }
               >
-                <option value="default">Default</option>
-                <option value="dark">Dark</option>
-                <option value="light">Light</option>
+                <option value="original">Original (Retro)</option>
+                <option value="oled-dark">OLED Dark</option>
+                <option value="outrun">Outrun</option>
+                <option value="matrix">Matrix</option>
+                <option value="lightsaber">Lightsaber</option>
               </select>
             </div>
             <div className="mb-3">
