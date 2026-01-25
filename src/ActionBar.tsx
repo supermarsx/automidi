@@ -27,14 +27,14 @@ export default function ActionBar() {
   const outputName = outputs.find(o => o.id === selectedOutput)?.name || 'NONE';
 
   return (
-    <div className="status-bar d-flex justify-content-between align-items-center" style={{ padding: '8px 16px' }}>
-      <div className="d-flex align-items-center gap-3 flex-wrap" style={{ fontSize: '0.95rem' }}>
+    <div className="status-bar d-flex justify-content-between align-items-center" style={{ padding: '10px 20px', marginBottom: '12px' }}>
+      <div className="d-flex align-items-center" style={{ gap: '16px', flexWrap: 'wrap', fontSize: '0.95rem' }}>
         <span className={`connection-status ${status}`}>
           {status.toUpperCase()}
         </span>
-        <span className="d-flex align-items-center">
+        <span className="d-flex align-items-center" style={{ gap: '6px' }}>
           PING:
-          <span className={`ping-value ms-1 ping-${pingClass}`}>
+          <span className={`ping-value ping-${pingClass}`}>
             {!pingEnabled
               ? 'N/A'
               : pingDelay === null
@@ -42,10 +42,10 @@ export default function ActionBar() {
                 : `${pingDelay}ms`}
           </span>
         </span>
-        <span>IN: {inputName}</span>
-        <span>OUT: {outputName}</span>
+        <span>IN: <strong>{inputName}</strong></span>
+        <span>OUT: <strong>{outputName}</strong></span>
         {status === 'closed' && !isTauriMode && (
-          <button className="retro-button btn-sm" onClick={reconnect} style={{ padding: '4px 12px', fontSize: '0.9rem' }}>
+          <button className="retro-button btn-sm" onClick={reconnect} style={{ padding: '3px 10px', fontSize: '0.85rem', marginLeft: '8px' }}>
             RECONNECT
           </button>
         )}

@@ -3,6 +3,7 @@ import { useStore } from './store';
 import { useMidiConnection, type RawMessage } from './useMidiConnection';
 import type { MidiDevice } from '../shared/messages';
 import { isDevicesMessage, isMidiPayload } from './types';
+import { useToastStore } from './toastStore';
 
 export interface MidiMessage {
   direction: 'in' | 'out';
@@ -16,6 +17,10 @@ export interface MidiMessage {
 
 export function useMidi() {
   const selectedOutput = useStore((s) => s.devices.outputId);
+  const setOutputId = useStore((s) => s.setOutputId);
+  const selectedInput = useStore((s) => s.devices.inputId);
+  const setInputId = useStore((s) => s.setInputId);
+  const addToast = useToastStore((s) => s.addToast);
   const {
     status,
     pingDelay,
@@ -29,6 +34,10 @@ export function useMidi() {
   const launchpadRef = useRef<string | null>(null);
   const listeners = useRef(new Set<(msg: MidiMessage) => void>());
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevInputsRef = useRef<MidiDevice[]>([]);
+  const prevOutputsRef = useRef<MidiDevice[]>([]);
+  const lastSelectedInputRef = useRef<string | null>(null);
+  const lastSelectedOutputRef = useRef<string | null>(null);
 
   const send = useCallback(
     async (bytes: number[] | Uint8Array) => {
@@ -62,9 +71,73 @@ export function useMidi() {
   useEffect(() => {
     const unsub = listenRaw((payload: RawMessage) => {
       if (isDevicesMessage(payload)) {
-        setInputs(payload.inputs || []);
-        setOutputs(payload.outputs || []);
-        const launchpad = payload.outputs?.find((o: MidiDevice) =>
+        const newInputs = payload.inputs || [];
+        const newOutputs = payload.outputs || [];
+        
+        // Check for disconnected devices
+        const prevInputIds = new Set(prevInputsRef.current.map(d => d.id));
+        const newInputIds = new Set(newInputs.map(d => d.id));
+        const prevOutputIds = new Set(prevOutputsRef.current.map(d => d.id));
+        const newOutputIds = new Set(newOutputs.map(d => d.id));
+        
+        // Detect disconnections
+        prevInputsRef.current.forEach(device => {
+          if (!newInputIds.has(device.id)) {
+            addToast(`Input device disconnected: ${device.name || device.id}`, 'error');
+            if (selectedInput === device.id) {
+              lastSelectedInputRef.current = device.id;
+            }
+          }
+        });
+        
+        prevOutputsRef.current.forEach(device => {
+          if (!newOutputIds.has(device.id)) {
+            addToast(`Output device disconnected: ${device.name || device.id}`, 'error');
+            if (selectedOutput === device.id) {
+              lastSelectedOutputRef.current = device.id;
+            }
+          }
+        });
+        
+        // Detect reconnections and new connections
+        newInputs.forEach(device => {
+          if (!prevInputIds.has(device.id)) {
+            if (prevInputsRef.current.length > 0) {
+              addToast(`Input device reconnected: ${device.name || device.id}`, 'success');
+            } else {
+              // Initial connection
+              addToast(`Input device connected: ${device.name || device.id}`, 'success');
+            }
+            // Auto-reconnect if it was the last selected device
+            if (lastSelectedInputRef.current === device.id || (!selectedInput && device.name?.toLowerCase().includes('launchpad'))) {
+              setInputId(device.id);
+              lastSelectedInputRef.current = null;
+            }
+          }
+        });
+        
+        newOutputs.forEach(device => {
+          if (!prevOutputIds.has(device.id)) {
+            if (prevOutputsRef.current.length > 0) {
+              addToast(`Output device reconnected: ${device.name || device.id}`, 'success');
+            } else {
+              // Initial connection
+              addToast(`Output device connected: ${device.name || device.id}`, 'success');
+            }
+            // Auto-reconnect if it was the last selected device
+            if (lastSelectedOutputRef.current === device.id || (!selectedOutput && device.name?.toLowerCase().includes('launchpad'))) {
+              setOutputId(device.id);
+              lastSelectedOutputRef.current = null;
+            }
+          }
+        });
+        
+        setInputs(newInputs);
+        setOutputs(newOutputs);
+        prevInputsRef.current = newInputs;
+        prevOutputsRef.current = newOutputs;
+        
+        const launchpad = newOutputs?.find((o: MidiDevice) =>
           o.name?.toLowerCase().includes('launchpad x'),
         );
         launchpadRef.current = launchpad ? launchpad.id : null;
@@ -82,7 +155,7 @@ export function useMidi() {
       }
     });
     return unsub;
-  }, [listenRaw]);
+  }, [listenRaw, selectedInput, selectedOutput, setInputId, setOutputId, addToast]);
 
   // Request device list on mount and when connected
   useEffect(() => {

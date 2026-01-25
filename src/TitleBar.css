@@ -1,12 +1,12 @@
 .titlebar {
   height: 32px;
-  background: linear-gradient(180deg, #000080 0%, #000060 100%);
+  background: linear-gradient(180deg, var(--bg-start) 0%, var(--button-bg) 100%);
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 8px;
   user-select: none;
-  border-bottom: 2px solid #00ffff;
+  border-bottom: 2px solid var(--panel-border);
   box-shadow: 0 2px 8px rgba(0, 255, 255, 0.3);
   position: fixed;
   top: 0;
@@ -20,7 +20,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: #ffff00;
+  color: var(--highlight);
   font-weight: bold;
   font-size: 16px;
   font-family: 'VT323', monospace;
@@ -32,15 +32,15 @@
 
 .titlebar-logo {
   animation: titlebar-glow 2s ease-in-out infinite alternate;
-  text-shadow: 2px 2px 0px #ff00ff, 0 0 5px #ffff00;
+  text-shadow: 2px 2px 0px var(--fg-secondary), 0 0 5px var(--highlight);
 }
 
 @keyframes titlebar-glow {
   from {
-    text-shadow: 2px 2px 0px #ff00ff, 0 0 5px #ffff00;
+    text-shadow: 2px 2px 0px var(--fg-secondary), 0 0 5px var(--highlight);
   }
   to {
-    text-shadow: 2px 2px 0px #ff00ff, 0 0 15px #ffff00, 0 0 25px #00ffff;
+    text-shadow: 2px 2px 0px var(--fg-secondary), 0 0 15px var(--highlight), 0 0 25px var(--panel-border);
   }
 }
 
@@ -52,9 +52,9 @@
 .titlebar-button {
   width: 32px;
   height: 24px;
-  border: 2px solid #00ffff;
-  background: #000040;
-  color: #00ffff;
+  border: 2px solid var(--panel-border);
+  background: var(--button-bg);
+  color: var(--fg);
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
@@ -69,13 +69,13 @@
 }
 
 .titlebar-button:hover {
-  background: #000080;
-  box-shadow: 0 0 10px #00ffff;
+  background: var(--button-hover);
+  box-shadow: 0 0 10px var(--panel-border);
   transform: scale(1.05);
 }
 
 .titlebar-button:active {
-  background: #0000a0;
+  background: var(--button-hover);
   transform: scale(0.95);
 }
 

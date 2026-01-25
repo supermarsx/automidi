@@ -108,9 +108,9 @@ export default function MidiLogger({ onClose }: Props) {
   };
 
   return (
-    <div className="midi-logger">
-      <div className="logger-header">
-        <h5 className="text-warning">◄ MIDI DATA STREAM ►</h5>
+    <div className={onClose ? "midi-logger" : "retro-panel"} style={onClose ? undefined : { marginBottom: '20px' }}>
+      <div className="logger-header" style={onClose ? undefined : { background: 'transparent', border: 'none', padding: '0 0 12px 0' }}>
+        <h5 className="text-warning" style={onClose ? undefined : { color: 'var(--highlight)', margin: 0 }}>◄ MIDI DATA STREAM ►</h5>
         <div className="d-flex align-items-center">
           <select
             className="form-select retro-select me-2"
@@ -165,7 +165,7 @@ export default function MidiLogger({ onClose }: Props) {
           )}
         </div>
       </div>
-      <div className="logger-content" ref={logRef}>
+      <div className="logger-content" ref={logRef} style={onClose ? undefined : { maxHeight: '400px', border: '2px solid var(--panel-border)', borderRadius: '4px', background: 'var(--input-bg)' }}>
         {filteredLogs.length === 0 ? (
           <div className="text-center text-warning p-3">
             NO MIDI DATA {filter !== 'all' ? `(${filter.toUpperCase()})` : ''}
