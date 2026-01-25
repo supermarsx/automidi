@@ -53,6 +53,7 @@ Status: Draft plan for migration
 - [x] Replace WebSocket client with Tauri IPC hooks.
 - [x] Create a `useTauriMidi` adapter mirroring `useMidiConnection`.
 - [x] Update `socket.ts`, `useWebSocket.ts`, and call sites.
+- [ ] Rebuild frontend tests for Tauri IPC (replace WebSocket mocks).
 - [ ] Validate all panels: LaunchpadCanvas, MacroBuilder, Logger, Settings.
 - [ ] Ensure keyboard and pointer behavior matches current app.
 

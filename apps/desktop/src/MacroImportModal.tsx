@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useStore } from './store';
 import type { Macro } from './store/macros';
 import { useToastStore } from './toastStore';
+import { isTauriRuntime, openJsonFile } from './tauriFiles';
 
 interface Props {
   onClose: () => void;
@@ -11,32 +12,42 @@ export default function MacroImportModal({ onClose }: Props) {
   const addToast = useToastStore((s) => s.addToast);
   const [data, setData] = useState<Macro[] | null>(null);
 
+  const parsePayload = (raw: string) => {
+    try {
+      const parsed = JSON.parse(raw);
+      if (
+        !Array.isArray(parsed) ||
+        parsed.some(
+          (m) =>
+            typeof m !== 'object' ||
+            typeof m.id !== 'string' ||
+            typeof m.name !== 'string',
+        )
+      ) {
+        throw new Error('Invalid format');
+      }
+      setData(parsed as Macro[]);
+    } catch {
+      setData(null);
+      addToast('Failed to parse file', 'error');
+    }
+  };
+
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
-      try {
-        const parsed = JSON.parse(ev.target?.result as string);
-        if (
-          !Array.isArray(parsed) ||
-          parsed.some(
-            (m) =>
-              typeof m !== 'object' ||
-              typeof m.id !== 'string' ||
-              typeof m.name !== 'string',
-          )
-        ) {
-          throw new Error('Invalid format');
-        }
-        setData(parsed as Macro[]);
-      } catch {
-        setData(null);
-        addToast('Failed to parse file', 'error');
-      }
+      parsePayload(ev.target?.result as string);
     };
     reader.readAsText(file);
     e.target.value = '';
+  };
+
+  const openDialog = async () => {
+    const content = await openJsonFile();
+    if (!content) return;
+    parsePayload(content);
   };
 
   const confirmImport = () => {
@@ -85,11 +96,17 @@ export default function MacroImportModal({ onClose }: Props) {
             <h5 className="modal-title">IMPORT MACROS</h5>
           </div>
           <div className="modal-body">
-            <input
-              type="file"
-              accept="application/json"
-              onChange={handleFile}
-            />
+            {isTauriRuntime() ? (
+              <button className="retro-button btn-sm" onClick={openDialog}>
+                CHOOSE FILE
+              </button>
+            ) : (
+              <input
+                type="file"
+                accept="application/json"
+                onChange={handleFile}
+              />
+            )}
             <p className="mt-2">
               Imported macros will be added to your current list.
             </p>

@@ -1,16 +1,10 @@
 import { useStore } from './store';
+import { saveJsonFile } from './tauriFiles';
 
 export default function MacroExportButton() {
   const handleExport = () => {
     const macros = useStore.getState().macros;
-    const data = JSON.stringify(macros);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'macros.json';
-    a.click();
-    URL.revokeObjectURL(url);
+    saveJsonFile('macros.json', macros);
   };
 
   return (
