@@ -6,12 +6,16 @@
   "scripts": {
     "dev": "concurrently -k \"npm:server\" \"vite\"",
     "dev:log-midi": "cross-env LOG_MIDI=true npm run dev",
+    "dev:desktop": "npm --prefix apps/desktop run dev",
     "build": "tsc -b && vite build",
+    "build:desktop": "npm --prefix apps/desktop run build",
     "lint": "eslint .",
     "format": "prettier --write .",
     "preview": "vite preview",
     "build:server": "tsc -p server/tsconfig.json",
     "server": "npm run build:server && node server/dist/index.js",
+    "tauri:dev": "npx @tauri-apps/cli@latest dev",
+    "tauri:build": "npx @tauri-apps/cli@latest build",
     "setup": "npm install",
     "test": "npm run build:server && vitest run"
   },

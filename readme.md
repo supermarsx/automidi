@@ -7,6 +7,13 @@ controlling MIDI devices. When a Launchpad X is detected the app automatically
 switches the controller into _Programmer_ mode so that every pad can be
 addressed individually.
 
+## Migration plan (Tauri + Next 16)
+
+The target desktop architecture and migration checklist live here:
+
+- Spec: `SPEC.md`
+- TODO: `TODO_TAURI_NEXT16.md`
+
 ## Setup
 
 Install dependencies before running any lint or build steps:
