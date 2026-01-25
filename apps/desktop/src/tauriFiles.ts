@@ -9,8 +9,8 @@ export async function saveJsonFile(
   const payload = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
 
   if (isTauriRuntime()) {
-    const { save } = await import('@tauri-apps/api/dialog');
-    const { writeTextFile } = await import('@tauri-apps/api/fs');
+    const { save } = await import('@tauri-apps/plugin-dialog');
+    const { writeTextFile } = await import('@tauri-apps/plugin-fs');
     const path = await save({
       defaultPath: defaultName,
       filters: [{ name: 'JSON', extensions: ['json'] }],
@@ -32,8 +32,8 @@ export async function saveJsonFile(
 
 export async function openJsonFile(): Promise<string | null> {
   if (!isTauriRuntime()) return null;
-  const { open } = await import('@tauri-apps/api/dialog');
-  const { readTextFile } = await import('@tauri-apps/api/fs');
+  const { open } = await import('@tauri-apps/plugin-dialog');
+  const { readTextFile } = await import('@tauri-apps/plugin-fs');
   const path = await open({
     multiple: false,
     filters: [{ name: 'JSON', extensions: ['json'] }],

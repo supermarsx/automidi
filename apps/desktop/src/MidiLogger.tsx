@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLogStore, serializeLogs } from './logStore';
+import { saveJsonFile } from './tauriFiles';
 
 interface Props {
   onClose: () => void;
@@ -98,13 +99,7 @@ export default function MidiLogger({ onClose }: Props) {
 
   const exportLogs = () => {
     const data = serializeLogs(filteredLogs);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'midi-logs.json';
-    a.click();
-    URL.revokeObjectURL(url);
+    saveJsonFile('midi-logs.json', data);
   };
 
   return (

@@ -61,7 +61,8 @@ Status: Draft plan for migration
 
 - [ ] Decide macro storage location (keep IndexedDB or move to Tauri Store).
 - [ ] If moving, write a one-time migration from existing IndexedDB data.
-- [ ] Add file import/export for macros using Tauri file dialogs.
+- [x] Add file import/export for macros using Tauri file dialogs.
+- [x] Extend Tauri file dialogs to configs/settings/log exports as needed.
 - [ ] Store settings via Tauri Store with schema validation.
 
 ## Phase 6 - Launchpad X and SysEx parity

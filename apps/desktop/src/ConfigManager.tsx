@@ -11,6 +11,7 @@ import {
   cc,
   lightingSysEx,
 } from './midiMessages';
+import { isTauriRuntime, openJsonFile, saveJsonFile } from './tauriFiles';
 
 export default function ConfigManager() {
   const configs = useStore((s) => s.configs);
@@ -169,15 +170,9 @@ export default function ConfigManager() {
   };
 
   const exportConfig = (cfg: PadConfig) => {
-    const data = JSON.stringify(cfg);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${cfg.name}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    addToast('Config exported', 'success');
+    saveJsonFile(`${cfg.name}.json`, cfg).then((ok) => {
+      if (ok) addToast('Config exported', 'success');
+    });
   };
 
   const importConfig = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -204,6 +199,25 @@ export default function ConfigManager() {
     e.target.value = '';
   };
 
+  const importConfigDialog = async () => {
+    const raw = await openJsonFile();
+    if (!raw) return;
+    try {
+      const cfg = JSON.parse(raw) as PadConfig;
+      addConfig({
+        ...cfg,
+        id: Date.now().toString(),
+        padLabels: cfg.padLabels || {},
+        padChannels: cfg.padChannels || {},
+        padActions: cfg.padActions || {},
+        tags: cfg.tags || [],
+      });
+      addToast('Config imported', 'success');
+    } catch {
+      addToast('Failed to import config', 'error');
+    }
+  };
+
   return (
     <div className="retro-panel">
       <h3>◄ Custom Configs ►</h3>
@@ -225,7 +239,17 @@ export default function ConfigManager() {
         </button>
       </div>
       <div className="mb-3">
-        <input type="file" accept="application/json" onChange={importConfig} />
+        {isTauriRuntime() ? (
+          <button className="retro-button btn-sm" onClick={importConfigDialog}>
+            IMPORT CONFIG
+          </button>
+        ) : (
+          <input
+            type="file"
+            accept="application/json"
+            onChange={importConfig}
+          />
+        )}
       </div>
       <div className="mb-3">
         <input
