@@ -6,11 +6,11 @@ import SysexWorkbench from './SysexWorkbench';
 import MidiDevices from './MidiDevices';
 import MidiLogger from './MidiLogger';
 import ActionBar from './ActionBar';
-import FloatingActionBar from './FloatingActionBar';
 import ConfigManager from './ConfigManager';
 import ToastContainer from './ToastContainer';
 import TitleBar from './TitleBar';
 import Tabs from './Tabs';
+import SettingsModal from './SettingsModal';
 import { usePadActions } from './usePadActions';
 import { useStore } from './store';
 import { useEffect } from 'react';
@@ -125,11 +125,18 @@ function App() {
                   <ConfigManager />
                 </div>
               </div>
+              <div className="row">
+                <div className="col-12">
+                  <div className="retro-panel">
+                    <h3>◄ Settings ►</h3>
+                    <SettingsModal />
+                  </div>
+                </div>
+              </div>
             </div>
           </Tabs>
         </div>
       </div>
-      <FloatingActionBar />
       <ToastContainer />
     </div>
   );

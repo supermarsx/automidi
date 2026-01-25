@@ -5,7 +5,7 @@ import { isTauri, saveFile, writeTextFile, openFile, readTextFile } from './taur
 import './SettingsModal.css';
 
 interface Props {
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 export default function SettingsModal({ onClose }: Props) {
@@ -100,7 +100,7 @@ export default function SettingsModal({ onClose }: Props) {
         .map((n) => Math.min(255, Math.max(0, n))),
     );
     setMacroConfirmTimeout(Math.max(0, mct));
-    onClose();
+    if (onClose) onClose();
     addToast('Settings saved', 'success');
   };
 
@@ -224,12 +224,22 @@ export default function SettingsModal({ onClose }: Props) {
   };
 
   useEffect(() => {
+    if (!onClose) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
+
+  // If onClose is not provided, render without modal wrapper (embedded mode)
+  if (!onClose) {
+    return (
+      <div className="settings-scroll">
+        <div className="mb-3">{renderSettingsContent()}</div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -242,7 +252,15 @@ export default function SettingsModal({ onClose }: Props) {
           <div className="modal-header">
             <h5 className="modal-title">◄ SYSTEM CONFIGURATION ►</h5>
           </div>
-          <div className="modal-body settings-scroll">
+          <div className="modal-body settings-scroll">{renderSettingsContent()}</div>
+        </div>
+      </div>
+    </div>
+  );
+
+  function renderSettingsContent() {
+    return (
+      <>
             <div className="mb-3">
               <label className="form-label text-info">HOST ADDRESS:</label>
               <input
@@ -542,12 +560,13 @@ export default function SettingsModal({ onClose }: Props) {
             <button className="retro-button me-2" onClick={save}>
               SAVE CONFIG
             </button>
-            <button className="retro-button" onClick={onClose}>
-              ABORT
-            </button>
+            {onClose && (
+              <button className="retro-button" onClick={onClose}>
+                ABORT
+              </button>
+            )}
           </div>
-        </div>
-      </div>
-    </div>
-  );
+        </>
+    );
+  }
 }

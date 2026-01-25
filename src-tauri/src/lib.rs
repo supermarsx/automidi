@@ -10,7 +10,7 @@ use tauri::{AppHandle, Emitter, Manager, State};
 pub fn run() {
     eprintln!("[automidi] Starting Tauri app...");
     eprintln!("[automidi] Registering commands: ping, run_app, run_shell, run_shell_bg, run_shell_win, keys_type, notify, list_devices, send_midi, set_listening, run_keys");
-    
+
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             ping,
@@ -27,7 +27,7 @@ pub fn run() {
         ])
         .setup(|app| {
             eprintln!("[automidi] Running setup...");
-            
+
             if cfg!(debug_assertions) {
                 eprintln!("[automidi] Debug mode: enabling logging");
                 app.handle().plugin(
@@ -36,7 +36,7 @@ pub fn run() {
                         .build(),
                 )?;
             }
-            
+
             eprintln!("[automidi] Initializing plugins...");
             app.handle().plugin(tauri_plugin_notification::init())?;
             app.handle().plugin(tauri_plugin_dialog::init())?;
@@ -47,7 +47,7 @@ pub fn run() {
             eprintln!("[automidi] Setting up application state...");
             let state = AppState::from_env();
             app.manage(state);
-            
+
             eprintln!("[automidi] Starting device watcher...");
             start_device_watcher(app.handle().clone());
 
@@ -62,21 +62,19 @@ pub fn run() {
             eprintln!("[automidi] Setup complete!");
             Ok(())
         })
-        .on_window_event(|_window, event| {
-            match event {
-                tauri::WindowEvent::CloseRequested { api, .. } => {
-                    eprintln!("[automidi] Window close requested");
-                    api.prevent_close();
-                }
-                tauri::WindowEvent::Destroyed => {
-                    eprintln!("[automidi] Window destroyed");
-                }
-                _ => {}
+        .on_window_event(|_window, event| match event {
+            tauri::WindowEvent::CloseRequested { api, .. } => {
+                eprintln!("[automidi] Window close requested");
+                api.prevent_close();
             }
+            tauri::WindowEvent::Destroyed => {
+                eprintln!("[automidi] Window destroyed");
+            }
+            _ => {}
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-    
+
     eprintln!("[automidi] App exited normally");
 }
 
@@ -293,7 +291,11 @@ fn midi_list_devices() -> MidiDevices {
 fn list_devices() -> MidiDevices {
     eprintln!("[automidi] list_devices command called");
     let devices = list_devices_internal();
-    eprintln!("[automidi] Found {} inputs, {} outputs", devices.inputs.len(), devices.outputs.len());
+    eprintln!(
+        "[automidi] Found {} inputs, {} outputs",
+        devices.inputs.len(),
+        devices.outputs.len()
+    );
     devices
 }
 
@@ -338,7 +340,10 @@ fn midi_send(app: AppHandle, port: String, bytes: Vec<u8>) -> Result<(), String>
 // Alias for frontend
 #[tauri::command]
 fn send_midi(app: AppHandle, port: String, bytes: Vec<u8>) -> Result<(), String> {
-    eprintln!("[automidi] send_midi command called with port: {}, bytes: {:?}", port, bytes);
+    eprintln!(
+        "[automidi] send_midi command called with port: {}, bytes: {:?}",
+        port, bytes
+    );
     // Call midi_send with port_id parameter
     midi_send(app, port, bytes)
 }
@@ -365,7 +370,10 @@ fn midi_set_listening(app: AppHandle, state: State<AppState>, enabled: bool) -> 
 // Alias for frontend
 #[tauri::command]
 fn set_listening(app: AppHandle, state: State<AppState>, enabled: bool) -> Result<(), String> {
-    eprintln!("[automidi] set_listening command called with enabled: {}", enabled);
+    eprintln!(
+        "[automidi] set_listening command called with enabled: {}",
+        enabled
+    );
     midi_set_listening(app, state, enabled)
 }
 
