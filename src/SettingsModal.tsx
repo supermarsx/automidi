@@ -73,6 +73,93 @@ export default function SettingsModal({ onClose }: Props) {
   const [mct, setMct] = useState(macroConfirmTimeout);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // Auto-save settings when they change
+  useEffect(() => {
+    setHost(h);
+  }, [h, setHost]);
+
+  useEffect(() => {
+    setPort(Number(p));
+  }, [p, setPort]);
+
+  useEffect(() => {
+    setAutoReconnect(ar);
+  }, [ar, setAutoReconnect]);
+
+  useEffect(() => {
+    setReconnectInterval(Math.max(1, ri) * 1000);
+  }, [ri, setReconnectInterval]);
+
+  useEffect(() => {
+    setMaxReconnectAttempts(mra);
+  }, [mra, setMaxReconnectAttempts]);
+
+  useEffect(() => {
+    setLogLimit(ll);
+  }, [ll, setLogLimit]);
+
+  useEffect(() => {
+    setPingInterval(Math.max(500, pi));
+  }, [pi, setPingInterval]);
+
+  useEffect(() => {
+    setPingEnabled(pe);
+  }, [pe, setPingEnabled]);
+
+  useEffect(() => {
+    setReconnectOnLost(rol);
+  }, [rol, setReconnectOnLost]);
+
+  useEffect(() => {
+    setPingGreen(pg);
+  }, [pg, setPingGreen]);
+
+  useEffect(() => {
+    setPingYellow(py);
+  }, [py, setPingYellow]);
+
+  useEffect(() => {
+    setPingOrange(po);
+  }, [po, setPingOrange]);
+
+  useEffect(() => {
+    setClearBeforeLoad(cbl);
+  }, [cbl, setClearBeforeLoad]);
+
+  useEffect(() => {
+    setSysexColorMode(scm);
+  }, [scm, setSysexColorMode]);
+
+  useEffect(() => {
+    setAutoSleep(asleep);
+  }, [asleep, setAutoSleep]);
+
+  useEffect(() => {
+    setAutoLoadFirstConfig(alfc);
+  }, [alfc, setAutoLoadFirstConfig]);
+
+  useEffect(() => {
+    setTheme(thm);
+  }, [thm, setTheme]);
+
+  useEffect(() => {
+    setApiKey(ak);
+  }, [ak, setApiKey]);
+
+  useEffect(() => {
+    setClock(
+      clk
+        .split(/\s+/)
+        .map((v) => parseInt(v, 10))
+        .filter((n) => !Number.isNaN(n))
+        .map((n) => Math.min(255, Math.max(0, n))),
+    );
+  }, [clk, setClock]);
+
+  useEffect(() => {
+    setMacroConfirmTimeout(Math.max(0, mct));
+  }, [mct, setMacroConfirmTimeout]);
+
   const save = () => {
     setHost(h);
     setPort(Number(p));
