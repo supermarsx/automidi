@@ -240,7 +240,7 @@ fn signature_for_devices(devices: &MidiDevices) -> String {
   entries.join("|")
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 fn midi_list_devices() -> MidiDevices {
   list_devices_internal()
 }
@@ -409,7 +409,7 @@ fn start_device_watcher(app: AppHandle) {
   });
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 fn run_app(state: State<AppState>, app_path: String) -> Result<(), String> {
   if !state.check_rate_limit() {
     return Err("command rate limit exceeded".to_string());
@@ -423,7 +423,7 @@ fn run_app(state: State<AppState>, app_path: String) -> Result<(), String> {
   Ok(())
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 fn run_shell(
   app: AppHandle,
   state: State<AppState>,
@@ -479,7 +479,7 @@ fn run_shell(
   Ok(())
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 fn run_shell_bg(state: State<AppState>, cmd: String) -> Result<(), String> {
   if !state.check_rate_limit() {
     return Err("command rate limit exceeded".to_string());
@@ -493,7 +493,7 @@ fn run_shell_bg(state: State<AppState>, cmd: String) -> Result<(), String> {
   Ok(())
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 fn run_shell_win(state: State<AppState>, cmd: String) -> Result<(), String> {
   if !state.check_rate_limit() {
     return Err("command rate limit exceeded".to_string());
@@ -525,7 +525,7 @@ fn keys_type(sequence: Vec<String>, interval: Option<u64>) -> Result<(), String>
   Ok(())
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 fn notify(app: AppHandle, title: Option<String>, message: String) -> Result<(), String> {
   use tauri_plugin_notification::NotificationExt;
 

@@ -1,0 +1,18 @@
+.action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.status.connected {
+  color: green;
+}
+
+.status.closed {
+  color: red;
+}
+
+.status.connecting {
+  color: orange;
+}

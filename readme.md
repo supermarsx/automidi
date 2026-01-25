@@ -14,6 +14,13 @@ The target desktop architecture and migration checklist live here:
 - Spec: `SPEC.md`
 - TODO: `TODO_TAURI_NEXT16.md`
 
+## Desktop (WIP)
+
+The Next.js + Tauri desktop app lives in `apps/desktop`.
+
+- Run the Next dev server: `npm run dev:desktop`
+- Run the Tauri dev shell: `npm run tauri:dev`
+
 ## Setup
 
 Install dependencies before running any lint or build steps:

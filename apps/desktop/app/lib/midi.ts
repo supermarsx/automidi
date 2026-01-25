@@ -7,12 +7,12 @@ export type MidiDevices = {
 
 export async function listMidiDevices(): Promise<MidiDevices> {
   const { invoke } = await import("@tauri-apps/api/core");
-  return invoke<MidiDevices>("midi_list_devices");
+  return invoke<MidiDevices>("midiListDevices");
 }
 
 export async function sendMidi(portId: string, bytes: number[]): Promise<void> {
   const { invoke } = await import("@tauri-apps/api/core");
-  await invoke("midi_send", { portId, bytes });
+  await invoke("midiSend", { portId, bytes });
 }
 
 export async function setMidiListening(enabled: boolean): Promise<void> {

@@ -1,0 +1,9 @@
+.sysex-workbench {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #ccc;
+}
+.sysex-workbench .params input {
+  width: 4rem;
+  margin-right: 0.5rem;
+}

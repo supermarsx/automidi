@@ -15,44 +15,44 @@ Status: Draft plan for migration
 
 ## Phase 1 - Repository structure and scaffolding
 
-- [ ] Decide the target layout:
+- [x] Decide the target layout:
       - Option A: keep Next app at repo root and add `src-tauri/`.
       - Option B: move Next app to `apps/desktop/` and keep shared code in
         `shared/`.
-- [ ] Initialize Tauri and confirm it can load a Next dev server.
-- [ ] Scaffold Next.js 16 App Router with TypeScript.
-- [ ] Configure a static output or compatible Tauri dev/build pipeline.
-- [ ] Set up shared TS config and path aliases for `shared/` modules.
-- [ ] Add a minimal `@tauri-apps/api` bridge and smoke test commands.
+- [x] Initialize Tauri and confirm it can load a Next dev server.
+- [x] Scaffold Next.js 16 App Router with TypeScript.
+- [x] Configure a static output or compatible Tauri dev/build pipeline.
+- [x] Set up shared TS config and path aliases for `shared/` modules.
+- [x] Add a minimal `@tauri-apps/api` bridge and smoke test commands.
 
 ## Phase 2 - Rust backend (MIDI core)
 
-- [ ] Select a MIDI crate (midir recommended) and confirm SysEx support.
-- [ ] Implement device enumeration for inputs and outputs.
-- [ ] Implement send MIDI bytes to output by id.
-- [ ] Implement MIDI input listening and event emission to the frontend.
-- [ ] Add hot-plug detection and emit `midi:devices` events.
-- [ ] Mirror the current message schema from `server/messages`.
-- [ ] Add outgoing MIDI event echo for logger parity.
+- [x] Select a MIDI crate (midir recommended) and confirm SysEx support.
+- [x] Implement device enumeration for inputs and outputs.
+- [x] Implement send MIDI bytes to output by id.
+- [x] Implement MIDI input listening and event emission to the frontend.
+- [x] Add hot-plug detection and emit `midi:devices` events.
+- [x] Mirror the current message schema from `server/messages`.
+- [x] Add outgoing MIDI event echo for logger parity.
 - [ ] Add unit tests for byte validation and port selection logic.
 
 ## Phase 3 - Backend utilities (parity with server features)
 
-- [ ] Implement OS notifications (Tauri plugin).
-- [ ] Implement keystroke automation (evaluate `enigo` or `rdev`).
-- [ ] Implement app launch and shell execution using Tauri shell.
-- [ ] Enforce allowlist rules and basic injection protections.
-- [ ] Add rate limiting for command execution (token bucket).
-- [ ] Implement `shell:output` event streaming.
+- [x] Implement OS notifications (Tauri plugin).
+- [x] Implement keystroke automation (evaluate `enigo` or `rdev`).
+- [x] Implement app launch and shell execution using Tauri shell.
+- [x] Enforce allowlist rules and basic injection protections.
+- [x] Add rate limiting for command execution (token bucket).
+- [x] Implement `shell:output` event streaming.
 
 ## Phase 4 - Frontend migration to Next.js 16
 
-- [ ] Port global styles, CSS modules, and assets into Next layout.
-- [ ] Convert entry point to App Router (`app/layout.tsx`, `app/page.tsx`).
+- [x] Port global styles, CSS modules, and assets into Next layout.
+- [x] Convert entry point to App Router (`app/layout.tsx`, `app/page.tsx`).
 - [ ] Replace Vite-specific env usage with Next `process.env` or runtime config.
-- [ ] Replace WebSocket client with Tauri IPC hooks.
-- [ ] Create a `useTauriMidi` adapter mirroring `useMidiConnection`.
-- [ ] Update `socket.ts`, `useWebSocket.ts`, and call sites.
+- [x] Replace WebSocket client with Tauri IPC hooks.
+- [x] Create a `useTauriMidi` adapter mirroring `useMidiConnection`.
+- [x] Update `socket.ts`, `useWebSocket.ts`, and call sites.
 - [ ] Validate all panels: LaunchpadCanvas, MacroBuilder, Logger, Settings.
 - [ ] Ensure keyboard and pointer behavior matches current app.
 
