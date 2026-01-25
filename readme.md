@@ -2,27 +2,90 @@
 
 # automidi
 
-**automidi** is a Vite + React application that provides a simple interface for
-controlling MIDI devices. When a Launchpad X is detected the app automatically
-switches the controller into _Programmer_ mode so that every pad can be
-addressed individually.
+**automidi** is a MIDI control application that provides a comprehensive interface for
+controlling MIDI devices, with special support for the Novation Launchpad X. When a 
+Launchpad X is detected, the app automatically switches the controller into _Programmer_ 
+mode so that every pad can be addressed individually.
 
-## Migration plan (Tauri + Next 16)
+## 🎯 Dual Architecture
 
-The target desktop architecture and migration checklist live here:
+AutoMIDI supports two runtime modes:
 
-- Spec: `SPEC.md`
-- TODO: `TODO_TAURI_NEXT16.md`
+### 🖥️ Native Desktop App (Tauri)
+- **Recommended for production use**
+- Native performance with Rust backend
+- Direct MIDI hardware access (lower latency)
+- Persistent storage with Tauri Store
+- OS notifications and system integration
+- Cross-platform: Windows, macOS, Linux
 
-## Desktop (WIP)
+**Quick start:**
+```bash
+npm install
+npm run dev:tauri
+```
 
-The Next.js + Tauri desktop app lives in `apps/desktop`.
+See [TAURI_QUICKSTART.md](./TAURI_QUICKSTART.md) for detailed setup.
 
-- Run the Next dev server: `npm run dev:desktop`
-- Run the Tauri dev shell: `npm run tauri:dev`
+### 🌐 Web App (Vite + Node.js)
+- Great for development and testing
+- Browser-based with WebSocket communication
+- WebMIDI API for MIDI access
+- Node.js server for system integration
 
-The legacy Vite + Node workflow is still present while the desktop migration
-is underway.
+**Quick start:**
+```bash
+npm install
+npm run dev
+```
+
+## 📚 Documentation
+
+- **[TAURI_QUICKSTART.md](./TAURI_QUICKSTART.md)** - Get started with Tauri development
+- **[TAURI_MIGRATION.md](./TAURI_MIGRATION.md)** - Architecture and implementation details
+- **[TODO_TAURI_NEXT16.md](./TODO_TAURI_NEXT16.md)** - Migration progress checklist
+- **[SPEC.md](./SPEC.md)** - Feature specifications
+- **[agents.md](./agents.md)** - Development workflow
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+**For Tauri (Desktop):**
+- [Rust](https://rustup.rs/) (latest stable)
+- Node.js 18+ and npm
+- Platform-specific dependencies (see [TAURI_QUICKSTART.md](./TAURI_QUICKSTART.md))
+
+**For Web Mode:**
+- Node.js 18+ and npm
+
+### Installation
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd automidi
+
+# Install dependencies
+npm install
+
+# Copy environment config
+cp .env.example .env
+```
+
+### Running
+
+**Desktop App (Tauri):**
+```bash
+npm run dev:tauri
+```
+
+**Web App:**
+```bash
+npm run dev
+```
+
+Visit http://localhost:5173 in your browser (web mode only).
 
 ## Setup
 
@@ -36,11 +99,11 @@ This script simply runs `npm install` to fetch all project packages.
 
 ---
 
-## Node server
+## Node server (Web Mode Only)
 
 The project ships with a small Node server that exposes MIDI devices to the
 browser. It must be running for the React frontend to communicate with your
-hardware.
+hardware in web mode.
 
 Start it with:
 

@@ -32,6 +32,7 @@ pub fn run() {
       app.handle().plugin(tauri_plugin_notification::init())?;
       app.handle().plugin(tauri_plugin_dialog::init())?;
       app.handle().plugin(tauri_plugin_fs::init())?;
+      app.handle().plugin(tauri_plugin_store::Builder::new().build())?;
 
       let state = AppState::from_env();
       app.manage(state);

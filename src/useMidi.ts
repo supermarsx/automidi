@@ -78,6 +78,15 @@ export function useMidi() {
     return unsub;
   }, [listenRaw]);
 
+  // Request device list on mount and when connected
+  useEffect(() => {
+    if (status === 'connected') {
+      sendRaw({ type: 'listDevices' });
+      // Also enable MIDI listening
+      sendRaw({ type: 'setListening', enabled: true });
+    }
+  }, [status, sendRaw]);
+
   useEffect(() => {
     if (launchpadRef.current !== null && status === 'connected') {
       const timeoutId = setTimeout(() => {

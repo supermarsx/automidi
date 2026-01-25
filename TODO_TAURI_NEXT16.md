@@ -34,7 +34,7 @@ Status: Draft plan for migration
 - [x] Add hot-plug detection and emit `midi:devices` events.
 - [x] Mirror the current message schema from `server/messages`.
 - [x] Add outgoing MIDI event echo for logger parity.
-- [ ] Add unit tests for byte validation and port selection logic.
+- [x] Add unit tests for byte validation and port selection logic.
 
 ## Phase 3 - Backend utilities (parity with server features)
 
@@ -49,20 +49,28 @@ Status: Draft plan for migration
 
 - [x] Port global styles, CSS modules, and assets into Next layout.
 - [x] Convert entry point to App Router (`app/layout.tsx`, `app/page.tsx`).
-- [ ] Replace Vite-specific env usage with Next `process.env` or runtime config.
 - [x] Replace WebSocket client with Tauri IPC hooks.
 - [x] Create a `useTauriMidi` adapter mirroring `useMidiConnection`.
 - [x] Update `socket.ts`, `useWebSocket.ts`, and call sites.
+- [x] Add Tauri environment detection utility.
+- [x] Create Tauri IPC adapter that fallback to WebSocket when not in Tauri.
+- [ ] Replace Vite-specific env usage with Next `process.env` or runtime config.
 - [ ] Rebuild frontend tests for Tauri IPC (replace WebSocket mocks) - started with useMidiConnection + dialog paths.
 - [ ] Validate all panels: LaunchpadCanvas, MacroBuilder, Logger, Settings.
 - [ ] Ensure keyboard and pointer behavior matches current app.
 
 ## Phase 5 - Data and persistence
 
-- [ ] Decide macro storage location (keep IndexedDB or move to Tauri Store).
-- [ ] If moving, write a one-time migration from existing IndexedDB data.
+- [x] Add Tauri Store plugin to Cargo.toml and initialize in lib.rs.
+- [x] Create tauriStore.ts wrapper for settings, macros, configs, and pads.
+- [x] Create useTauriPersistence hook to sync Zustand with Tauri Store.
+- [x] Integrate persistence hook in App.tsx.
 - [x] Add file import/export for macros using Tauri file dialogs.
 - [x] Extend Tauri file dialogs to configs/settings/log exports as needed.
+- [x] Create tauriDialogs.ts with file picker and message dialog utilities.
+- [x] Create tauriWindow.ts for window management (minimize, maximize, etc).
+- [ ] Decide macro storage location (keep IndexedDB or move to Tauri Store) - **DECISION: Use Tauri Store**.
+- [ ] If moving, write a one-time migration from existing IndexedDB data.
 - [ ] Store settings via Tauri Store with schema validation.
 
 ## Phase 6 - Launchpad X and SysEx parity

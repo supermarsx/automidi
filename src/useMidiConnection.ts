@@ -5,11 +5,17 @@ import { registerSend } from './socket';
 import { useWebSocket } from './useWebSocket';
 import type { ClientMessage, ServerMessage } from '../shared/messages';
 import { useToastStore } from './toastStore';
+import { isTauri } from './tauri';
+import { useTauriMidiConnection } from './useTauriMidiConnection';
 
 export type RawMessage = ServerMessage;
 export type RawListener = (msg: RawMessage) => void;
 
 export function useMidiConnection() {
+  // Use Tauri connection if available, otherwise fallback to WebSocket
+  if (isTauri()) {
+    return useTauriMidiConnection();
+  }
   const host = useStore((s) => s.settings.host);
   const port = useStore((s) => s.settings.port);
   const apiKey = useStore((s) => s.settings.apiKey);

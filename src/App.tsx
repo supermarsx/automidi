@@ -13,13 +13,24 @@ import { useStore } from './store';
 import { useEffect } from 'react';
 import { useMidi } from './useMidi';
 import { setSleepMode } from './midiMessages';
+import { useTauriPersistence } from './useTauriPersistence';
+import { performMigrationWorkflow } from './tauriMigration';
+import { isTauri } from './tauri';
 import './App.css';
 
 function App() {
   usePadActions();
+  useTauriPersistence(); // Enable Tauri Store persistence
   const autoSleep = useStore((s) => s.settings.autoSleep);
   const theme = useStore((s) => s.settings.theme);
   const { send } = useMidi();
+
+  // Check for migration on first load (Tauri mode only)
+  useEffect(() => {
+    if (isTauri()) {
+      performMigrationWorkflow().catch(console.error);
+    }
+  }, []);
 
   useEffect(() => {
     document.body.className = `theme-${theme}`;

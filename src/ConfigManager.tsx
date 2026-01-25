@@ -11,6 +11,7 @@ import {
   cc,
   lightingSysEx,
 } from './midiMessages';
+import { isTauri, saveFile, writeTextFile, openFile, readTextFile } from './tauriApi';
 
 export default function ConfigManager() {
   const configs = useStore((s) => s.configs);
@@ -168,16 +169,65 @@ export default function ConfigManager() {
     addToast('Config updated', 'success');
   };
 
-  const exportConfig = (cfg: PadConfig) => {
-    const data = JSON.stringify(cfg);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${cfg.name}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    addToast('Config exported', 'success');
+  const exportConfig = async (cfg: PadConfig) => {
+    const data = JSON.stringify(cfg, null, 2);
+
+    if (isTauri()) {
+      try {
+        const filePath = await saveFile({
+          title: 'Export Config',
+          filters: [{ name: 'JSON', extensions: ['json'] }],
+          defaultPath: `${cfg.name}.json`,
+        });
+
+        if (filePath) {
+          const success = await writeTextFile(filePath, data);
+          if (success) {
+            addToast('Config exported', 'success');
+          } else {
+            addToast('Failed to write file', 'error');
+          }
+        }
+      } catch (error) {
+        addToast(`Export failed: ${error}`, 'error');
+      }
+    } else {
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${cfg.name}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      addToast('Config exported', 'success');
+    }
+  };
+
+  const importConfigTauri = async () => {
+    try {
+      const filePath = await openFile({
+        title: 'Import Config',
+        filters: [{ name: 'JSON', extensions: ['json'] }],
+      });
+
+      if (filePath) {
+        const content = await readTextFile(filePath);
+        if (content) {
+          const cfg = JSON.parse(content) as PadConfig;
+          addConfig({
+            ...cfg,
+            id: Date.now().toString(),
+            padLabels: cfg.padLabels || {},
+            padChannels: cfg.padChannels || {},
+            padActions: cfg.padActions || {},
+            tags: cfg.tags || [],
+          });
+          addToast('Config imported', 'success');
+        }
+      }
+    } catch (error) {
+      addToast(`Import failed: ${error}`, 'error');
+    }
   };
 
   const importConfig = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -225,7 +275,13 @@ export default function ConfigManager() {
         </button>
       </div>
       <div className="mb-3">
-        <input type="file" accept="application/json" onChange={importConfig} />
+        {isTauri() ? (
+          <button className="retro-button btn-sm" onClick={importConfigTauri}>
+            IMPORT CONFIG FILE
+          </button>
+        ) : (
+          <input type="file" accept="application/json" onChange={importConfig} />
+        )}
       </div>
       <div className="mb-3">
         <input

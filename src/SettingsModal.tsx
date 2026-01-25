@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useStore } from './store';
 import { useToastStore } from './toastStore';
+import { isTauri, saveFile, writeTextFile, openFile, readTextFile } from './tauriApi';
 import './SettingsModal.css';
 
 interface Props {
@@ -103,16 +104,106 @@ export default function SettingsModal({ onClose }: Props) {
     addToast('Settings saved', 'success');
   };
 
-  const exportSettings = () => {
-    const data = JSON.stringify(useStore.getState().settings);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'system-config.json';
-    a.click();
-    URL.revokeObjectURL(url);
-    addToast('Config exported', 'success');
+  const exportSettings = async () => {
+    const data = JSON.stringify(useStore.getState().settings, null, 2);
+
+    if (isTauri()) {
+      try {
+        const filePath = await saveFile({
+          title: 'Export Settings',
+          filters: [{ name: 'JSON', extensions: ['json'] }],
+          defaultPath: 'system-config.json',
+        });
+
+        if (filePath) {
+          const success = await writeTextFile(filePath, data);
+          if (success) {
+            addToast('Settings exported', 'success');
+          } else {
+            addToast('Failed to write file', 'error');
+          }
+        }
+      } catch (error) {
+        addToast(`Export failed: ${error}`, 'error');
+      }
+    } else {
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'system-config.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      addToast('Settings exported', 'success');
+    }
+  };
+
+  const importSettingsTauri = async () => {
+    try {
+      const filePath = await openFile({
+        title: 'Import Settings',
+        filters: [{ name: 'JSON', extensions: ['json'] }],
+      });
+
+      if (filePath) {
+        const content = await readTextFile(filePath);
+        if (content) {
+          const cfg = JSON.parse(content);
+          applyImportedSettings(cfg);
+          addToast('Settings imported', 'success');
+        }
+      }
+    } catch (error) {
+      addToast(`Import failed: ${error}`, 'error');
+    }
+  };
+
+  const applyImportedSettings = (cfg: unknown) => {
+    const settings = cfg as Record<string, unknown>;
+    setHost(settings.host as string ?? h);
+    setPort(settings.port as number ?? p);
+    setAutoReconnect(settings.autoReconnect as boolean ?? ar);
+    setReconnectInterval(settings.reconnectInterval as number ?? reconnectInterval);
+    setMaxReconnectAttempts(settings.maxReconnectAttempts as number ?? mra);
+    setLogLimit(settings.logLimit as number ?? ll);
+    setPingInterval(settings.pingInterval as number ?? pi);
+    setPingEnabled(settings.pingEnabled as boolean ?? pe);
+    setReconnectOnLost(settings.reconnectOnLost as boolean ?? rol);
+    setPingGreen(settings.pingGreen as number ?? pg);
+    setPingYellow(settings.pingYellow as number ?? py);
+    setPingOrange(settings.pingOrange as number ?? po);
+    setClearBeforeLoad(settings.clearBeforeLoad as boolean ?? cbl);
+    setSysexColorMode(settings.sysexColorMode as string ?? scm);
+    setAutoSleep(settings.autoSleep as boolean ?? asleep);
+    setAutoLoadFirstConfig(settings.autoLoadFirstConfig as boolean ?? alfc);
+    setTheme(settings.theme as string ?? thm);
+    setApiKey(settings.apiKey as string ?? ak);
+    setClock(Array.isArray(settings.clock) ? settings.clock as number[] : clock);
+    setMacroConfirmTimeout(settings.macroConfirmTimeout as number ?? macroConfirmTimeout);
+    setH(settings.host as string ?? h);
+    setP(settings.port as number ?? p);
+    setAr(settings.autoReconnect as boolean ?? ar);
+    setRi((settings.reconnectInterval as number ?? reconnectInterval) / 1000);
+    setMra(settings.maxReconnectAttempts as number ?? mra);
+    setLl(settings.logLimit as number ?? ll);
+    setPi(settings.pingInterval as number ?? pi);
+    setPg(settings.pingGreen as number ?? pg);
+    setPy(settings.pingYellow as number ?? py);
+    setPo(settings.pingOrange as number ?? po);
+    setPe(settings.pingEnabled as boolean ?? pe);
+    setRol(settings.reconnectOnLost as boolean ?? rol);
+    setCbl(settings.clearBeforeLoad as boolean ?? cbl);
+    setScm(settings.sysexColorMode as string ?? scm);
+    setAsleep(settings.autoSleep as boolean ?? asleep);
+    setAlfc(settings.autoLoadFirstConfig as boolean ?? alfc);
+    setThm(settings.theme as string ?? thm);
+    setAk(settings.apiKey as string ?? ak);
+    setClk(
+      (Array.isArray(settings.clock) ? settings.clock as number[] : clock)
+        .map((n: number) => n.toString())
+        .join(' '),
+    );
+    setMct(settings.macroConfirmTimeout as number ?? macroConfirmTimeout);
   };
 
   const importSettings = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,51 +213,8 @@ export default function SettingsModal({ onClose }: Props) {
     reader.onload = (ev) => {
       try {
         const cfg = JSON.parse(ev.target?.result as string);
-        setHost(cfg.host ?? h);
-        setPort(cfg.port ?? p);
-        setAutoReconnect(cfg.autoReconnect ?? ar);
-        setReconnectInterval(cfg.reconnectInterval ?? reconnectInterval);
-        setMaxReconnectAttempts(cfg.maxReconnectAttempts ?? mra);
-        setLogLimit(cfg.logLimit ?? ll);
-        setPingInterval(cfg.pingInterval ?? pi);
-        setPingEnabled(cfg.pingEnabled ?? pe);
-        setReconnectOnLost(cfg.reconnectOnLost ?? rol);
-        setPingGreen(cfg.pingGreen ?? pg);
-        setPingYellow(cfg.pingYellow ?? py);
-        setPingOrange(cfg.pingOrange ?? po);
-        setClearBeforeLoad(cfg.clearBeforeLoad ?? cbl);
-        setSysexColorMode(cfg.sysexColorMode ?? scm);
-        setAutoSleep(cfg.autoSleep ?? asleep);
-        setAutoLoadFirstConfig(cfg.autoLoadFirstConfig ?? alfc);
-        setTheme(cfg.theme ?? thm);
-        setApiKey(cfg.apiKey ?? ak);
-        setClock(Array.isArray(cfg.clock) ? cfg.clock : clock);
-        setMacroConfirmTimeout(cfg.macroConfirmTimeout ?? macroConfirmTimeout);
-        setH(cfg.host ?? h);
-        setP(cfg.port ?? p);
-        setAr(cfg.autoReconnect ?? ar);
-        setRi((cfg.reconnectInterval ?? reconnectInterval) / 1000);
-        setMra(cfg.maxReconnectAttempts ?? mra);
-        setLl(cfg.logLimit ?? ll);
-        setPi(cfg.pingInterval ?? pi);
-        setPg(cfg.pingGreen ?? pg);
-        setPy(cfg.pingYellow ?? py);
-        setPo(cfg.pingOrange ?? po);
-        setPe(cfg.pingEnabled ?? pe);
-        setRol(cfg.reconnectOnLost ?? rol);
-        setCbl(cfg.clearBeforeLoad ?? cbl);
-        setScm(cfg.sysexColorMode ?? scm);
-        setAsleep(cfg.autoSleep ?? asleep);
-        setAlfc(cfg.autoLoadFirstConfig ?? alfc);
-        setThm(cfg.theme ?? thm);
-        setAk(cfg.apiKey ?? ak);
-        setClk(
-          (Array.isArray(cfg.clock) ? cfg.clock : clock)
-            .map((n: number) => n.toString())
-            .join(' '),
-        );
-        setMct(cfg.macroConfirmTimeout ?? macroConfirmTimeout);
-        addToast('Config imported', 'success');
+        applyImportedSettings(cfg);
+        addToast('Settings imported', 'success');
       } catch {
         addToast('Failed to import config', 'error');
       }
@@ -487,7 +535,7 @@ export default function SettingsModal({ onClose }: Props) {
             </button>
             <button
               className="retro-button me-2"
-              onClick={() => fileRef.current?.click()}
+              onClick={() => (isTauri() ? importSettingsTauri() : fileRef.current?.click())}
             >
               IMPORT
             </button>

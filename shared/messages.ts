@@ -57,6 +57,21 @@ export interface GetDevicesMessage {
   type: 'getDevices';
 }
 
+export interface ListDevicesMessage {
+  type: 'listDevices';
+}
+
+export interface SendMidiMessage2 {
+  type: 'sendMidi';
+  portId: string;
+  bytes: number[];
+}
+
+export interface SetListeningMessage {
+  type: 'setListening';
+  enabled: boolean;
+}
+
 export interface MidiDevice {
   id: string;
   name: string;
@@ -83,6 +98,9 @@ export interface MidiEventMessage {
 
 export type ClientMessage =
   | SendMidiMessage
+  | SendMidiMessage2
+  | ListDevicesMessage
+  | SetListeningMessage
   | RunAppMessage
   | RunShellMessage
   | RunShellWinMessage
