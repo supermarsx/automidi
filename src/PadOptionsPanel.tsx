@@ -103,177 +103,226 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
   return (
     <div className="pad-options-panel" onClick={(e) => e.stopPropagation()}>
       <h4>PAD {pad.id}</h4>
-      <div className="mb-3">
-        <label className="form-label text-info">LABEL:</label>
-        <input
-          className="form-control retro-input"
-          value={label}
-          onChange={handleLabelChange}
-          placeholder="Label"
-        />
+      <table style={{ width: '100%', borderSpacing: '0 8px' }}>
+        <tbody>
+          <tr>
+            <td style={{ width: '25%', verticalAlign: 'middle', paddingRight: '12px' }}>
+              <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>LABEL:</label>
+            </td>
+            <td style={{ width: '60%' }}>
+              <input
+                className="form-control retro-input"
+                value={label}
+                onChange={handleLabelChange}
+                placeholder="Label"
+              />
+            </td>
+            <td style={{ width: '15%' }}></td>
+          </tr>
+          <tr>
+            <td style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+              <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>STATIC COLOR:</label>
+            </td>
+            <td>
+              <select
+                className="form-select retro-select"
+                value={colours[1] || '#000000'}
+                onChange={handleChange(1)}
+                style={{ backgroundColor: colours[1] || '#000000' }}
+              >
+                {LAUNCHPAD_COLORS.map((color) => (
+                  <option
+                    key={color.value}
+                    value={color.color}
+                    style={{
+                      backgroundColor: color.color,
+                      color: color.color === '#000000' ? '#fff' : '#000',
+                    }}
+                  >
+                    {color.name}
+                  </option>
+                ))}
+              </select>
+            </td>
+            <td></td>
+          </tr>
+          <tr>
+            <td style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+              <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>FLASH COLOR:</label>
+            </td>
+            <td>
+              <select
+                className="form-select retro-select"
+                value={colours[2] || '#000000'}
+                onChange={handleChange(2)}
+                style={{ backgroundColor: colours[2] || '#000000' }}
+              >
+                {LAUNCHPAD_COLORS.map((color) => (
+                  <option
+                    key={color.value}
+                    value={color.color}
+                    style={{
+                      backgroundColor: color.color,
+                      color: color.color === '#000000' ? '#fff' : '#000',
+                    }}
+                  >
+                    {color.name}
+                  </option>
+                ))}
+              </select>
+            </td>
+            <td></td>
+          </tr>
+          <tr>
+            <td style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+              <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>PULSE COLOR:</label>
+            </td>
+            <td>
+              <select
+                className="form-select retro-select"
+                value={colours[3] || '#000000'}
+                onChange={handleChange(3)}
+                style={{ backgroundColor: colours[3] || '#000000' }}
+              >
+                {LAUNCHPAD_COLORS.map((color) => (
+                  <option
+                    key={color.value}
+                    value={color.color}
+                    style={{
+                      backgroundColor: color.color,
+                      color: color.color === '#000000' ? '#fff' : '#000',
+                    }}
+                  >
+                    {color.name}
+                  </option>
+                ))}
+              </select>
+            </td>
+            <td></td>
+          </tr>
+          <tr>
+            <td style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+              <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>MODE:</label>
+            </td>
+            <td>
+              <div className="mode-buttons d-flex" style={{ gap: '8px' }}>
+                <button
+                  className={`retro-button btn-sm${channel === 1 ? ' selected' : ''}`}
+                  onClick={() => handleModeClick(1)}
+                >
+                  STATIC
+                </button>
+                <button
+                  className={`retro-button btn-sm${channel === 2 ? ' selected' : ''}`}
+                  onClick={() => handleModeClick(2)}
+                >
+                  FLASH
+                </button>
+                <button
+                  className={`retro-button btn-sm${channel === 3 ? ' selected' : ''}`}
+                  onClick={() => handleModeClick(3)}
+                >
+                  PULSE
+                </button>
+              </div>
+            </td>
+            <td></td>
+          </tr>
+          <tr>
+            <td style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+              <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>ON NOTE ON:</label>
+            </td>
+            <td>
+              <select
+                className="form-select retro-select"
+                value={action.noteOn || ''}
+                onChange={handleActionChange('noteOn')}
+              >
+                <option value="">NONE</option>
+                {macros.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </td>
+            <td style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)', paddingLeft: '8px' }}>
+              Macro on press
+            </td>
+          </tr>
+          <tr>
+            <td style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+              <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>ON NOTE OFF:</label>
+            </td>
+            <td>
+              <select
+                className="form-select retro-select"
+                value={action.noteOff || ''}
+                onChange={handleActionChange('noteOff')}
+              >
+                <option value="">NONE</option>
+                {macros.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </td>
+            <td style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)', paddingLeft: '8px' }}>
+              Macro on release
+            </td>
+          </tr>
+          <tr>
+            <td style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+              <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>CONFIRM PLAY:</label>
+            </td>
+            <td>
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id={`confirm-${pad.id}`}
+                checked={action.confirm || false}
+                onChange={(e) =>
+                  setPadAction(pad.id, { ...action, confirm: e.target.checked })
+                }
+              />
+            </td>
+            <td style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)', paddingLeft: '8px' }}>
+              Ask before playing macro
+            </td>
+          </tr>
+          <tr>
+            <td style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+              <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>TOAST CONFIRM:</label>
+            </td>
+            <td>
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id={`toast-${pad.id}`}
+                checked={action.confirmToast || false}
+                onChange={(e) =>
+                  setPadAction(pad.id, {
+                    ...action,
+                    confirmToast: e.target.checked,
+                  })
+                }
+              />
+            </td>
+            <td style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)', paddingLeft: '8px' }}>
+              Show notification
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
+        <button className="retro-button" onClick={clearPad}>
+          CLEAR
+        </button>
+        <button className="retro-button" onClick={onClose}>
+          CLOSE
+        </button>
       </div>
-      <div className="mb-3">
-        <label className="form-label text-info">STATIC COLOR:</label>
-        <select
-          className="form-select retro-select"
-          value={colours[1] || '#000000'}
-          onChange={handleChange(1)}
-          style={{ backgroundColor: colours[1] || '#000000' }}
-        >
-          {LAUNCHPAD_COLORS.map((color) => (
-            <option
-              key={color.value}
-              value={color.color}
-              style={{
-                backgroundColor: color.color,
-                color: color.color === '#000000' ? '#fff' : '#000',
-              }}
-            >
-              {color.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="mb-3">
-        <label className="form-label text-info">FLASH COLOR:</label>
-        <select
-          className="form-select retro-select"
-          value={colours[2] || '#000000'}
-          onChange={handleChange(2)}
-          style={{ backgroundColor: colours[2] || '#000000' }}
-        >
-          {LAUNCHPAD_COLORS.map((color) => (
-            <option
-              key={color.value}
-              value={color.color}
-              style={{
-                backgroundColor: color.color,
-                color: color.color === '#000000' ? '#fff' : '#000',
-              }}
-            >
-              {color.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="mb-3">
-        <label className="form-label text-info">PULSE COLOR:</label>
-        <select
-          className="form-select retro-select"
-          value={colours[3] || '#000000'}
-          onChange={handleChange(3)}
-          style={{ backgroundColor: colours[3] || '#000000' }}
-        >
-          {LAUNCHPAD_COLORS.map((color) => (
-            <option
-              key={color.value}
-              value={color.color}
-              style={{
-                backgroundColor: color.color,
-                color: color.color === '#000000' ? '#fff' : '#000',
-              }}
-            >
-              {color.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="mb-3">
-        <label className="form-label text-info">MODE:</label>
-        <div className="mode-buttons d-flex">
-          <button
-            className={`retro-button btn-sm me-2${channel === 1 ? ' selected' : ''}`}
-            onClick={() => handleModeClick(1)}
-          >
-            STATIC
-          </button>
-          <button
-            className={`retro-button btn-sm me-2${channel === 2 ? ' selected' : ''}`}
-            onClick={() => handleModeClick(2)}
-          >
-            FLASH
-          </button>
-          <button
-            className={`retro-button btn-sm${channel === 3 ? ' selected' : ''}`}
-            onClick={() => handleModeClick(3)}
-          >
-            PULSE
-          </button>
-        </div>
-      </div>
-      <div className="mb-3">
-        <label className="form-label text-info">ON NOTE ON:</label>
-        <select
-          className="form-select retro-select"
-          value={action.noteOn || ''}
-          onChange={handleActionChange('noteOn')}
-        >
-          <option value="">NONE</option>
-          {macros.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="mb-3">
-        <label className="form-label text-info">ON NOTE OFF:</label>
-        <select
-          className="form-select retro-select"
-          value={action.noteOff || ''}
-          onChange={handleActionChange('noteOff')}
-        >
-          <option value="">NONE</option>
-          {macros.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="form-check mb-3">
-        <input
-          className="form-check-input"
-          type="checkbox"
-          id={`confirm-${pad.id}`}
-          checked={action.confirm || false}
-          onChange={(e) =>
-            setPadAction(pad.id, { ...action, confirm: e.target.checked })
-          }
-        />
-        <label
-          className="form-check-label text-info"
-          htmlFor={`confirm-${pad.id}`}
-        >
-          CONFIRM BEFORE PLAY
-        </label>
-      </div>
-      <div className="form-check mb-3">
-        <input
-          className="form-check-input"
-          type="checkbox"
-          id={`toast-${pad.id}`}
-          checked={action.confirmToast || false}
-          onChange={(e) =>
-            setPadAction(pad.id, {
-              ...action,
-              confirmToast: e.target.checked,
-            })
-          }
-        />
-        <label
-          className="form-check-label text-info"
-          htmlFor={`toast-${pad.id}`}
-        >
-          TOAST CONFIRMATION
-        </label>
-      </div>
-      <button className="retro-button me-2" onClick={clearPad}>
-        CLEAR
-      </button>
-      <button className="retro-button" onClick={onClose}>
-        CLOSE
-      </button>
     </div>
   );
 }
