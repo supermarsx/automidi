@@ -62,10 +62,10 @@ function App() {
           <ActionBar />
           <Tabs
             tabs={[
-              { id: 'mission', label: 'Mission Control', icon: '◄►' },
-              { id: 'diagnostics', label: 'Diagnostics', icon: '⚡' },
-              { id: 'macros', label: 'Macros', icon: '⚙' },
-              { id: 'config', label: 'Config', icon: '⚙' },
+              { id: 'mission', label: 'Mission Control', icon: '🚀' },
+              { id: 'diagnostics', label: 'Diagnostics', icon: '📊' },
+              { id: 'macros', label: 'Macros', icon: '🎹' },
+              { id: 'config', label: 'Config', icon: '⚙️' },
             ]}
           >
             {/* Mission Control Tab */}

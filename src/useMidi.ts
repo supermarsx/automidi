@@ -4,6 +4,7 @@ import { useMidiConnection, type RawMessage } from './useMidiConnection';
 import type { MidiDevice } from '../shared/messages';
 import { isDevicesMessage, isMidiPayload } from './types';
 import { useToastStore } from './toastStore';
+import { useLogStore } from './logStore';
 
 export interface MidiMessage {
   direction: 'in' | 'out';
@@ -21,6 +22,7 @@ export function useMidi() {
   const selectedInput = useStore((s) => s.devices.inputId);
   const setInputId = useStore((s) => s.setInputId);
   const addToast = useToastStore((s) => s.addToast);
+  const addMessage = useLogStore((s) => s.addMessage);
   const {
     status,
     pingDelay,
@@ -48,11 +50,20 @@ export function useMidi() {
       }
       const bytesArray = Array.from(bytes);
       console.log('[useMidi] Sending MIDI:', { port: targetPort, bytes: bytesArray });
+      
+      // Log outgoing MIDI message
+      addMessage({
+        direction: 'out',
+        message: bytesArray,
+        timestamp: Date.now(),
+        target: outputs.find(o => o.id === targetPort)?.name || targetPort,
+      });
+      
       const result = await sendRaw({ type: 'send', port: targetPort, bytes: bytesArray });
       console.log('[useMidi] Send result:', result);
       return result;
     },
-    [selectedOutput, sendRaw],
+    [selectedOutput, sendRaw, addMessage, outputs],
   );
 
   const sendRef = useRef(send);
@@ -151,11 +162,15 @@ export function useMidi() {
           port: payload.port,
           pressure: payload.pressure,
         };
+        
+        // Log incoming MIDI message
+        addMessage(msg);
+        
         for (const fn of listeners.current) fn(msg);
       }
     });
     return unsub;
-  }, [listenRaw, selectedInput, selectedOutput, setInputId, setOutputId, addToast]);
+  }, [listenRaw, selectedInput, selectedOutput, setInputId, setOutputId, addToast, addMessage]);
 
   // Request device list on mount and when connected
   useEffect(() => {
