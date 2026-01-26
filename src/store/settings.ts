@@ -23,8 +23,10 @@ export interface SettingsSlice {
     apiKey: string;
     clock: number[];
     macroConfirmTimeout: number;
+    collapsedSections: Record<string, boolean>;
   };
   setHost: (h: string) => void;
+  setCollapsedSection: (section: string, collapsed: boolean) => void;
   setPort: (p: number) => void;
   setAutoReconnect: (enabled: boolean) => void;
   setReconnectInterval: (interval: number) => void;
@@ -76,6 +78,7 @@ export const createSettingsSlice: StateCreator<
     apiKey: '',
     clock: [0xf8],
     macroConfirmTimeout: 2000,
+    collapsedSections: {},
   },
   setHost: (h) =>
     set((state) => ({ settings: { ...state.settings, host: h } })),
@@ -158,5 +161,12 @@ export const createSettingsSlice: StateCreator<
   setMacroConfirmTimeout: (ms) =>
     set((state) => ({
       settings: { ...state.settings, macroConfirmTimeout: Math.max(0, ms) },
+    })),
+  setCollapsedSection: (section, collapsed) =>
+    set((state) => ({
+      settings: {
+        ...state.settings,
+        collapsedSections: { ...state.settings.collapsedSections, [section]: collapsed },
+      },
     })),
 });

@@ -59,6 +59,21 @@
 
 .tab-icon {
   font-size: 1rem;
+  color: var(--fg-secondary);
+  opacity: 0.8;
+}
+
+.tab-button.active .tab-icon {
+  color: var(--highlight);
+  opacity: 1;
+}
+
+.tab-button:hover .tab-icon {
+  opacity: 1;
+}
+
+.theme-oled-dark .tab-button.active .tab-icon {
+  color: #a0a0a0 !important;
 }
 
 .tabs-content {

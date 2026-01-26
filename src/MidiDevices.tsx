@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useMidi } from './useMidi';
 import { useStore } from './store';
 
@@ -8,14 +7,15 @@ export default function MidiDevices() {
   const selectedOutput = useStore((s) => s.devices.outputId);
   const setInputId = useStore((s) => s.setInputId);
   const setOutputId = useStore((s) => s.setOutputId);
-  const [collapsed, setCollapsed] = useState(false);
+  const collapsed = useStore((s) => s.settings.collapsedSections['midiDevices'] || false);
+  const setCollapsedSection = useStore((s) => s.setCollapsedSection);
 
   const currentInputName = inputs.find(i => i.id === selectedInput)?.name || 'None';
   const currentOutputName = outputs.find(o => o.id === selectedOutput)?.name || 'None';
 
   return (
     <div className="retro-panel">
-      <h3 style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => setCollapsed(!collapsed)}>
+      <h3 style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => setCollapsedSection('midiDevices', !collapsed)}>
         {collapsed ? '► ' : '▼ '} MIDI Device Matrix
       </h3>
       <div style={{ fontSize: '0.9rem', marginBottom: '8px', color: 'var(--fg-secondary)' }}>
