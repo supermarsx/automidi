@@ -28,12 +28,12 @@ export default function ActionBar() {
 
   return (
     <div className="status-bar d-flex justify-content-between align-items-center" style={{ padding: '0 10px', marginBottom: '6px', height: '28px' }}>
-      <div className="d-flex align-items-center" style={{ gap: '12px', flexWrap: 'nowrap', fontSize: '0.85rem', width: '100%' }}>
-        <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>SYSTEM STATUS:</span>
-        <span className={`connection-status ${status}`}>
+      <div className="d-flex align-items-center" style={{ gap: '20px', flexWrap: 'nowrap', fontSize: '0.85rem', width: '100%' }}>
+        <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap', marginRight: '8px' }}>SYSTEM STATUS:</span>
+        <span className={`connection-status ${status}`} style={{ margin: '0 8px' }}>
           {status.toUpperCase()}
         </span>
-        <span className="d-flex align-items-center" style={{ gap: '6px' }}>
+        <span className="d-flex align-items-center" style={{ gap: '6px', margin: '0 8px' }}>
           PING:
           <span className={`ping-value ping-${pingClass}`}>
             {!pingEnabled
@@ -43,10 +43,10 @@ export default function ActionBar() {
                 : `${pingDelay}ms`}
           </span>
         </span>
-        <span>IN: <strong>{inputName}</strong></span>
-        <span>OUT: <strong>{outputName}</strong></span>
+        <span style={{ margin: '0 8px' }}>IN: <strong>{inputName}</strong></span>
+        <span style={{ margin: '0 8px' }}>OUT: <strong>{outputName}</strong></span>
         {status === 'closed' && !isTauriMode && (
-          <button className="retro-button btn-sm" onClick={reconnect} style={{ padding: '0px 8px', fontSize: '0.8rem', marginLeft: '8px', lineHeight: '1.2' }}>
+          <button className="retro-button btn-sm" onClick={reconnect} style={{ padding: '0px 8px', fontSize: '0.8rem', marginLeft: '16px', lineHeight: '1.2' }}>
             RECONNECT
           </button>
         )}
