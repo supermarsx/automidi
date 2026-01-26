@@ -96,6 +96,14 @@
   color: #909090 !important;
 }
 
+.theme-oled-dark strong {
+  color: #b0b0b0 !important;
+}
+
+.theme-oled-dark h5 {
+  color: #a0a0a0 !important;
+}
+
 .theme-oled-dark .retro-title {
   text-shadow: none;
   animation: none;

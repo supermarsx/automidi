@@ -68,7 +68,7 @@ export default function SysexWorkbench() {
 
   return (
     <div className="sysex-workbench">
-      <h3 className="text-warning">◄ SysEx Workbench ►</h3>
+      <h3>◄ SysEx Workbench ►</h3>
       <div className="mb-3">
         <label className="form-label text-info">COMMAND:</label>
         <select 

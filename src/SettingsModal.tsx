@@ -75,8 +75,11 @@ export default function SettingsModal({ onClose }: Props) {
 
   // Auto-save settings when they change
   useEffect(() => {
-    setHost(h);
-  }, [h, setHost]);
+    if (h !== host) {
+      setHost(h);
+      addToast('Host updated', 'success');
+    }
+  }, [h, setHost, host, addToast]);
 
   useEffect(() => {
     setPort(Number(p));
@@ -139,8 +142,11 @@ export default function SettingsModal({ onClose }: Props) {
   }, [alfc, setAutoLoadFirstConfig]);
 
   useEffect(() => {
-    setTheme(thm);
-  }, [thm, setTheme]);
+    if (thm !== theme) {
+      setTheme(thm);
+      addToast('Theme changed', 'success');
+    }
+  }, [thm, setTheme, theme, addToast]);
 
   useEffect(() => {
     setApiKey(ak);
@@ -161,32 +167,6 @@ export default function SettingsModal({ onClose }: Props) {
   }, [mct, setMacroConfirmTimeout]);
 
   const save = () => {
-    setHost(h);
-    setPort(Number(p));
-    setAutoReconnect(ar);
-    setReconnectInterval(Math.max(1, ri) * 1000); // Minimum 1 second, convert back to milliseconds
-    setMaxReconnectAttempts(mra);
-    setLogLimit(ll);
-    setPingInterval(Math.max(500, pi));
-    setPingEnabled(pe);
-    setReconnectOnLost(rol);
-    setPingGreen(pg);
-    setPingYellow(py);
-    setPingOrange(po);
-    setClearBeforeLoad(cbl);
-    setSysexColorMode(scm);
-    setAutoSleep(asleep);
-    setAutoLoadFirstConfig(alfc);
-    setTheme(thm);
-    setApiKey(ak);
-    setClock(
-      clk
-        .split(/\s+/)
-        .map((v) => parseInt(v, 10))
-        .filter((n) => !Number.isNaN(n))
-        .map((n) => Math.min(255, Math.max(0, n))),
-    );
-    setMacroConfirmTimeout(Math.max(0, mct));
     if (onClose) onClose();
     addToast('Settings saved', 'success');
   };
