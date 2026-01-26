@@ -104,6 +104,20 @@
   color: #a0a0a0 !important;
 }
 
+.theme-oled-dark .connection-status.connected,
+.theme-oled-dark .connection-status.connecting,
+.theme-oled-dark .connection-status.closed {
+  color: #ffffff !important;
+}
+
+.theme-oled-dark .device-item {
+  color: #909090 !important;
+}
+
+.theme-oled-dark .device-item.selected {
+  color: #b0b0b0 !important;
+}
+
 .theme-oled-dark .retro-title {
   text-shadow: none;
   animation: none;
@@ -525,7 +539,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #000;
+  color: var(--bg-start);
   font-weight: bold;
   cursor: move;
   transition: all 0.2s;
@@ -586,21 +600,21 @@ body {
 
 .connection-status.connected {
   background: #00ff00;
-  color: #000000;
+  color: var(--bg-start);
   border: 1px solid #00ff00;
   box-shadow: 0 0 5px #00ff00;
 }
 
 .connection-status.connecting {
   background: #ffff00;
-  color: #000000;
+  color: var(--bg-start);
   border: 1px solid #ffff00;
   animation: blink 1s infinite;
 }
 
 .connection-status.closed {
   background: #ff0000;
-  color: #000000;
+  color: var(--bg-start);
   border: 1px solid #ff0000;
 }
 
