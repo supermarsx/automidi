@@ -118,6 +118,58 @@
   color: #b0b0b0 !important;
 }
 
+/* Diagnostics Cards */
+.diagnostics-card {
+  padding: 12px;
+  background: var(--input-bg);
+  border: 2px solid var(--panel-border);
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.diagnostics-header {
+  color: var(--highlight);
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.diagnostics-table {
+  width: 100%;
+  font-size: 0.95rem;
+}
+
+.diagnostics-table td {
+  padding: 4px 8px;
+  vertical-align: middle;
+}
+
+.diagnostics-label {
+  color: var(--fg);
+  font-weight: bold;
+  opacity: 0.9;
+  width: 40%;
+}
+
+.diagnostics-value {
+  color: var(--fg-secondary);
+  opacity: 0.95;
+}
+
+/* OLED Dark Diagnostics Overrides */
+.theme-oled-dark .diagnostics-header {
+  color: #a0a0a0 !important;
+}
+
+.theme-oled-dark .diagnostics-label {
+  color: #b0b0b0 !important;
+}
+
+.theme-oled-dark .diagnostics-value {
+  color: #909090 !important;
+}
+
 .theme-oled-dark .retro-title {
   text-shadow: none;
   animation: none;

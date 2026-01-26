@@ -96,35 +96,74 @@ function App() {
                     <h3>◄ System Diagnostics ►</h3>
                     <div className="row mb-3">
                       <div className="col-md-4">
-                        <div style={{ padding: '12px', background: 'var(--input-bg)', border: '2px solid var(--panel-border)', borderRadius: '4px', marginBottom: '12px' }}>
-                          <h5 style={{ color: 'var(--highlight)', marginTop: 0 }}>CONNECTION</h5>
-                          <div style={{ fontSize: '0.95rem', lineHeight: '1.8' }}>
-                            <div><strong>Status:</strong> <span className={`connection-status ${status}`} style={{ marginLeft: '8px', padding: '2px 8px', fontSize: '0.85rem' }}>{status.toUpperCase()}</span></div>
-                            <div><strong>Ping:</strong> {pingEnabled ? (pingDelay !== null ? `${pingDelay}ms` : '---') : 'Disabled'}</div>
-                            <div><strong>Mode:</strong> {isTauri() ? 'Tauri IPC' : 'WebSocket'}</div>
-                          </div>
+                        <div className="diagnostics-card">
+                          <h5 className="diagnostics-header">CONNECTION</h5>
+                          <table className="diagnostics-table">
+                            <tbody>
+                              <tr>
+                                <td className="diagnostics-label">Status:</td>
+                                <td><span className={`connection-status ${status}`}>{status.toUpperCase()}</span></td>
+                              </tr>
+                              <tr>
+                                <td className="diagnostics-label">Ping:</td>
+                                <td className="diagnostics-value">{pingEnabled ? (pingDelay !== null ? `${pingDelay}ms` : '---') : 'Disabled'}</td>
+                              </tr>
+                              <tr>
+                                <td className="diagnostics-label">Mode:</td>
+                                <td className="diagnostics-value">{isTauri() ? 'Tauri IPC' : 'WebSocket'}</td>
+                              </tr>
+                            </tbody>
+                          </table>
                         </div>
                       </div>
                       <div className="col-md-4">
-                        <div style={{ padding: '12px', background: 'var(--input-bg)', border: '2px solid var(--panel-border)', borderRadius: '4px', marginBottom: '12px' }}>
-                          <h5 style={{ color: 'var(--highlight)', marginTop: 0 }}>DEVICES</h5>
-                          <div style={{ fontSize: '0.95rem', lineHeight: '1.8' }}>
-                            <div><strong>Inputs:</strong> {inputs.length}</div>
-                            <div><strong>Outputs:</strong> {outputs.length}</div>
-                            <div><strong>Selected In:</strong> {inputs.find(i => i.id === selectedInput)?.name || 'None'}</div>
-                            <div><strong>Selected Out:</strong> {outputs.find(o => o.id === selectedOutput)?.name || 'None'}</div>
-                          </div>
+                        <div className="diagnostics-card">
+                          <h5 className="diagnostics-header">DEVICES</h5>
+                          <table className="diagnostics-table">
+                            <tbody>
+                              <tr>
+                                <td className="diagnostics-label">Inputs:</td>
+                                <td className="diagnostics-value">{inputs.length}</td>
+                              </tr>
+                              <tr>
+                                <td className="diagnostics-label">Outputs:</td>
+                                <td className="diagnostics-value">{outputs.length}</td>
+                              </tr>
+                              <tr>
+                                <td className="diagnostics-label">Selected In:</td>
+                                <td className="diagnostics-value">{inputs.find(i => i.id === selectedInput)?.name || 'None'}</td>
+                              </tr>
+                              <tr>
+                                <td className="diagnostics-label">Selected Out:</td>
+                                <td className="diagnostics-value">{outputs.find(o => o.id === selectedOutput)?.name || 'None'}</td>
+                              </tr>
+                            </tbody>
+                          </table>
                         </div>
                       </div>
                       <div className="col-md-4">
-                        <div style={{ padding: '12px', background: 'var(--input-bg)', border: '2px solid var(--panel-border)', borderRadius: '4px', marginBottom: '12px' }}>
-                          <h5 style={{ color: 'var(--highlight)', marginTop: 0 }}>LOGS</h5>
-                          <div style={{ fontSize: '0.95rem', lineHeight: '1.8' }}>
-                            <div><strong>Total:</strong> {logs.length}</div>
-                            <div><strong>Incoming:</strong> {logs.filter(l => l.direction === 'in').length}</div>
-                            <div><strong>Outgoing:</strong> {logs.filter(l => l.direction === 'out').length}</div>
-                            <div><strong>Theme:</strong> {theme}</div>
-                          </div>
+                        <div className="diagnostics-card">
+                          <h5 className="diagnostics-header">LOGS</h5>
+                          <table className="diagnostics-table">
+                            <tbody>
+                              <tr>
+                                <td className="diagnostics-label">Total:</td>
+                                <td className="diagnostics-value">{logs.length}</td>
+                              </tr>
+                              <tr>
+                                <td className="diagnostics-label">Incoming:</td>
+                                <td className="diagnostics-value">{logs.filter(l => l.direction === 'in').length}</td>
+                              </tr>
+                              <tr>
+                                <td className="diagnostics-label">Outgoing:</td>
+                                <td className="diagnostics-value">{logs.filter(l => l.direction === 'out').length}</td>
+                              </tr>
+                              <tr>
+                                <td className="diagnostics-label">Theme:</td>
+                                <td className="diagnostics-value">{theme}</td>
+                              </tr>
+                            </tbody>
+                          </table>
                         </div>
                       </div>
                     </div>
