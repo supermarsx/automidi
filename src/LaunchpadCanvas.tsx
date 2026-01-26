@@ -126,20 +126,23 @@ export function LaunchpadCanvas() {
       />,
     );
   }
-  const handleWrapperClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!selected) return;
-    const target = e.target as HTMLElement;
-    if (target.closest('.pad-options-panel')) return;
-    if (target.closest('.midi-pad-container')) return;
-    setSelected(null);
-  };
-
   return (
-    <div className="launchpad-canvas-wrapper" onClick={handleWrapperClick}>
-      <div className="midi-grid-fixed">{grid}</div>
-      {selected && (
-        <PadOptionsPanel pad={selected} onClose={() => setSelected(null)} />
-      )}
+    <div className="launchpad-canvas-wrapper">
+      <div className="launchpad-grid-column">
+        <div className="midi-grid-fixed">{grid}</div>
+      </div>
+      <div className="launchpad-config-column">
+        {selected ? (
+          <PadOptionsPanel pad={selected} onClose={() => setSelected(null)} />
+        ) : (
+          <div className="pad-options-panel">
+            <h4>PAD CONFIGURATOR</h4>
+            <p style={{ color: 'var(--fg-secondary)', textAlign: 'center', marginTop: '40px' }}>
+              Click a pad to configure
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

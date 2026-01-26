@@ -385,7 +385,18 @@ body {
 }
 
 .launchpad-canvas-wrapper {
-  position: relative;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.launchpad-grid-column {
+  flex: 0 0 auto;
+}
+
+.launchpad-config-column {
+  flex: 1;
+  min-width: 300px;
 }
 
 .midi-grid-fixed {
@@ -1045,17 +1056,12 @@ body {
 
 /* Side panel for pad options */
 .pad-options-panel {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 240px;
-  height: 100%;
-  background: var(--panel-bg);
-  border-left: 2px solid var(--panel-border);
-  box-shadow: -2px 0 10px var(--panel-border);
+  background: var(--input-bg);
+  border: 2px solid var(--panel-border);
+  box-shadow: 0 0 10px var(--panel-border);
   padding: 24px;
-  z-index: 800;
-  overflow-y: auto;
+  border-radius: 8px;
+  min-height: 400px;
 }
 
 .pad-options-panel h4 {

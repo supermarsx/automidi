@@ -103,13 +103,13 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
   return (
     <div className="pad-options-panel" onClick={(e) => e.stopPropagation()}>
       <h4>PAD {pad.id}</h4>
-      <table style={{ width: '100%', borderSpacing: '0 8px' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <tbody>
           <tr>
-            <td style={{ width: '25%', verticalAlign: 'middle', paddingRight: '12px' }}>
+            <td style={{ width: '25%', verticalAlign: 'middle', padding: '16px 12px 8px 8px' }}>
               <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>LABEL:</label>
             </td>
-            <td style={{ width: '60%' }}>
+            <td style={{ width: '60%', padding: '16px 0 8px 0' }}>
               <input
                 className="form-control retro-input"
                 value={label}
@@ -117,13 +117,13 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
                 placeholder="Label"
               />
             </td>
-            <td style={{ width: '15%' }}></td>
+            <td style={{ width: '15%', padding: '16px 8px 8px 8px' }}></td>
           </tr>
           <tr>
-            <td style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+            <td style={{ verticalAlign: 'middle', padding: '8px 12px 8px 8px' }}>
               <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>STATIC COLOR:</label>
             </td>
-            <td>
+            <td style={{ padding: '8px 0' }}>
               <select
                 className="form-select retro-select"
                 value={colours[1] || '#000000'}
@@ -144,13 +144,13 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
                 ))}
               </select>
             </td>
-            <td></td>
+            <td style={{ padding: '8px 8px 8px 8px' }}></td>
           </tr>
           <tr>
-            <td style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+            <td style={{ verticalAlign: 'middle', padding: '8px 12px 8px 8px' }}>
               <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>FLASH COLOR:</label>
             </td>
-            <td>
+            <td style={{ padding: '8px 0' }}>
               <select
                 className="form-select retro-select"
                 value={colours[2] || '#000000'}
@@ -171,13 +171,13 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
                 ))}
               </select>
             </td>
-            <td></td>
+            <td style={{ padding: '8px 8px 8px 8px' }}></td>
           </tr>
           <tr>
-            <td style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+            <td style={{ verticalAlign: 'middle', padding: '8px 12px 8px 8px' }}>
               <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>PULSE COLOR:</label>
             </td>
-            <td>
+            <td style={{ padding: '8px 0' }}>
               <select
                 className="form-select retro-select"
                 value={colours[3] || '#000000'}
@@ -198,13 +198,13 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
                 ))}
               </select>
             </td>
-            <td></td>
+            <td style={{ padding: '8px 8px 8px 8px' }}></td>
           </tr>
           <tr>
-            <td style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+            <td style={{ verticalAlign: 'middle', padding: '8px 12px 8px 8px' }}>
               <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>MODE:</label>
             </td>
-            <td>
+            <td style={{ padding: '8px 0' }}>
               <div className="mode-buttons d-flex" style={{ gap: '8px' }}>
                 <button
                   className={`retro-button btn-sm${channel === 1 ? ' selected' : ''}`}
@@ -226,13 +226,13 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
                 </button>
               </div>
             </td>
-            <td></td>
+            <td style={{ padding: '8px 8px 8px 8px' }}></td>
           </tr>
           <tr>
-            <td style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+            <td style={{ verticalAlign: 'middle', padding: '8px 12px 8px 8px' }}>
               <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>ON NOTE ON:</label>
             </td>
-            <td>
+            <td style={{ padding: '8px 0' }}>
               <select
                 className="form-select retro-select"
                 value={action.noteOn || ''}
@@ -246,15 +246,15 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
                 ))}
               </select>
             </td>
-            <td style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)', paddingLeft: '8px' }}>
+            <td style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)', padding: '8px 8px 8px 8px' }}>
               Macro on press
             </td>
           </tr>
           <tr>
-            <td style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+            <td style={{ verticalAlign: 'middle', padding: '8px 12px 8px 8px' }}>
               <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>ON NOTE OFF:</label>
             </td>
-            <td>
+            <td style={{ padding: '8px 0' }}>
               <select
                 className="form-select retro-select"
                 value={action.noteOff || ''}
@@ -268,15 +268,15 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
                 ))}
               </select>
             </td>
-            <td style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)', paddingLeft: '8px' }}>
+            <td style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)', padding: '8px 8px 8px 8px' }}>
               Macro on release
             </td>
           </tr>
           <tr>
-            <td style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+            <td style={{ verticalAlign: 'middle', padding: '8px 12px 8px 8px' }}>
               <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>CONFIRM PLAY:</label>
             </td>
-            <td>
+            <td style={{ padding: '8px 0' }}>
               <input
                 className="form-check-input"
                 type="checkbox"
@@ -287,15 +287,15 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
                 }
               />
             </td>
-            <td style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)', paddingLeft: '8px' }}>
+            <td style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)', padding: '8px 8px 8px 8px' }}>
               Ask before playing macro
             </td>
           </tr>
           <tr>
-            <td style={{ verticalAlign: 'middle', paddingRight: '12px' }}>
+            <td style={{ verticalAlign: 'middle', padding: '8px 12px 8px 8px' }}>
               <label className="form-label" style={{ margin: 0, color: 'var(--highlight)' }}>TOAST CONFIRM:</label>
             </td>
-            <td>
+            <td style={{ padding: '8px 0' }}>
               <input
                 className="form-check-input"
                 type="checkbox"
@@ -309,7 +309,7 @@ export default function PadOptionsPanel({ pad, onClose }: Props) {
                 }
               />
             </td>
-            <td style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)', paddingLeft: '8px' }}>
+            <td style={{ fontSize: '0.75rem', color: 'var(--fg-secondary)', padding: '8px 8px 8px 8px' }}>
               Show notification
             </td>
           </tr>
