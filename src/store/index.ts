@@ -26,12 +26,20 @@ import {
   type PadConfig,
 } from './configs';
 import { createSettingsSlice, type SettingsSlice } from './settings';
+import {
+  createWorkflowsSlice,
+  type WorkflowsSlice,
+  type Workflow,
+  type WorkflowNode,
+  type WorkflowConnection,
+} from './workflows';
 
 export type StoreState = DevicesSlice &
   MacrosSlice &
   PadsSlice &
   SettingsSlice &
-  ConfigsSlice;
+  ConfigsSlice &
+  WorkflowsSlice;
 
 const kvStore = createIdbStore('automidi-db', 'state');
 
@@ -49,6 +57,7 @@ export const useStore = create<StoreState>()(
       ...createPadsSlice(set, get, api),
       ...createConfigsSlice(set, get, api),
       ...createSettingsSlice(set, get, api),
+      ...createWorkflowsSlice(set, get, api),
     }),
     {
       name: 'store',
@@ -101,4 +110,4 @@ export const useStore = create<StoreState>()(
   ),
 );
 
-export type { Macro, MacroType, PadColourMap, PadActions, PadConfig };
+export type { Macro, MacroType, PadColourMap, PadActions, PadConfig, Workflow, WorkflowNode, WorkflowConnection };

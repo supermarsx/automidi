@@ -11,6 +11,7 @@ import ToastContainer from './ToastContainer';
 import TitleBar from './TitleBar';
 import Tabs from './Tabs';
 import SettingsModal from './SettingsModal';
+import WorkflowManager from './WorkflowManager';
 import { usePadActions } from './usePadActions';
 import { useStore } from './store';
 import { useEffect } from 'react';
@@ -65,6 +66,7 @@ function App() {
               { id: 'mission', label: 'Mission Control', icon: '🚀' },
               { id: 'diagnostics', label: 'Diagnostics', icon: '📊' },
               { id: 'macros', label: 'Macros', icon: '🎹' },
+              { id: 'workflows', label: 'Workflows', icon: '🎼' },
               { id: 'config', label: 'Config', icon: '⚙️' },
             ]}
           >
@@ -190,6 +192,15 @@ function App() {
                 </div>
                 <div className="col-md-6">
                   <MacroBuilder />
+                </div>
+              </div>
+            </div>
+
+            {/* Workflows Tab */}
+            <div>
+              <div className="row">
+                <div className="col-12">
+                  <WorkflowManager />
                 </div>
               </div>
             </div>

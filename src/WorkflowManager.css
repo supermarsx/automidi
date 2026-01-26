@@ -1,0 +1,311 @@
+.workflow-manager {
+  padding: 20px;
+  max-width: 100%;
+}
+
+.workflow-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--panel-border);
+}
+
+.workflow-header h3 {
+  margin: 0;
+  color: var(--highlight);
+  font-size: 1.8rem;
+  text-shadow: 2px 2px 0px var(--panel-border);
+}
+
+.workflow-create-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: var(--input-bg);
+  border: 2px solid var(--panel-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: box-shadow 0.3s;
+}
+
+.workflow-create-form:hover {
+  box-shadow: 0 4px 16px var(--panel-border);
+}
+
+.workflow-create-form input {
+  flex: 1;
+  font-size: 1rem;
+}
+
+.workflow-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.workflow-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--input-bg);
+  border: 2px solid var(--panel-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.workflow-item:hover {
+  border-color: var(--highlight);
+  box-shadow: 0 4px 16px var(--panel-border);
+  transform: translateY(-2px);
+}
+
+.workflow-item.active {
+  border-color: var(--highlight);
+  background: var(--bg-start);
+  box-shadow: 0 6px 24px var(--highlight);
+  transform: translateY(-2px);
+}
+
+.workflow-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--highlight);
+  border-radius: 8px 0 0 8px;
+  box-shadow: 0 0 12px var(--highlight);
+}
+
+.workflow-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.workflow-item-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: var(--highlight);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.workflow-item.active .workflow-item-name {
+  text-shadow: 0 0 8px var(--highlight), 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.workflow-item-meta {
+  font-size: 0.85rem;
+  color: var(--fg-secondary);
+  opacity: 0.9;
+}
+
+.workflow-content {
+  display: flex;
+  gap: 16px;
+}
+
+.workflow-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+}
+
+.workflow-sidebar h4 {
+  margin: 0 0 14px 0;
+  color: var(--highlight);
+  font-size: 1.2rem;
+  text-shadow: 1px 1px 2px var(--panel-border);
+}
+
+.node-palette {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.node-palette-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+  background: var(--button-bg);
+  border: 2px solid var(--panel-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: var(--fg);
+  font-family: 'VT323', monospace;
+  min-height: 75px;
+}
+
+.node-palette-item:hover {
+  border-color: var(--highlight);
+  box-shadow: 0 4px 16px var(--panel-border);
+  transform: translateY(-3px);
+}
+
+.node-palette-item.active {
+  border-color: var(--highlight);
+  background: var(--bg-start);
+  box-shadow: 0 6px 24px var(--highlight);
+  transform: translateY(-3px);
+}
+
+.node-palette-item.active::after {
+  content: '✓';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 0.9rem;
+  color: var(--highlight);
+  text-shadow: 0 0 8px var(--highlight);
+}
+
+.node-palette-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.node-palette-label {
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.node-config {
+  padding: 16px;
+  background: var(--input-bg);
+  border: 2px solid var(--panel-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.node-config h4 {
+  color: var(--highlight);
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+  text-shadow: 1px 1px 2px var(--panel-border);
+}
+
+.node-config .mb-2 {
+  margin-bottom: 10px;
+}
+
+.node-config label {
+  color: var(--fg);
+  font-weight: bold;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.workflow-canvas-container {
+  flex: 1;
+}
+
+/* OLED Dark theme overrides */
+.theme-oled-dark .workflow-header {
+  border-bottom-color: #2a2a2a !important;
+}
+
+.theme-oled-dark .workflow-header h3 {
+  text-shadow: none !important;
+  color: #a0a0a0 !important;
+}
+
+.theme-oled-dark .workflow-create-form {
+  background: #000000 !important;
+  border-color: #2a2a2a !important;
+  box-shadow: none !important;
+}
+
+.theme-oled-dark .workflow-create-form:hover {
+  box-shadow: none !important;
+}
+
+.theme-oled-dark .workflow-item {
+  background: #0a0a0a !important;
+  border-color: #2a2a2a !important;
+  box-shadow: none !important;
+}
+
+.theme-oled-dark .workflow-item:hover {
+  border-color: #404040 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.theme-oled-dark .workflow-item.active {
+  border-color: #606060 !important;
+  background: #000000 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.theme-oled-dark .workflow-item.active::before {
+  background: #808080 !important;
+  box-shadow: none !important;
+}
+
+.theme-oled-dark .workflow-item-name {
+  color: #b0b0b0 !important;
+  text-shadow: none !important;
+}
+
+.theme-oled-dark .workflow-item.active .workflow-item-name {
+  text-shadow: none !important;
+}
+
+.theme-oled-dark .workflow-sidebar h4 {
+  color: #a0a0a0 !important;
+  text-shadow: none !important;
+}
+
+.theme-oled-dark .node-palette-item {
+  background: #0a0a0a !important;
+  border-color: #2a2a2a !important;
+  box-shadow: none !important;
+}
+
+.theme-oled-dark .node-palette-item:hover {
+  border-color: #404040 !important;
+  box-shadow: none !important;
+}
+
+.theme-oled-dark .node-palette-item.active {
+  border-color: #606060 !important;
+  background: #000000 !important;
+  box-shadow: none !important;
+}
+
+.theme-oled-dark .node-palette-item.active::after {
+  text-shadow: none !important;
+}
+
+.theme-oled-dark .node-config {
+  background: #000000 !important;
+  border-color: #2a2a2a !important;
+  box-shadow: none !important;
+}
+
+.theme-oled-dark .node-config h4 {
+  color: #a0a0a0 !important;
+  text-shadow: none !important;
+}
